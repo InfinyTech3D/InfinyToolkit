@@ -1,0 +1,19 @@
+
+************************************
+*         PluginSleeve.txt        *
+************************************
+
+
+
+AUTHOR :
+ - Erik Pernod (erik.pernod@gmail.com)
+
+
+
+
+LICENCE :
+ - None
+
+
+
+OTHER COMMENTS :

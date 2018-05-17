@@ -1,0 +1,11 @@
+# CMake package configuration file for Sleeve
+
+@PACKAGE_INIT@
+
+check_required_components(Sleeve)
+
+find_package(SofaComponentGeneral REQUIRED)
+
+if(NOT TARGET Sleeve)
+	include("${CMAKE_CURRENT_LIST_DIR}/SleeveTargets.cmake")
+endif()
