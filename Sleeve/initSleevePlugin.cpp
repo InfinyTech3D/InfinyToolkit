@@ -73,10 +73,9 @@ const char* getModuleComponentList()
     return "W3CDriver";
 }
 
-
-
 }
 
 }
 
-//SOFA_LINK_CLASS(W3CToolsManager)
+SOFA_LINK_CLASS(SleevePinceManager)
+SOFA_LINK_CLASS(SleevePositionsMapper)

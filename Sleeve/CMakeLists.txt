@@ -4,10 +4,13 @@ project(Sleeve)
 set(SLEEVE_VERSION 0.1)
 
 set(HEADER_FILES
-
+    SleevePinceManager.h
+    SleevePositionsMapper.h
 )
 
 set(SOURCE_FILES
+    SleevePinceManager.cpp
+    SleevePositionsMapper.cpp
     initSleevePlugin.cpp
 )
 
