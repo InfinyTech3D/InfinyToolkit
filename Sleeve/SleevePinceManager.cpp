@@ -890,13 +890,9 @@ void SleevePinceManager::draw(const core::visual::VisualParams* vparams)
     sofa::defaulttype::Vec4f color = sofa::defaulttype::Vec4f(0.2f, 1.0f, 1.0f, 1.0f);
     vparams->drawTool()->drawLine(m_min, m_max, Vec<4, float>(1.0, 0.0, 1.0, 1.0));
     
-    glColor3f(1.0, 0.0, 0.0);
-    vparams->drawTool()->drawLine(zero, xAxis, color);
-    glColor3f(0.0, 1.0, 0.0);
-    vparams->drawTool()->drawLine(zero, yAxis, color);
-    glColor3f(0.0, 0.0, 1.0);
-    vparams->drawTool()->drawLine(zero, zAxis, color);
-    glColor3f(1.0, 1.0, 1.0);
+    vparams->drawTool()->drawLine(zero, xAxis, sofa::defaulttype::Vec4f(1.0, 0.0, 0.0, 0.0));
+    vparams->drawTool()->drawLine(zero, yAxis, sofa::defaulttype::Vec4f(0.0, 1.0, 0.0, 0.0));
+    vparams->drawTool()->drawLine(zero, zAxis, sofa::defaulttype::Vec4f(0.0, 0.0, 1.0, 0.0));
 
     if (m_model == NULL)
         return;
