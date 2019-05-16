@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(Sleeve)
 
 set(SLEEVE_VERSION 0.1)
+set(USE_SLEEVE_PLUGIN true CACHE BOOL "Use Sleeve plugin")
 
 set(HEADER_FILES
     SleevePinceManager.h
