@@ -2,10 +2,10 @@
 
 @PACKAGE_INIT@
 
-check_required_components(Sleeve)
+find_package(SofaGeneral REQUIRED)
 
-find_package(SofaComponentGeneral REQUIRED)
-
-if(NOT TARGET Sleeve)
-	include("${CMAKE_CURRENT_LIST_DIR}/SleeveTargets.cmake")
+if(NOT TARGET @PROJECT_NAME@)
+	include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 endif()
+
+check_required_components(@PROJECT_NAME@)
