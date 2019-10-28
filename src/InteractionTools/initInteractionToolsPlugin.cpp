@@ -77,5 +77,5 @@ const char* getModuleComponentList()
 
 }
 
-SOFA_LINK_CLASS(SleevePinceManager)
-SOFA_LINK_CLASS(SleevePositionsMapper)
+SOFA_LINK_CLASS(PliersToolManager)
+SOFA_LINK_CLASS(PliersPositionsMapper)

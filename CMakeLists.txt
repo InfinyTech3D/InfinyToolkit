@@ -5,17 +5,17 @@ find_package(SofaGeneral REQUIRED)
 
 set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
-set(PLIERS_TOOLS_SRC_DIR src/InteractionTools)
+set(INTERACTIONTOOLS_SRC_DIR src/InteractionTools)
 
 set(HEADER_FILES
-    ${PLIERS_TOOLS_SRC_DIR}/PliersPinceManager.h
-    ${PLIERS_TOOLS_SRC_DIR}/PliersPositionsMapper.h
+    ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.h
+    ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.h
 )
 
 set(SOURCE_FILES
-    ${PLIERS_TOOLS_SRC_DIR}/PliersPinceManager.cpp
-    ${PLIERS_TOOLS_SRC_DIR}/PliersPositionsMapper.cpp
-    ${PLIERS_TOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
 )
 
 set(README_FILES PluginInteractionTools.txt)
@@ -38,7 +38,7 @@ sofa_generate_package(
     NAME ${PROJECT_NAME}
     TARGETS ${PROJECT_NAME}
     VERSION ${PROJECT_VERSION}
-    INCLUDE_SOURCE_DIR ${PLIERS_TOOLS_SRC_DIR}
+    INCLUDE_SOURCE_DIR ${INTERACTIONTOOLS_SRC_DIR}
     INCLUDE_INSTALL_DIR ${PROJECT_NAME}
     RELOCATABLE "plugins"
     )
