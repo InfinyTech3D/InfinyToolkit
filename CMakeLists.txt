@@ -8,14 +8,14 @@ set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 set(PLIERS_TOOLS_SRC_DIR src/PliersTools)
 
 set(HEADER_FILES
-    ${PLIERS_TOOLS_SRC_DIR}/SleevePinceManager.h
-    ${PLIERS_TOOLS_SRC_DIR}/SleevePositionsMapper.h
+    ${PLIERS_TOOLS_SRC_DIR}/PliersPinceManager.h
+    ${PLIERS_TOOLS_SRC_DIR}/PliersPositionsMapper.h
 )
 
 set(SOURCE_FILES
-    ${PLIERS_TOOLS_SRC_DIR}/SleevePinceManager.cpp
-    ${PLIERS_TOOLS_SRC_DIR}/SleevePositionsMapper.cpp
-    ${PLIERS_TOOLS_SRC_DIR}/initSleevePlugin.cpp
+    ${PLIERS_TOOLS_SRC_DIR}/PliersPinceManager.cpp
+    ${PLIERS_TOOLS_SRC_DIR}/PliersPositionsMapper.cpp
+    ${PLIERS_TOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
 )
 
 set(README_FILES PluginInteractionTools.txt)
