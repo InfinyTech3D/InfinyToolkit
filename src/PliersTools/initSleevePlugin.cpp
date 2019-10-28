@@ -19,15 +19,63 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SLEEVE_CONFIG_H
-#define SLEEVE_CONFIG_H
+#include <PliersTools/config.h>
 
-#include <sofa/helper/system/config.h>
+namespace sofa
+{
 
-#ifdef SOFA_BUILD_SLEEVE
-#  define SOFA_SLEEVE_API SOFA_EXPORT_DYNAMIC_LIBRARY
-#else
-#  define SOFA_SLEEVE_API SOFA_IMPORT_DYNAMIC_LIBRARY
-#endif
+namespace component
+{
 
-#endif
+//Here are just several convenient functions to help user to know what contains the plugin
+
+extern "C" {
+    SOFA_INTERACTIONTOOLS_API void initExternalModule();
+    SOFA_INTERACTIONTOOLS_API const char* getModuleName();
+    SOFA_INTERACTIONTOOLS_API const char* getModuleVersion();
+    SOFA_INTERACTIONTOOLS_API const char* getModuleLicense();
+    SOFA_INTERACTIONTOOLS_API const char* getModuleDescription();
+    SOFA_INTERACTIONTOOLS_API const char* getModuleComponentList();
+}
+
+void initExternalModule()
+{
+    static bool first = true;
+    if (first)
+    {
+        first = false;
+    }
+}
+
+const char* getModuleName()
+{
+    return "InteractionTools";
+}
+
+const char* getModuleVersion()
+{
+    return "0.1";
+}
+
+const char* getModuleLicense()
+{
+    return "";
+}
+
+
+const char* getModuleDescription()
+{
+    return "plugin to interact with Sleeve tool.";
+}
+
+const char* getModuleComponentList()
+{
+    return "W3CDriver";
+}
+
+}
+
+}
+
+SOFA_LINK_CLASS(SleevePinceManager)
+SOFA_LINK_CLASS(SleevePositionsMapper)

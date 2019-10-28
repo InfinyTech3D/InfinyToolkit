@@ -1,6 +1,6 @@
 /******************************************************************************
 *       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2017 INRIA, USTL, UJF, CNRS, MGH                    *
+*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,63 +19,16 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <Sleeve/config.h>
+#ifndef SOFA_INTERACTIONTOOLS_CONFIG_H
+#define SOFA_INTERACTIONTOOLS_CONFIG_H
 
-namespace sofa
-{
+#include <sofa/helper/system/config.h>
 
-namespace component
-{
+#ifdef SOFA_BUILD_INTERACTIONTOOLS
+#  define SOFA_TARGET SofaInteractionTools
+#  define SOFA_INTERACTIONTOOLS_API SOFA_EXPORT_DYNAMIC_LIBRARY
+#else
+#  define SOFA_INTERACTIONTOOLS_API SOFA_IMPORT_DYNAMIC_LIBRARY
+#endif
 
-//Here are just several convenient functions to help user to know what contains the plugin
-
-extern "C" {
-    SOFA_SLEEVE_API void initExternalModule();
-    SOFA_SLEEVE_API const char* getModuleName();
-    SOFA_SLEEVE_API const char* getModuleVersion();
-    SOFA_SLEEVE_API const char* getModuleLicense();
-    SOFA_SLEEVE_API const char* getModuleDescription();
-    SOFA_SLEEVE_API const char* getModuleComponentList();
-}
-
-void initExternalModule()
-{
-    static bool first = true;
-    if (first)
-    {
-        first = false;
-    }
-}
-
-const char* getModuleName()
-{
-    return "Sleeve";
-}
-
-const char* getModuleVersion()
-{
-    return "0.1";
-}
-
-const char* getModuleLicense()
-{
-    return "";
-}
-
-
-const char* getModuleDescription()
-{
-    return "plugin to interact with Sleeve tool.";
-}
-
-const char* getModuleComponentList()
-{
-    return "W3CDriver";
-}
-
-}
-
-}
-
-SOFA_LINK_CLASS(SleevePinceManager)
-SOFA_LINK_CLASS(SleevePositionsMapper)
+#endif

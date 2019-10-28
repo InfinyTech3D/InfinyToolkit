@@ -1,4 +1,4 @@
-# CMake package configuration file for Sleeve
+# CMake package configuration file for InteractionTools
 
 @PACKAGE_INIT@
 

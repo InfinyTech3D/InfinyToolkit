@@ -1,29 +1,44 @@
 cmake_minimum_required(VERSION 3.1)
-project(Sleeve)
-
-set(SLEEVE_VERSION 0.1)
-set(USE_SLEEVE_PLUGIN true CACHE BOOL "Use Sleeve plugin")
-
-set(HEADER_FILES
-    SleevePinceManager.h
-    SleevePositionsMapper.h
-)
-
-set(SOURCE_FILES
-    SleevePinceManager.cpp
-    SleevePositionsMapper.cpp
-    initSleevePlugin.cpp
-)
-
-set(README_FILES PluginSleeve.txt)
+project(InteractionTools VERSION 0.1)
 
 find_package(SofaGeneral REQUIRED)
 
-add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${SCENES_FILES} ${README_FILES})
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-DSOFA_BUILD_SLEEVEPLUGIN")
-target_link_libraries(${PROJECT_NAME} PUBLIC SofaComponentGeneral)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
+set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
+
+set(PLIERS_TOOLS_SRC_DIR src/PliersTools)
+
+set(HEADER_FILES
+    ${PLIERS_TOOLS_SRC_DIR}/SleevePinceManager.h
+    ${PLIERS_TOOLS_SRC_DIR}/SleevePositionsMapper.h
+)
+
+set(SOURCE_FILES
+    ${PLIERS_TOOLS_SRC_DIR}/SleevePinceManager.cpp
+    ${PLIERS_TOOLS_SRC_DIR}/SleevePositionsMapper.cpp
+    ${PLIERS_TOOLS_SRC_DIR}/initSleevePlugin.cpp
+)
+
+set(README_FILES PluginInteractionTools.txt)
+
+# Create the plugin library.
+add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES})
+
+# Set define dllimport/dllexport mechanism on Windows.
+target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
+
+# Link the plugin library to its dependencies (other libraries).
+target_link_libraries(${PROJECT_NAME} SofaComponentGeneral)
+
+target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
+target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>")
+target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
-sofa_create_package(${PROJECT_NAME} ${SLEEVE_VERSION} ${PROJECT_NAME} ${PROJECT_NAME})
-
+sofa_generate_package(
+    NAME ${PROJECT_NAME}
+    TARGETS ${PROJECT_NAME}
+    VERSION ${PROJECT_VERSION}
+    INCLUDE_SOURCE_DIR ${PLIERS_TOOLS_SRC_DIR}
+    INCLUDE_INSTALL_DIR ${PROJECT_NAME}
+    RELOCATABLE "plugins"
+    )
