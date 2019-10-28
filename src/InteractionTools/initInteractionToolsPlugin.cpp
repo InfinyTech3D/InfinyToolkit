@@ -19,7 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <PliersTools/config.h>
+#include <InteractionTools/config.h>
 
 namespace sofa
 {

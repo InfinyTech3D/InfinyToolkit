@@ -5,7 +5,7 @@ find_package(SofaGeneral REQUIRED)
 
 set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
-set(PLIERS_TOOLS_SRC_DIR src/PliersTools)
+set(PLIERS_TOOLS_SRC_DIR src/InteractionTools)
 
 set(HEADER_FILES
     ${PLIERS_TOOLS_SRC_DIR}/PliersPinceManager.h
