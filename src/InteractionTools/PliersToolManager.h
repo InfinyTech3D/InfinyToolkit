@@ -19,9 +19,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_MISC_SleevePinceManager_H
-#define SOFA_COMPONENT_MISC_SleevePinceManager_H
-#include "config.h"
+#ifndef SOFA_INTERACTIONTOOLS_PLIERSTOOLMANAGER_H
+#define SOFA_INTERACTIONTOOLS_PLIERSTOOLMANAGER_H
+#include <InteractionTools/config.h>
 
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/topology/BaseTopology.h>
@@ -65,24 +65,18 @@ typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::def
 typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
 typedef sofa::component::projectiveconstraintset::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
 
-/** Read file containing topological modification. Or apply input modifications
- * A timestep has to be established for each modification.
- *
- * SIMPLE METHODE FOR THE MOMENT. DON'T HANDLE MULTIPLE TOPOLOGIES
+/** 
+*
 */
-class SOFA_SLEEVE_API SleevePinceManager: public core::objectmodel::BaseObject
+class SOFA_INTERACTIONTOOLS_API PliersToolManager: public core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(SleevePinceManager,core::objectmodel::BaseObject);
-
-
+    SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);
 
 protected:
-    SleevePinceManager();
+    PliersToolManager();
 
-    virtual ~SleevePinceManager();
-
-  
+    virtual ~PliersToolManager();
 
 public:
     virtual void init() override;
@@ -178,4 +172,4 @@ protected:
 
 } // namespace sofa
 
-#endif
+#endif // SOFA_INTERACTIONTOOLS_PLIERSTOOLMANAGER_H

@@ -19,12 +19,11 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <PliersTools/PliersPositionsMapper.h>
+#include <InteractionTools/PliersPositionsMapper.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 
 #include <sofa/simulation/Node.h>
-
 
 #include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 #include <SofaBaseTopology/TetrahedronSetTopologyModifier.h>
@@ -42,20 +41,20 @@ namespace component
 namespace engine
 {
 
-SOFA_DECL_CLASS(SleevePositionsMapper)
+SOFA_DECL_CLASS(PliersPositionsMapper)
 
 using namespace defaulttype;
 using namespace sofa::core::topology;
 
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
 
-int SleevePositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
-        .add< SleevePositionsMapper >();
+int PliersPositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
+        .add< PliersPositionsMapper >();
 
 
-SleevePositionsMapper::SleevePositionsMapper()
-    : m_model(NULL)
-	, m_topo(NULL)
+PliersPositionsMapper::PliersPositionsMapper()
+    : m_model(nullptr)
+	, m_topo(nullptr)
 	, d_positions(initData(&d_positions, "position", "Rest position coordinates of the degrees of freedom."))
 	, m_tetraTube(initData(&m_tetraTube, "tetraTube", "list of tetra id representing the tube"))
 	, m_tetraFat(initData(&m_tetraFat, "tetraFat", "list of tetra id representing the fat"))
@@ -67,20 +66,20 @@ SleevePositionsMapper::SleevePositionsMapper()
 }
 
 
-SleevePositionsMapper::~SleevePositionsMapper()
+PliersPositionsMapper::~PliersPositionsMapper()
 {
 
 }
 
 
-void SleevePositionsMapper::init()
+void PliersPositionsMapper::init()
 {
 	this->getContext()->get(m_topo);
-	if (m_topo == NULL)
+	if (m_topo == nullptr)
 		std::cout << "Error: NO tetraCon" << std::endl;
 
 	this->getContext()->get(m_model);
-	if (m_model == NULL)
+	if (m_model == nullptr)
 		std::cout << "Error: NO mechaObj" << std::endl;
 
 	addInput(&d_positions);
@@ -89,16 +88,16 @@ void SleevePositionsMapper::init()
 	setDirtyValue();
 }
 
-void SleevePositionsMapper::reinit()
+void PliersPositionsMapper::reinit()
 {
 /*    if (!m_useDataInputs.getValue())
         this->readDataFile();
         */
 }
 
-void SleevePositionsMapper::update()
+void PliersPositionsMapper::doUpdate()
 {
-	std::cout << "SleevePositionsMapper::update()" << std::endl;
+	std::cout << "PliersPositionsMapper::update()" << std::endl;
 	cleanDirty();
 
 	const sofa::helper::vector<int>& _tetraTube = m_tetraTube.getValue();
@@ -157,7 +156,7 @@ void SleevePositionsMapper::update()
 
 }
 
-void SleevePositionsMapper::handleTopologyChange()
+void PliersPositionsMapper::handleTopologyChange()
 {
 	std::list<const TopologyChange *>::const_iterator itBegin = m_topo->beginChange();
 	std::list<const TopologyChange *>::const_iterator itEnd = m_topo->endChange();
@@ -226,12 +225,12 @@ void SleevePositionsMapper::handleTopologyChange()
 	}
 }
 
-void SleevePositionsMapper::draw(const core::visual::VisualParams* vparams)
+void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 {
    if (!vparams->displayFlags().getShowBehaviorModels())
         return;
    
-    if (m_model == NULL || m_topo == NULL)
+    if (m_model == nullptr || m_topo == nullptr)
         return;
 
 	sofa::defaulttype::Vec4f color = sofa::defaulttype::Vec4f(0.2f, 1.0f, 1.0f, 1.0f);

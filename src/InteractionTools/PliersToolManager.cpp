@@ -57,7 +57,7 @@ namespace component
 namespace misc
 {
 
-SOFA_DECL_CLASS(SleevePinceManager)
+SOFA_DECL_CLASS(PliersToolManager)
 
 using namespace defaulttype;
 using namespace sofa::core::topology;
@@ -65,11 +65,11 @@ using namespace sofa::core::topology;
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
 using sofa::component::collision::SphereModel;
 
-int SleevePinceManagerClass = core::RegisterObject("Handle sleeve Pince.")
-        .add< SleevePinceManager >();
+int PliersToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
+        .add< PliersToolManager >();
 
 
-SleevePinceManager::SleevePinceManager()
+PliersToolManager::PliersToolManager()
     : m_pathMord1(initData(&m_pathMord1, "pathMord1", "Path to mord1"))
     , m_pathMord2(initData(&m_pathMord2, "pathMord2", "Path to mord2"))
     , m_pathModel(initData(&m_pathModel, "pathModel", "Path to model"))
@@ -86,13 +86,13 @@ SleevePinceManager::SleevePinceManager()
 }
 
 
-SleevePinceManager::~SleevePinceManager()
+PliersToolManager::~PliersToolManager()
 {
 
 }
 
 
-void SleevePinceManager::init()
+void PliersToolManager::init()
 {
     const std::string& pathMord1 = m_pathMord1.getValue();
     const std::string& pathMord2 = m_pathMord2.getValue();
@@ -121,7 +121,7 @@ void SleevePinceManager::init()
     computeBoundingBox();
 }
 
-int SleevePinceManager::testModels()
+int PliersToolManager::testModels()
 {
     if (m_mord1 == NULL)
         return -20;
@@ -135,7 +135,7 @@ int SleevePinceManager::testModels()
     return 52;
 }
 
-bool SleevePinceManager::computeBoundingBox()
+bool PliersToolManager::computeBoundingBox()
 {
     if (m_mord1 == NULL || m_mord2 == NULL)
     {
@@ -201,14 +201,14 @@ bool SleevePinceManager::computeBoundingBox()
     return true;
 }
 
-void SleevePinceManager::reinit()
+void PliersToolManager::reinit()
 {
 /*    if (!m_useDataInputs.getValue())
         this->readDataFile();
         */
 }
 
-void SleevePinceManager::computeVertexIdsInBroadPhase(float margin)
+void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
 {
     // First compute boundingbox
     computeBoundingBox();    
@@ -232,7 +232,7 @@ void SleevePinceManager::computeVertexIdsInBroadPhase(float margin)
     }
 }
 
-bool SleevePinceManager::unactiveTool()
+bool PliersToolManager::unactiveTool()
 {
 	if (m_model == NULL)
 		return false;
@@ -271,7 +271,7 @@ bool SleevePinceManager::unactiveTool()
 	return true;
 }
 
-bool SleevePinceManager::reactiveTool()
+bool PliersToolManager::reactiveTool()
 {
 	// Restaure the default collision behavior
 	std::vector<SphereModel*> col_models;
@@ -294,7 +294,7 @@ bool SleevePinceManager::reactiveTool()
 }
 
 
-const sofa::helper::vector< int >& SleevePinceManager::grabModel()
+const sofa::helper::vector< int >& PliersToolManager::grabModel()
 {
     // If no point in the broadphase, nothing to do
     if (m_idBroadPhase.size() == 0)
@@ -431,7 +431,7 @@ const sofa::helper::vector< int >& SleevePinceManager::grabModel()
     return m_idgrabed;
 }
 
-void SleevePinceManager::releaseGrab()
+void PliersToolManager::releaseGrab()
 {    
     if (!m_forcefieldUP || !m_forcefieldDOWN)
         return;
@@ -463,7 +463,7 @@ void SleevePinceManager::releaseGrab()
 	}
 }
 
-bool SleevePinceManager::createFF(float _stiffness)
+bool PliersToolManager::createFF(float _stiffness)
 {
     m_stiffness = _stiffness;
 
@@ -492,7 +492,7 @@ bool SleevePinceManager::createFF(float _stiffness)
     return 0;
 }
 
-void SleevePinceManager::computePlierAxis()
+void PliersToolManager::computePlierAxis()
 {
     zero = sofa::defaulttype::Vec3f(0, 0, 0);
     xAxis = sofa::defaulttype::Vec3f(1, 0, 0);
@@ -522,7 +522,7 @@ void SleevePinceManager::computePlierAxis()
 
 }
 
-int SleevePinceManager::cutFromTetra(float minX, float maxX, bool cut)
+int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
 {
     if (m_idBroadPhase.empty())
         return 10000;
@@ -669,7 +669,7 @@ int SleevePinceManager::cutFromTetra(float minX, float maxX, bool cut)
     return items.size();
 }
 
-int SleevePinceManager::pathCutFromTetra(float minX, float maxX)
+int PliersToolManager::pathCutFromTetra(float minX, float maxX)
 {    
     int res = cutFromTetra(minX, maxX, false);
     if (res > 1000)
@@ -710,7 +710,7 @@ int SleevePinceManager::pathCutFromTetra(float minX, float maxX)
 }
 
 
-void SleevePinceManager::cutFromTriangles()
+void PliersToolManager::cutFromTriangles()
 {
     // Classify right/left points of the plier
     sofa::helper::vector<int> idsLeft;
@@ -800,7 +800,7 @@ void SleevePinceManager::cutFromTriangles()
 }
 
 
-void SleevePinceManager::handleEvent(sofa::core::objectmodel::Event* event)
+void PliersToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
     if (KeypressedEvent::checkEventType(event))
     {
@@ -882,7 +882,7 @@ void SleevePinceManager::handleEvent(sofa::core::objectmodel::Event* event)
     }
 }
 
-void SleevePinceManager::draw(const core::visual::VisualParams* vparams)
+void PliersToolManager::draw(const core::visual::VisualParams* vparams)
 {
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;

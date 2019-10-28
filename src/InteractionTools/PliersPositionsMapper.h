@@ -19,9 +19,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_MISC_SleevePositionsMapper_H
-#define SOFA_COMPONENT_MISC_SleevePositionsMapper_H
-#include "config.h"
+#ifndef SOFA_INTERACTIONTOOLS_PLIERSPOSITIONSMAPPER_H
+#define SOFA_INTERACTIONTOOLS_PLIERSPOSITIONSMAPPER_H
+#include <InteractionTools/config.h>
 
 #include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 #include <sofa/core/DataEngine.h>
@@ -46,29 +46,23 @@ namespace engine
 {
 	using core::DataEngine;
 
-/** Read file containing topological modification. Or apply input modifications
- * A timestep has to be established for each modification.
- *
- * SIMPLE METHODE FOR THE MOMENT. DON'T HANDLE MULTIPLE TOPOLOGIES
+/** 
+*
 */
-class SOFA_SLEEVE_API SleevePositionsMapper: public DataEngine
+class SOFA_INTERACTIONTOOLS_API PliersPositionsMapper: public DataEngine
 {
 public:
-    SOFA_CLASS(SleevePositionsMapper,core::objectmodel::BaseObject);
-
-
+    SOFA_CLASS(PliersPositionsMapper,core::objectmodel::BaseObject);
 
 protected:
-    SleevePositionsMapper();
+    PliersPositionsMapper();
 
-    virtual ~SleevePositionsMapper();
-
-  
+    virtual ~PliersPositionsMapper(); 
 
 public:
     void init() override;
     void reinit() override;
-	void update() override;
+	void doUpdate() override;
 
 
     void draw(const core::visual::VisualParams* vparams) override;
@@ -102,4 +96,4 @@ protected:
 
 } // namespace sofa
 
-#endif
+#endif // SOFA_INTERACTIONTOOLS_PLIERSPOSITIONSMAPPER_H
