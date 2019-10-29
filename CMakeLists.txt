@@ -3,6 +3,7 @@ project(InteractionTools VERSION 0.1)
 
 find_package(SofaGeneral REQUIRED)
 find_package(SofaHaptics REQUIRED)
+find_package(SofaCarving REQUIRED)
 
 set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -12,13 +13,15 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.h
     ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.h
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.h
+    ${INTERACTIONTOOLS_SRC_DIR}/HapticCarvingManager.h    
 )
 
 set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp    
+    ${INTERACTIONTOOLS_SRC_DIR}/HapticCarvingManager.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
 )
 
 set(README_FILES PluginInteractionTools.txt)
@@ -30,7 +33,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} SofaComponentGeneral SofaHaptics)
+target_link_libraries(${PROJECT_NAME} SofaComponentGeneral SofaHaptics SofaCarving)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>")
