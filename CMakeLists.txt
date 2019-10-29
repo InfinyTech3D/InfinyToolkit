@@ -10,6 +10,7 @@ set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 set(INTERACTIONTOOLS_SRC_DIR src/InteractionTools)
 
 set(HEADER_FILES
+    ${INTERACTIONTOOLS_SRC_DIR}/config.h.in
     ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.h
     ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.h
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.h
