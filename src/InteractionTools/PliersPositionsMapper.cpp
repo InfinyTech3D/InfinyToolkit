@@ -20,17 +20,13 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <InteractionTools/PliersPositionsMapper.h>
+
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 
-#include <sofa/simulation/Node.h>
-
 #include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
-#include <SofaBaseTopology/TetrahedronSetTopologyModifier.h>
+#include <sofa/defaulttype/Vec.h>
 
-#include <sofa/simulation/Simulation.h>
-
-#include <time.h>
 
 namespace sofa
 {
@@ -46,15 +42,12 @@ SOFA_DECL_CLASS(PliersPositionsMapper)
 using namespace defaulttype;
 using namespace sofa::core::topology;
 
-typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
-
 int PliersPositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
         .add< PliersPositionsMapper >();
 
 
 PliersPositionsMapper::PliersPositionsMapper()
-    : m_model(nullptr)
-	, m_topo(nullptr)
+    : m_topo(nullptr)
 	, d_positions(initData(&d_positions, "position", "Rest position coordinates of the degrees of freedom."))
 	, m_tetraTube(initData(&m_tetraTube, "tetraTube", "list of tetra id representing the tube"))
 	, m_tetraFat(initData(&m_tetraFat, "tetraFat", "list of tetra id representing the fat"))
@@ -75,12 +68,11 @@ PliersPositionsMapper::~PliersPositionsMapper()
 void PliersPositionsMapper::init()
 {
 	this->getContext()->get(m_topo);
-	if (m_topo == nullptr)
-		std::cout << "Error: NO tetraCon" << std::endl;
-
-	this->getContext()->get(m_model);
-	if (m_model == nullptr)
-		std::cout << "Error: NO mechaObj" << std::endl;
+    if (m_topo == nullptr) {
+        sofa::core::objectmodel::BaseObject::d_componentstate.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        msg_error() << "PliersPositionsMapper need a topology pointer";
+        return;
+    }
 
 	addInput(&d_positions);
 	addOutput(&m_tubePositions);
@@ -90,14 +82,12 @@ void PliersPositionsMapper::init()
 
 void PliersPositionsMapper::reinit()
 {
-/*    if (!m_useDataInputs.getValue())
-        this->readDataFile();
-        */
+
 }
 
 void PliersPositionsMapper::doUpdate()
 {
-	std::cout << "PliersPositionsMapper::update()" << std::endl;
+	msg_info() << "PliersPositionsMapper::update()";
 	cleanDirty();
 
 	const sofa::helper::vector<int>& _tetraTube = m_tetraTube.getValue();
@@ -178,13 +168,13 @@ void PliersPositionsMapper::handleTopologyChange()
 			for (unsigned int i = 0; i < tab.size(); ++i)
 			{
 				int idTetraRemoved = tab[i];
-				std::cout << "idTetraRemoved: " << idTetraRemoved << std::endl;
+				msg_info() << "idTetraRemoved: " << idTetraRemoved;
 				// check tetra tube
 				for (unsigned int j = 0; j < _tetraTube.size(); ++j)
 				{
 					if (idLastTetra == _tetraTube[j])
 					{
-						std::cout << "tetra tube switch: " << _tetraTube[j] << " by " << idTetraRemoved << std::endl;
+						msg_info() << "tetra tube switch: " << _tetraTube[j] << " by " << idTetraRemoved;
 						_tetraTube[j] = idTetraRemoved;
 						updateNeeded = true;
 					}
@@ -198,7 +188,7 @@ void PliersPositionsMapper::handleTopologyChange()
 				{
 					if (idLastTetra == _tetraFat[j])
 					{
-						std::cout << "tetra fat switch: " << _tetraFat[j] << " by " << idTetraRemoved << std::endl;
+						msg_info() << "tetra fat switch: " << _tetraFat[j] << " by " << idTetraRemoved;
 						_tetraFat[j] = idTetraRemoved;
 						updateNeeded = true;
 					}
@@ -230,7 +220,7 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
    if (!vparams->displayFlags().getShowBehaviorModels())
         return;
    
-    if (m_model == nullptr || m_topo == nullptr)
+    if (m_topo == nullptr)
         return;
 
 	sofa::defaulttype::Vec4f color = sofa::defaulttype::Vec4f(0.2f, 1.0f, 1.0f, 1.0f);
@@ -247,21 +237,7 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }
 
-	/*color = sofa::defaulttype::Vec4f(0.2f, 0.0f, 1.0f, 1.0f);
-	const sofa::helper::vector<unsigned int>& _tetraFat = m_tetraFat.getValue();
-	for (int i = 0; i < _tetraFat.size(); i++)
-	{
-		const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(_tetraFat[i]);
-
-		sofa::defaulttype::Vec3f p0 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
-		sofa::defaulttype::Vec3f p1 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
-		sofa::defaulttype::Vec3f p2 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
-		sofa::defaulttype::Vec3f p3 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
-
-		vparams->drawTool()->drawTriangle(p0, p1, p2, p3, color);
-	}
-      */
-
+	
 	const helper::vector<sofa::defaulttype::Vec<3, SReal> >& tubePositions = m_tubePositions.getValue();
 
 	for (int i = 0; i < tubePositions.size()-1; i++)
@@ -276,7 +252,7 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 		vparams->drawTool()->drawPoint(grasPositions[i], Vec<4, float>(1.0, 0.0, 1.0, 1.0));
 	}
 
-   // std::cout << "drawLine: " << m_min[0] << " " << m_min[1] << " " << m_min[2] << std::endl;
+   // msg_info() << "drawLine: " << m_min[0] << " " << m_min[1] << " " << m_min[2];
 }
 
 

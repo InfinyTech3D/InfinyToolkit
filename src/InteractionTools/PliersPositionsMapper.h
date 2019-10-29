@@ -21,20 +21,9 @@
 ******************************************************************************/
 #ifndef SOFA_INTERACTIONTOOLS_PLIERSPOSITIONSMAPPER_H
 #define SOFA_INTERACTIONTOOLS_PLIERSPOSITIONSMAPPER_H
+
 #include <InteractionTools/config.h>
-
-#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 #include <sofa/core/DataEngine.h>
-#include <sofa/core/objectmodel/Event.h>
-
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-
-
-#include <sofa/defaulttype/DataTypeInfo.h>
-#include <sofa/simulation/Visitor.h>
-
-#include <sofa/defaulttype/Vec.h>
 
 namespace sofa
 {
@@ -42,17 +31,21 @@ namespace sofa
 namespace component
 {
 
+namespace topology
+{
+    class TetrahedronSetTopologyContainer;
+}
+
 namespace engine
 {
-	using core::DataEngine;
 
 /** 
 *
 */
-class SOFA_INTERACTIONTOOLS_API PliersPositionsMapper: public DataEngine
+class SOFA_INTERACTIONTOOLS_API PliersPositionsMapper: public sofa::core::DataEngine
 {
 public:
-    SOFA_CLASS(PliersPositionsMapper,core::objectmodel::BaseObject);
+    SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
 
 protected:
     PliersPositionsMapper();
@@ -78,8 +71,6 @@ public:
     }
 
 protected:
- 
-    sofa::core::behavior::BaseMechanicalState* m_model;
 	sofa::component::topology::TetrahedronSetTopologyContainer* m_topo;
 
 	Data< helper::vector<sofa::defaulttype::Vec<3, SReal> > > d_positions;

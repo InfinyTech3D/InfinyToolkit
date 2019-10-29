@@ -23,28 +23,8 @@
 #define SOFA_INTERACTIONTOOLS_PLIERSTOOLMANAGER_H
 #include <InteractionTools/config.h>
 
-#include <sofa/core/topology/BaseMeshTopology.h>
-#include <sofa/core/topology/BaseTopology.h>
-#include <sofa/core/objectmodel/BaseObject.h>
-#include <sofa/core/objectmodel/Event.h>
-
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-
 #include <SofaDeformable/StiffSpringForceField.h>
-
-#include <sofa/defaulttype/DataTypeInfo.h>
-#include <sofa/simulation/Visitor.h>
-
-#include <SofaBaseTopology/TriangleSetGeometryAlgorithms.h>
 #include <SofaGeneralObjectInteraction/AttachConstraint.h>
-#include <sofa/defaulttype/Vec.h>
-
-#ifdef SOFA_HAVE_ZLIB
-#include <zlib.h>
-#endif
-
-#include <fstream>
 
 namespace sofa
 {
@@ -54,12 +34,6 @@ namespace component
 
 namespace misc
 {
-
-#ifdef SOFA_FLOAT
-typedef float Real; ///< alias
-#else
-typedef double Real; ///< alias
-#endif
 
 typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
 typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
