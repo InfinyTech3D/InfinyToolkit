@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.005" gravity="10 0 0" >
+    <VisualStyle displayFlags="hideBehaviorModels showCollisionModels hideMappings hideForceFields" />
+
+	<RequiredPlugin pluginName="MeshRefinement" />
+    <RequiredPlugin pluginName="Geomagic" />
+    <RequiredPlugin pluginName='SofaHaptics' />
+    
+    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceDetection name="detection" />
+    <DefaultContactManager name="response" response="FrictionContact" />
+    <LocalMinDistance name="proximity" alarmDistance="0.5" contactDistance="0.1" angleCone="0.0" />
+
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
+    
+    <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
+        positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" />
+	<AdvanceCarvingManager active="@GeomagicDevice.button1" carvingDistance="1.0" 
+        refineCriteria="0.01" carvingCriteria="0.3" carvingSpeed="0.001" drawContacts="1"/>
+	
+
+    <Node name="ToolController">
+        <MechanicalObject template="Rigid3d" name="DOFs" position="@GeomagicDevice.positionDevice"/>
+        <MechanicalStateController template="Rigid3d" listening="true" mainDirection="-1.0 0.0 0.0" handleEventTriggersUpdate="true"/>
+    </Node>
+	
+	
+	<Node name="Cube_Volume_1">
+        <MeshGmshLoader name="loader" filename="mesh/cube_03.msh" scale3d="0.5 0.5 0.5" translation="-5 5 -5"/>
+        <MechanicalObject src="@loader" name="Volume"/>
+
+		<TetrahedronSetTopologyContainer  name="TetraContainer" src="@loader" tags=" "/>
+		<TetrahedronSetTopologyModifier   name="TetraModifier" />
+		<TetrahedronSetTopologyAlgorithms name="TetraTopoAlgo"  template="Vec3d" />
+		<TetrahedronSetGeometryAlgorithms name="TetraGeomAlgo"  template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.8"/>
+                
+        <Node name="Cube_Surface">
+            <TriangleSetTopologyContainer  name="TriContainer" fileTopology="" tags=" " />
+			<TriangleSetTopologyModifier   name="TriModifier" />
+			<TriangleSetTopologyAlgorithms name="TriTopoAlgo" template="Vec3d" />
+			<TriangleSetGeometryAlgorithms name="TriGeomAlgo" template="Vec3d" />
+			
+            <Tetra2TriangleTopologicalMapping input="@../TetraContainer" output="@TriContainer" />
+        	
+			<LineCollisionModel name="colTargetLine1" contactStiffness="1" simulated="0" moving="0" group="1"/>    
+            <PointCollisionModel name="colTargetPoint1" contactStiffness="1" group="1"/>
+			<TriangleCollisionModel name="colTargetTriangle1" contactStiffness="1" tags="CarvingSurface" group="1"/>
+            <Node name="Cube_Visu">
+                <OglModel name="Visual" color="green"/>
+                <IdentityMapping input="@../" output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+	
+	
+    <Node name="Instrument" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
+        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
+        
+		<MechanicalObject name="instrumentState" template="Rigid3d" />
+		<UniformMass name="mass" totalMass="0.05" />
+		
+		<RestShapeSpringsForceField stiffness='1000000000' angularStiffness='1000000000' external_rest_shape='@../ToolController/DOFs' points='0' external_points='0' />
+        <LCPForceFeedback activate="true" forceCoef="0.005"/>
+        <UncoupledConstraintCorrection/>
+        
+        <Node name="CollisionModel" >
+            <MeshObjLoader filename="./mesh/drill_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="-180" rz="-90" dz="3.5" dx="-0.3" />
+            <LineCollisionModel name="instrumentLine" contactStiffness="10" />
+            <PointCollisionModel name="instrumentPoint" contactStiffness="10" tags="CarvingTool" /> 
+            <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState" />
+        </Node>        
+    </Node>
+	
+</Node>

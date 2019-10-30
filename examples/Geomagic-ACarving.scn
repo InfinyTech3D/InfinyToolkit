@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.005" gravity="10 0 0" >
+    <VisualStyle displayFlags="hideBehaviorModels showCollisionModels hideMappings hideForceFields" />
+
+	<RequiredPlugin pluginName="MeshRefinement" />
+    <RequiredPlugin pluginName="Geomagic" />
+    <RequiredPlugin pluginName="SofaHaptics" />
+    <RequiredPlugin pluginName="InteractionTools" />
+    
+    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceDetection name="detection" />
+    <DefaultContactManager name="response" response="FrictionContact" />
+    <LocalMinDistance name="proximity" alarmDistance="0.5" contactDistance="0.1" angleCone="0.0" />
+
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
+    
+    <HapticEmulator name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
+        positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" />
+	<AdvanceCarvingManager active="@GeomagicDevice.button1" carvingDistance="0.01" 
+        refineCriteria="1.0" carvingCriteria="1.0" carvingSpeed="0.001" drawContacts="1" refineThreshold="0.01"/>
+	
+
+    <Node name="ToolController">
+        <MechanicalObject template="Rigid3d" name="DOFs" position="@GeomagicDevice.positionDevice"/>
+        <MechanicalStateController template="Rigid3d" listening="true" mainDirection="-1.0 0.0 0.0" handleEventTriggersUpdate="true"/>
+    </Node>
+	
+	
+	<Node name="Cube_Volume_1">
+        <MeshGmshLoader name="loader" filename="mesh/cube_03.msh" scale3d="0.5 0.5 0.5" translation="-5 5 -5"/>
+        <MechanicalObject src="@loader" name="Volume"/>
+
+		<TetrahedronSetTopologyContainer  name="TetraContainer" src="@loader" tags=" "/>
+		<TetrahedronSetTopologyModifier   name="TetraModifier" />
+		<TetrahedronSetTopologyAlgorithms name="TetraTopoAlgo"  template="Vec3d" />
+		<TetrahedronSetGeometryAlgorithms name="TetraGeomAlgo"  template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
+        
+        <LineCollisionModel name="colTargetLine1" contactStiffness="1" simulated="0" moving="0" group="1"/>    
+        <PointCollisionModel name="colTargetPoint1" contactStiffness="1" tags="CarvingSurface" group="1"/>
+        <TriangleCollisionModel name="colTargetTriangle1" contactStiffness="1" tags="CarvingSurface"group="1"/>
+    </Node>
+	
+	
+    <Node name="Instrument" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
+        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
+        
+		<MechanicalObject name="instrumentState" template="Rigid3d" />
+		<UniformMass name="mass" totalMass="0.05" />
+		
+		<RestShapeSpringsForceField stiffness='1000000000' angularStiffness='1000000000' external_rest_shape='@../ToolController/DOFs' points='0' external_points='0' />
+        <LCPForceFeedback activate="true" forceCoef="0.005"/>
+        <UncoupledConstraintCorrection/>
+        
+        <Node name="toolCollision" >
+            <MeshObjLoader filename="./mesh/drill_collision_2p.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="3.5" dx="0.0" />
+            <LineCollisionModel name="instrumentLine" contactStiffness="10" />
+            <SphereCollisionModel name="instrumentPoint" contactStiffness="10" tags="CarvingTool" radius="0.1"/> 
+            <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState" />
+        </Node>        
+    </Node>
+	
+</Node>
