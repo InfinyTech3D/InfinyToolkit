@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.03" showBoundingTree="0" gravity="0 -0.9 0">
+  <RequiredPlugin name="Carving" pluginName="SofaCarving" />
+  <RequiredPlugin name="Refinement" pluginName="MeshRefinement" />
+  <RequiredPlugin name="InteractionTools" pluginName="InteractionTools" />
+  <RequiredPlugin name='SofaOpenglVisual'/>
+  <VisualStyle displayFlags="showCollisionModels hideVisual" />
+  
+  <DefaultPipeline verbose="0" />
+  <BruteForceDetection name="N2" />
+  <DefaultContactManager response="default" />
+  <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1"/>
+  
+  <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
+  <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
+  
+  <CarvingManager active="true" carvingDistance="-0.05"/>
+  
+  <Node name="carvingElement">
+    <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
+    <UniformMass name="Mass" totalMass="10.0" />
+    <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+  </Node>
+
+  <Node name="Hexa2Tetra" >
+    <RegularGridTopology name="HexaTop" n="11 11 11" min="0 0 0" max="10 10 10" />
+    <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
+    <TetrahedronSetTopologyModifier name="Modifier"/>
+	<Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />
+  </Node>
+  
+  <Node name="Cube">
+    <MechanicalObject position="@../Hexa2Tetra/Container.position" name="Volume" />
+    
+    <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/Container" />
+    <TetrahedronSetTopologyModifier name="Modifier" />
+    <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+    <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
+
+    <DiagonalMass massDensity="1.0" />
+
+    <BoxROI name="box" box="-1 -1 -1 11 0 11" drawBoxes="true" />
+    <FixedConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
+
+    <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="1000" poissonRatio="0.3" method="large" />
+
+    <Node name="Surface">
+      <TriangleSetTopologyContainer  name="Container"/>
+      <TriangleSetTopologyModifier   name="Modifier" />
+      <TriangleSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+      <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
+      <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+      <TriangleCollisionModel name="triangleCol" tags="CarvingSurface"/>
+      <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
+      
+      <Node name="liver-Visual">
+          <OglModel name="Visual" color="green" />
+          <IdentityMapping input="@../../Volume" output="@Visual" />
+      </Node>
+    </Node>
+  </Node>
+
+
+
+</Node>
