@@ -89,7 +89,7 @@ void SurfaceCarvingManager::bwdInit()
 		getContext()->get<SurfaceModel>(&models_tmp, core::objectmodel::Tag("ShavingBurrSurface"), core::objectmodel::BaseContext::SearchRoot);
 		for (int i = 0; i < models_tmp.size(); i++)
 		{
-			if (!(models_tmp[i]->getTopology()->getNbQuads()) && !(models_tmp[i]->getTopology()->getNbTetrahedra()) && !(models_tmp[i]->getTopology()->getNbHexahedra()) && (models_tmp[i]->getTopology()->getNbTriangles()))
+			if (!(models_tmp[i]->getCollisionTopology()->getNbQuads()) && !(models_tmp[i]->getCollisionTopology()->getNbTetrahedra()) && !(models_tmp[i]->getCollisionTopology()->getNbHexahedra()) && (models_tmp[i]->getCollisionTopology()->getNbTriangles()))
 				models.push_back(models_tmp[i]);
 		}
 		if (models.size())
@@ -312,7 +312,7 @@ helper::vector<int> SurfaceCarvingManager::getShavingPointIdx(const ContactVecto
 
 		for (unsigned int k = 0; k < 3; k++)
 		{
-			ShavingPointIdx.push_back(modelSurface->getMeshTopology()->getTriangle(triangleIdx)[k]);
+			ShavingPointIdx.push_back(modelSurface->getCollisionTopology()->getTriangle(triangleIdx)[k]);
 		}
 	}
 
