@@ -91,14 +91,14 @@ void PliersPositionsMapper::doUpdate()
 	cleanDirty();
 
 	const sofa::helper::vector<int>& _tetraTube = m_tetraTube.getValue();
-	const sofa::helper::vector<sofa::defaulttype::Vec<3, SReal> >& _positions = d_positions.getValue();
-	helper::vector<sofa::defaulttype::Vec<3, SReal> >& tubePositions = *m_tubePositions.beginEdit();
+	const sofa::helper::vector<sofa::defaulttype::Vec3 >& _positions = d_positions.getValue();
+	helper::vector<sofa::defaulttype::Vec3 >& tubePositions = *m_tubePositions.beginEdit();
 	tubePositions.resize(_tetraTube.size());
 	for (int i = 0; i < _tetraTube.size(); i++)
 	{
 		int idTetra = _tetraTube[i];
 		if (idTetra == -1) {
-			tubePositions[i] = sofa::defaulttype::Vec3f(666.666, 666.666, 666.666);
+			tubePositions[i] = sofa::defaulttype::Vec3(666.666, 666.666, 666.666);
 			continue;
 		}
 
@@ -114,7 +114,7 @@ void PliersPositionsMapper::doUpdate()
 	m_tubePositions.endEdit();
 
 	const sofa::helper::vector<int>& _tetraFat = m_tetraFat.getValue();
-	helper::vector<sofa::defaulttype::Vec<3, SReal> >& grasPositions = *m_grasPositions.beginEdit();
+	helper::vector<sofa::defaulttype::Vec3 >& grasPositions = *m_grasPositions.beginEdit();
 	grasPositions.resize(_tetraFat.size());
 	for (int i = 0; i < _tetraFat.size()/3; i++)
 	{
@@ -125,19 +125,19 @@ void PliersPositionsMapper::doUpdate()
 		idTetras[2] = _tetraFat[i * 3 + 2];
 
 		if (idTetras[0] == -1 || idTetras[1] == -1 || idTetras[2] == -1) {
-			grasPositions[i * 3] = sofa::defaulttype::Vec3f(666.666, 666.666, 666.666);
-			grasPositions[i * 3 + 1] = sofa::defaulttype::Vec3f(666.666, 666.666, 666.666);
-			grasPositions[i * 3 + 2] = sofa::defaulttype::Vec3f(666.666, 666.666, 666.666);
+			grasPositions[i * 3] = sofa::defaulttype::Vec3(666.666, 666.666, 666.666);
+			grasPositions[i * 3 + 1] = sofa::defaulttype::Vec3(666.666, 666.666, 666.666);
+			grasPositions[i * 3 + 2] = sofa::defaulttype::Vec3(666.666, 666.666, 666.666);
 			continue;
 		}
 
 		for (int j = 0; j < 3; j++)
 		{
 			const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(idTetras[j]);
-			sofa::defaulttype::Vec3f p0 = _positions[tetra[0]];
-			sofa::defaulttype::Vec3f p1 = _positions[tetra[1]];
-			sofa::defaulttype::Vec3f p2 = _positions[tetra[2]];
-			sofa::defaulttype::Vec3f p3 = _positions[tetra[3]];
+			sofa::defaulttype::Vec3 p0 = _positions[tetra[0]];
+			sofa::defaulttype::Vec3 p1 = _positions[tetra[1]];
+			sofa::defaulttype::Vec3 p2 = _positions[tetra[2]];
+			sofa::defaulttype::Vec3 p3 = _positions[tetra[3]];
 
 			grasPositions[i * 3 + j] = (p0 + p1 + p2 + p3) / 4;
 		}
@@ -162,7 +162,7 @@ void PliersPositionsMapper::handleTopologyChange()
 			sofa::helper::vector<int>& _tetraFat = *m_tetraFat.beginEdit();
 
 			const sofa::helper::vector<unsigned int> &tab = (static_cast< const sofa::core::topology::TetrahedraRemoved *>(*itBegin))->getArray();
-			int idLastTetra = m_topo->getNumberOfTetrahedra()-1;
+			int idLastTetra = int(m_topo->getNumberOfTetrahedra()-1);
 			bool updateNeeded = false;
 			
 			for (unsigned int i = 0; i < tab.size(); ++i)

@@ -62,7 +62,7 @@ public:
 
 
     // global methods    
-    bool createFF(float _stiffness);
+    int createFF(float _stiffness);
     bool computeBoundingBox();
     void computeVertexIdsInBroadPhase(float margin = 0.0);
 
@@ -85,8 +85,8 @@ public:
     virtual void handleEvent(sofa::core::objectmodel::Event* event) override;
     void computePlierAxis();
 
-    void setPlierAxis(sofa::defaulttype::Mat3x3f _matP) { matP = _matP; }
-    void setPlierOrigin(sofa::defaulttype::Vec3f _zero) { zero = _zero; }
+    void setPlierAxis(sofa::defaulttype::Mat3x3 _matP) { matP = _matP; }
+    void setPlierOrigin(sofa::defaulttype::Vec3 _zero) { zero = _zero; }
 
     sofa::defaulttype::Vector3 m_min, m_max;
 
@@ -115,14 +115,14 @@ protected:
     sofa::helper::vector <int> m_idgrabed;
     sofa::helper::vector <int> m_idBroadPhase;
 
-    float m_oldCollisionStiffness;
+    SReal m_oldCollisionStiffness;
 
     // Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
-    sofa::defaulttype::Mat3x3f matP;
-    sofa::defaulttype::Vec3f zero;
-    sofa::defaulttype::Vec3f xAxis;
-    sofa::defaulttype::Vec3f yAxis;
-    sofa::defaulttype::Vec3f zAxis;
+    sofa::defaulttype::Mat3x3 matP;
+    sofa::defaulttype::Vec3 zero;
+    sofa::defaulttype::Vec3 xAxis;
+    sofa::defaulttype::Vec3 yAxis;
+    sofa::defaulttype::Vec3 zAxis;
 
     // Pointer to the mechanicalObject
     sofa::core::behavior::BaseMechanicalState* m_mord1;

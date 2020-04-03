@@ -4,7 +4,7 @@ project(InteractionTools VERSION 0.1)
 find_package(SofaGeneral REQUIRED)
 find_package(SofaHaptics REQUIRED)
 find_package(SofaCarving REQUIRED)
-find_package(SofaSphFluid REQUIRED)
+#find_package(SofaSphFluid REQUIRED)
 find_package(MeshRefinement REQUIRED)
 
 set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")

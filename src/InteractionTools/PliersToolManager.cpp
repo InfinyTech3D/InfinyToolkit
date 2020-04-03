@@ -296,8 +296,8 @@ const sofa::helper::vector< int >& PliersToolManager::grabModel()
 
     // For each point in the broadphase search the neariest point of the plier
     // If none under minDist = 2; point is rejected
-    int nbrVM1 = m_mord1->getSize();
-    int nbrVM2 = m_mord2->getSize();
+    size_t nbrVM1 = m_mord1->getSize();
+    size_t nbrVM2 = m_mord2->getSize();
     for (int i = 0; i < m_idBroadPhase.size(); i++)
     {
         SReal Mx = m_model->getPX(m_idBroadPhase[i]);
@@ -307,8 +307,8 @@ const sofa::helper::vector< int >& PliersToolManager::grabModel()
         bool attached = false;
         int idModel1 = -1;
 		int idModel2 = -1;
-        float minDist1 = 2;
-		float minDist2 = 2;
+        SReal minDist1 = 2;
+        SReal minDist2 = 2;
         // compute bary on mordUP
         for (int j = 0; j < nbrVM1; j++)
         {
@@ -450,7 +450,7 @@ void PliersToolManager::releaseGrab()
 	}
 }
 
-bool PliersToolManager::createFF(float _stiffness)
+int PliersToolManager::createFF(float _stiffness)
 {
     m_stiffness = _stiffness;
 
@@ -481,28 +481,28 @@ bool PliersToolManager::createFF(float _stiffness)
 
 void PliersToolManager::computePlierAxis()
 {
-    zero = sofa::defaulttype::Vec3f(0, 0, 0);
-    xAxis = sofa::defaulttype::Vec3f(1, 0, 0);
-    yAxis = sofa::defaulttype::Vec3f(0, 1, 0);
-    zAxis = sofa::defaulttype::Vec3f(0, 0, 1);
+    zero = sofa::defaulttype::Vec3(0, 0, 0);
+    xAxis = sofa::defaulttype::Vec3(1, 0, 0);
+    yAxis = sofa::defaulttype::Vec3(0, 1, 0);
+    zAxis = sofa::defaulttype::Vec3(0, 0, 1);
 
     if (m_mord1 == NULL)
         return;
 
-    zero = sofa::defaulttype::Vec3f(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
-    xAxis = sofa::defaulttype::Vec3f(m_mord1->getPX(1), m_mord1->getPY(1), m_mord1->getPZ(1));
-    yAxis = sofa::defaulttype::Vec3f(m_mord1->getPX(20), m_mord1->getPY(20), m_mord1->getPZ(20));
-    zAxis = sofa::defaulttype::Vec3f(m_mord1->getPX(100), m_mord1->getPY(100), m_mord1->getPZ(100));
+    zero = sofa::defaulttype::Vec3(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
+    xAxis = sofa::defaulttype::Vec3(m_mord1->getPX(1), m_mord1->getPY(1), m_mord1->getPZ(1));
+    yAxis = sofa::defaulttype::Vec3(m_mord1->getPX(20), m_mord1->getPY(20), m_mord1->getPZ(20));
+    zAxis = sofa::defaulttype::Vec3(m_mord1->getPX(100), m_mord1->getPY(100), m_mord1->getPZ(100));
 
-    sofa::defaulttype::Vec3f xDir = (xAxis - zero); xDir.normalize();
-    sofa::defaulttype::Vec3f yDir = (yAxis - zero); yDir.normalize();
-    sofa::defaulttype::Vec3f zDir = (zAxis - zero); zDir.normalize();
+    sofa::defaulttype::Vec3 xDir = (xAxis - zero); xDir.normalize();
+    sofa::defaulttype::Vec3 yDir = (yAxis - zero); yDir.normalize();
+    sofa::defaulttype::Vec3 zDir = (zAxis - zero); zDir.normalize();
 
-    matP = sofa::defaulttype::Mat3x3f(xDir, yDir, zDir);
+    matP = sofa::defaulttype::Mat3x3(xDir, yDir, zDir);
 
-    //sofa::defaulttype::Vec3f test1 = sofa::defaulttype::Vec3f(m_mord1->getPX(3), m_mord1->getPY(3), m_mord1->getPZ(3));
-    //sofa::defaulttype::Vec3f test2 = sofa::defaulttype::Vec3f(m_mord1->getPX(40), m_mord1->getPY(40), m_mord1->getPZ(40));
-    //sofa::defaulttype::Vec3f test3 = sofa::defaulttype::Vec3f(m_mord1->getPX(45), m_mord1->getPY(45), m_mord1->getPZ(45));
+    //sofa::defaulttype::Vec3 test1 = sofa::defaulttype::Vec3(m_mord1->getPX(3), m_mord1->getPY(3), m_mord1->getPZ(3));
+    //sofa::defaulttype::Vec3 test2 = sofa::defaulttype::Vec3(m_mord1->getPX(40), m_mord1->getPY(40), m_mord1->getPZ(40));
+    //sofa::defaulttype::Vec3 test3 = sofa::defaulttype::Vec3(m_mord1->getPX(45), m_mord1->getPY(45), m_mord1->getPZ(45));
     //msg_info() << "test1 : " << test1 << " -> " << matP*(test1 - zero);
     //msg_info() << "test2 : " << test2 << " -> " << matP*(test2 - zero);
     //msg_info() << "test3 : " << test3 << " -> " << matP*(test3 - zero);
@@ -521,7 +521,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     sofa::helper::vector<int> idsRight;
     for (int i = 0; i < m_idBroadPhase.size(); i++)
     {
-        sofa::defaulttype::Vec3f vert = sofa::defaulttype::Vec3f(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
+        sofa::defaulttype::Vec3 vert = sofa::defaulttype::Vec3(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
         vert = matP*(vert - zero);
 
 		if (vert[2] < -20.0 || vert[2] > 20.0) // outside on the borders
@@ -653,7 +653,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
 	if (lastCut)
 		return 40000;
 
-    return items.size();
+    return int(items.size());
 }
 
 int PliersToolManager::pathCutFromTetra(float minX, float maxX)
@@ -693,7 +693,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
         }
     }
 
-    return m_idgrabed.size();
+    return int(m_idgrabed.size());
 }
 
 
@@ -704,7 +704,7 @@ void PliersToolManager::cutFromTriangles()
     sofa::helper::vector<int> idsRight;
     for (int i = 0; i < m_idgrabed.size(); i++)
     {
-        sofa::defaulttype::Vec3f vert = sofa::defaulttype::Vec3f(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
+        sofa::defaulttype::Vec3 vert = sofa::defaulttype::Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
         vert = matP*(vert - zero);
 
         if (vert[0] < 0.0 || vert[0] > 8.0)
@@ -889,7 +889,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
         SReal x = m_model->getPX(m_idgrabed[i]);
         SReal y = m_model->getPY(m_idgrabed[i]);
         SReal z = m_model->getPZ(m_idgrabed[i]);
-        vparams->drawTool()->drawPoint(sofa::defaulttype::Vec3f(x, y, z), Vec<4, float>(255.0, 0.0, 0.0, 1.0));
+        vparams->drawTool()->drawPoint(sofa::defaulttype::Vec3(x, y, z), Vec<4, float>(255.0, 0.0, 0.0, 1.0));
     }
 
 
@@ -904,10 +904,10 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
         
-        sofa::defaulttype::Vec3f p0 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
-        sofa::defaulttype::Vec3f p1 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
-        sofa::defaulttype::Vec3f p2 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
-        sofa::defaulttype::Vec3f p3 = sofa::defaulttype::Vec3f(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
+        sofa::defaulttype::Vec3 p0 = sofa::defaulttype::Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
+        sofa::defaulttype::Vec3 p1 = sofa::defaulttype::Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
+        sofa::defaulttype::Vec3 p2 = sofa::defaulttype::Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
+        sofa::defaulttype::Vec3 p3 = sofa::defaulttype::Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
 
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }

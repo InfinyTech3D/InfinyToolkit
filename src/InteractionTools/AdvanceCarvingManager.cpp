@@ -1051,7 +1051,7 @@ void AdvanceCarvingManager::draw(const core::visual::VisualParams* vparams)
             }
         }
 
-        vparams->drawTool()->drawScaledTetrahedra(pos, defaulttype::Vec4f(0.0f, 0.5f, 1.0f, 1.0f), 0.7);
+        vparams->drawTool()->drawScaledTetrahedra(pos, defaulttype::Vec4f(0.0f, 0.5f, 1.0f, 1.0f), 0.7f);
         //vparams->drawTool()->drawTriangles(pos, defaulttype::Vec4f(0.0f, 0.5f, 1.0f, 1.0f));
     }
     
