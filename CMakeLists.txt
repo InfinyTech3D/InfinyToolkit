@@ -44,7 +44,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} SofaComponentGeneral SofaHaptics SofaCarving)
+target_link_libraries(${PROJECT_NAME} SofaCore SofaHaptics SofaCarving)
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
