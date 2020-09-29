@@ -21,6 +21,7 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/SurfaceCarvingManager.h
     ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.h
     ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h
+    ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.h
 )
 
 set(SOURCE_FILES
@@ -32,6 +33,7 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/SurfaceCarvingManager.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.cpp    
     ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
 )
 
