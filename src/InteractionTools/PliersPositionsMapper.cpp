@@ -69,7 +69,7 @@ void PliersPositionsMapper::init()
 {
 	this->getContext()->get(m_topo);
     if (m_topo == nullptr) {
-        sofa::core::objectmodel::BaseObject::d_componentstate.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         msg_error() << "PliersPositionsMapper need a topology pointer";
         return;
     }
@@ -161,7 +161,7 @@ void PliersPositionsMapper::handleTopologyChange()
 			sofa::helper::vector<int>& _tetraTube = *m_tetraTube.beginEdit();
 			sofa::helper::vector<int>& _tetraFat = *m_tetraFat.beginEdit();
 
-			const sofa::helper::vector<unsigned int> &tab = (static_cast< const sofa::core::topology::TetrahedraRemoved *>(*itBegin))->getArray();
+			const sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> &tab = (static_cast< const sofa::core::topology::TetrahedraRemoved *>(*itBegin))->getArray();
 			int idLastTetra = int(m_topo->getNumberOfTetrahedra()-1);
 			bool updateNeeded = false;
 			

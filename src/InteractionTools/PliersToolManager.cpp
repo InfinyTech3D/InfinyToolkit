@@ -634,7 +634,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
 
         for (int i = 0; i < vitems.size(); i++)
         {
-            sofa::helper::vector<unsigned int> its;
+            sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> its;
             its.push_back(vitems[i]);
             tetraModif->removeTetrahedra(its);
             tetraModif->notifyEndingEvent();

@@ -135,8 +135,8 @@ protected:
     float m_stiffness;
 
     // Keep it for debug drawing
-    sofa::helper::vector<unsigned int> tetraIdsOnCut;
-    sofa::helper::vector<unsigned int> triIdsOnCut;
+    sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> tetraIdsOnCut;
+    sofa::helper::vector<sofa::core::topology::Topology::TriangleID> triIdsOnCut;
 };
 
 
