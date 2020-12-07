@@ -34,9 +34,9 @@
         <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
       <!--
 
-        <Point  selfCollision="0" group="1"/>
+        <PointCollisionModel  selfCollision="0" group="1"/>
         <Triangle  selfCollision="0" group="1"/>
-        <Line  selfCollision="0" group="1"/>
+        <LineCollisionModel  selfCollision="0" group="1"/>
             
         <UncoupledConstraintCorrection />
         
