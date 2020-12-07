@@ -35,7 +35,7 @@
       <!--
 
         <PointCollisionModel  selfCollision="0" group="1"/>
-        <Triangle  selfCollision="0" group="1"/>
+        <TriangleCollisionModel  selfCollision="0" group="1"/>
         <LineCollisionModel  selfCollision="0" group="1"/>
             
         <UncoupledConstraintCorrection />
