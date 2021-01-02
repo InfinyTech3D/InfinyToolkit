@@ -27,6 +27,9 @@
 #include <sofa/core/collision/DetectionOutput.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 
+#include <SofaMeshCollision/TriangleModel.h>
+#include <SofaMeshCollision/PointModel.h>
+
 #include <sofa/core/topology/TopologicalMapping.h>
 #include <sofa/helper/gl/template.h>
 #include <SofaUserInteraction/TopologicalChangeManager.h>
@@ -321,11 +324,11 @@ helper::vector<int> SurfaceCarvingManager::getShavingPointIdx(const ContactVecto
 
 helper::vector<unsigned int> SurfaceCarvingManager::MoveContactVertex(helper::vector<int> ShavingPointIdx)
 {
-	sofa::component::collision::TPointModel< sofa::defaulttype::Vec3Types >* toolTPM = NULL;
+	sofa::component::collision::PointCollisionModel< DataTypes >* toolTPM = nullptr;
 	modelTool->getContext()->get(toolTPM);
 	const VecCoord& x_tool = toolTPM->getMechanicalState()->read(core::ConstVecCoordId::position())->getValue();
 
-	sofa::component::collision::TTriangleModel< sofa::defaulttype::Vec3Types >* surf_TTM = NULL;
+	sofa::component::collision::TriangleCollisionModel< sofa::defaulttype::Vec3Types >* surf_TTM = nullptr;
 	modelSurface->getContext()->get(surf_TTM);
 	const VecCoord& x_surf = surf_TTM->getX();
 

@@ -60,7 +60,7 @@ protected:
     MiddleForceField();
 
 public:
-    void doInit() override;
+    void init() override;
 
     // ForceField methods
     /// Add the forces
