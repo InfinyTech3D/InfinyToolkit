@@ -1,3 +1,12 @@
+##############################################################################
+#             Copyright (C) - InfinyTech3D - All Rights Reserved             #
+#                                                                            #
+#  Unauthorized copying of this file, via any medium is strictly prohibited  #
+#  Proprietary and confidential.                                             #
+#                                                                            #
+#  Written by Erik Pernod <erik.pernod@infinytech3d.com>, September 2019     #
+##############################################################################
+
 cmake_minimum_required(VERSION 3.1)
 project(InteractionTools VERSION 0.1)
 

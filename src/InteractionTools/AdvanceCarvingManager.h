@@ -1,5 +1,12 @@
-#ifndef SOFA_INTERACTIONTOOLS_ADVANCECARVINGMANAGER_H
-#define SOFA_INTERACTIONTOOLS_ADVANCECARVINGMANAGER_H
+/*****************************************************************************
+ *            Copyright (C) - InfinyTech3D - All Rights Reserved             *
+ *                                                                           *
+ * Unauthorized copying of this file, via any medium is strictly prohibited  *
+ * Proprietary and confidential.                                             *
+ *                                                                           *
+ * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
+ ****************************************************************************/
+#pragma once
 
 #include <InteractionTools/config.h>
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
@@ -162,5 +169,3 @@ protected:
 } // namespace component
 
 } // namespace sofa
-
-#endif // SOFA_INTERACTIONTOOLS_ADVANCECARVINGMANAGER_H

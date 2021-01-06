@@ -1,3 +1,12 @@
+/*****************************************************************************
+ *            Copyright (C) - InfinyTech3D - All Rights Reserved             *
+ *                                                                           *
+ * Unauthorized copying of this file, via any medium is strictly prohibited  *
+ * Proprietary and confidential.                                             *
+ *                                                                           *
+ * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
+ ****************************************************************************/
+
 #include "NeedleTracker.h"
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
