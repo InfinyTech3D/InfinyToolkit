@@ -184,7 +184,7 @@ void SurfaceCarvingManager::CheckCollisionDetection()
 		{
 			contacts = dynamic_cast<const ContactVector*>(it->second);
 		}
-		unsigned int ncontacts = 0;
+		size_t ncontacts = 0;
 		if (contacts != NULL)
 		{
 			Coll_TF = true;

@@ -16,7 +16,7 @@
 #include <sofa/core/CollisionModel.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/objectmodel/Event.h>
-#include <sofa/defaulttype/Vec3Types.h>
+#include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/core/objectmodel/HapticDeviceEvent.h>
 
