@@ -30,7 +30,6 @@
         
         <TriangleSetTopologyContainer  name="Container" src="@loader"/>
         <TriangleSetTopologyModifier   name="Modifier" />
-        <TriangleSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
       <!--
 

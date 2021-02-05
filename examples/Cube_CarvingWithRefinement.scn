@@ -34,7 +34,6 @@
     
     <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/Container" />
     <TetrahedronSetTopologyModifier name="Modifier" />
-    <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
     <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
 
     <DiagonalMass massDensity="1.0" />
@@ -51,7 +50,6 @@ carvingRadius="@../carvingElement/tool.radius"/>
     <Node name="Surface">
       <TriangleSetTopologyContainer  name="Container"/>
       <TriangleSetTopologyModifier   name="Modifier" />
-      <TriangleSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
       <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
       <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 

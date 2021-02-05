@@ -32,13 +32,11 @@
 
 		<TetrahedronSetTopologyContainer  name="TetraContainer" src="@loader" tags=" "/>
 		<TetrahedronSetTopologyModifier   name="TetraModifier" />
-		<TetrahedronSetTopologyAlgorithms name="TetraTopoAlgo"  template="Vec3d" />
 		<TetrahedronSetGeometryAlgorithms name="TetraGeomAlgo"  template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.8"/>
                 
         <Node name="Cube_Surface">
             <TriangleSetTopologyContainer  name="TriContainer" fileTopology="" tags=" " />
 			<TriangleSetTopologyModifier   name="TriModifier" />
-			<TriangleSetTopologyAlgorithms name="TriTopoAlgo" template="Vec3d" />
 			<TriangleSetGeometryAlgorithms name="TriGeomAlgo" template="Vec3d" />
 			
             <Tetra2TriangleTopologicalMapping input="@../TetraContainer" output="@TriContainer" />
