@@ -37,6 +37,8 @@ MiddleForceField<DataTypes>::MiddleForceField()
 template<class DataTypes>
 void MiddleForceField<DataTypes>::init()
 {
+    core::behavior::ForceField<DataTypes>::init();
+
     core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
     m_bary = Coord(0.0, 0.0, 0.0);
 
