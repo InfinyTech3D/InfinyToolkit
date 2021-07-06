@@ -20,6 +20,7 @@
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
 
+#include <sofa/simulation/Node.h>
 #include <SofaBaseMechanics/MechanicalObject.h>
 
 

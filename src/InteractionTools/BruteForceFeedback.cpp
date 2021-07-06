@@ -10,6 +10,7 @@
 #include <InteractionTools/BruteForceFeedback.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/simulation/Node.h>
 
 using namespace std;
 
