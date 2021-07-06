@@ -78,9 +78,9 @@ void PliersPositionsMapper::doUpdate()
 	msg_info() << "PliersPositionsMapper::update()";
 	cleanDirty();
 
-	const sofa::helper::vector<int>& _tetraTube = m_tetraTube.getValue();
-	const sofa::helper::vector<sofa::defaulttype::Vec3 >& _positions = d_positions.getValue();
-	helper::vector<sofa::defaulttype::Vec3 >& tubePositions = *m_tubePositions.beginEdit();
+	const sofa::type::vector<int>& _tetraTube = m_tetraTube.getValue();
+	const sofa::type::vector<sofa::defaulttype::Vec3 >& _positions = d_positions.getValue();
+	type::vector<sofa::defaulttype::Vec3 >& tubePositions = *m_tubePositions.beginEdit();
 	tubePositions.resize(_tetraTube.size());
 	for (int i = 0; i < _tetraTube.size(); i++)
 	{
@@ -92,17 +92,17 @@ void PliersPositionsMapper::doUpdate()
 
 		const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(idTetra);
 
-		sofa::defaulttype::Vec3f p0 = _positions[tetra[0]];
-		sofa::defaulttype::Vec3f p1 = _positions[tetra[1]];
-		sofa::defaulttype::Vec3f p2 = _positions[tetra[2]];
-		sofa::defaulttype::Vec3f p3 = _positions[tetra[3]];
+		sofa::type::Vec3f p0 = _positions[tetra[0]];
+		sofa::type::Vec3f p1 = _positions[tetra[1]];
+		sofa::type::Vec3f p2 = _positions[tetra[2]];
+		sofa::type::Vec3f p3 = _positions[tetra[3]];
 
 		tubePositions[i] = (p0 + p1 + p2 + p3) / 4;
 	}
 	m_tubePositions.endEdit();
 
-	const sofa::helper::vector<int>& _tetraFat = m_tetraFat.getValue();
-	helper::vector<sofa::defaulttype::Vec3 >& grasPositions = *m_grasPositions.beginEdit();
+	const sofa::type::vector<int>& _tetraFat = m_tetraFat.getValue();
+	type::vector<sofa::defaulttype::Vec3 >& grasPositions = *m_grasPositions.beginEdit();
 	grasPositions.resize(_tetraFat.size());
 	for (int i = 0; i < _tetraFat.size()/3; i++)
 	{
@@ -146,10 +146,10 @@ void PliersPositionsMapper::handleTopologyChange()
 		{
 		case core::topology::TETRAHEDRAREMOVED:
 		{
-			sofa::helper::vector<int>& _tetraTube = *m_tetraTube.beginEdit();
-			sofa::helper::vector<int>& _tetraFat = *m_tetraFat.beginEdit();
+			sofa::type::vector<int>& _tetraTube = *m_tetraTube.beginEdit();
+			sofa::type::vector<int>& _tetraFat = *m_tetraFat.beginEdit();
 
-			const sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> &tab = (static_cast< const sofa::core::topology::TetrahedraRemoved *>(*itBegin))->getArray();
+			const sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> &tab = (static_cast< const sofa::core::topology::TetrahedraRemoved *>(*itBegin))->getArray();
 			int idLastTetra = int(m_topo->getNumberOfTetrahedra()-1);
 			bool updateNeeded = false;
 			
@@ -211,33 +211,33 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
     if (m_topo == nullptr)
         return;
 
-	sofa::defaulttype::Vec4f color = sofa::defaulttype::Vec4f(0.2f, 1.0f, 1.0f, 1.0f);
-	const sofa::helper::vector<sofa::defaulttype::Vec<3, SReal> >& _positions = d_positions.getValue();
-	const sofa::helper::vector<int>& _tetraTube = m_tetraTube.getValue();
+	sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
+	const sofa::type::vector<Vec<3, SReal> >& _positions = d_positions.getValue();
+	const sofa::type::vector<int>& _tetraTube = m_tetraTube.getValue();
     for (int i = 0; i < _tetraTube.size(); i++)
     {
         const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(_tetraTube[i]);
         
-		sofa::defaulttype::Vec3f p0 = _positions[tetra[0]];
-        sofa::defaulttype::Vec3f p1 = _positions[tetra[1]];
-        sofa::defaulttype::Vec3f p2 = _positions[tetra[2]];
-        sofa::defaulttype::Vec3f p3 = _positions[tetra[3]];
+		sofa::type::Vec3f p0 = _positions[tetra[0]];
+        sofa::type::Vec3f p1 = _positions[tetra[1]];
+        sofa::type::Vec3f p2 = _positions[tetra[2]];
+        sofa::type::Vec3f p3 = _positions[tetra[3]];
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }
 
 	
-	const helper::vector<sofa::defaulttype::Vec<3, SReal> >& tubePositions = m_tubePositions.getValue();
+	const type::vector<Vec<3, SReal> >& tubePositions = m_tubePositions.getValue();
 
 	for (int i = 0; i < tubePositions.size()-1; i++)
 	{
-		vparams->drawTool()->drawLine(tubePositions[i], tubePositions[i+1], Vec<4, float>(1.0, 0.0, 1.0, 1.0));
+		vparams->drawTool()->drawLine(tubePositions[i], tubePositions[i+1], sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
 	}
 
-	const helper::vector<sofa::defaulttype::Vec<3, SReal> >& grasPositions = m_grasPositions.getValue();
+	const type::vector<Vec<3, SReal> >& grasPositions = m_grasPositions.getValue();
 
 	for (int i = 0; i < grasPositions.size(); i++)
 	{
-		vparams->drawTool()->drawPoint(grasPositions[i], Vec<4, float>(1.0, 0.0, 1.0, 1.0));
+		vparams->drawTool()->drawPoint(grasPositions[i], sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
 	}
 
    // msg_info() << "drawLine: " << m_min[0] << " " << m_min[1] << " " << m_min[2];

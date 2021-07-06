@@ -43,12 +43,12 @@ public:
 	typedef DataTypes::Real Real;
 	typedef DataTypes::VecCoord VecCoord;
 	typedef DataTypes::VecDeriv VecDeriv;
-	typedef defaulttype::Vec<6, Real> Vec6;
+	typedef type::Vec<6, Real> Vec6;
 
 	typedef core::CollisionModel ToolModel;
 	typedef core::CollisionModel SurfaceModel;		
 
-	typedef helper::vector<core::collision::DetectionOutput> ContactVector;
+	typedef type::vector<core::collision::DetectionOutput> ContactVector;
 	
 	Data < std::string > f_modelTool;
 	Data < std::string > f_modelSurface;
@@ -61,7 +61,7 @@ public:
 	std::vector<SurfaceModel*> models;			// Target object
 	
 	Coord mv_direction;
-	Data< sofa::defaulttype::Vector3 > tip_idx;
+	Data< sofa::type::Vector3 > tip_idx;
 
 protected:
 	core::collision::Intersection* intersectionMethod;
@@ -82,17 +82,17 @@ public:
 	void CheckCollisionDetection();
 	void doShave_Burr(const ContactVector* contacts);
 
-	helper::vector<int> getShavingPointIdx(const ContactVector* contacts);
-	helper::vector<unsigned int> MoveContactVertex(helper::vector<int> ShavingPointIdx);
+	type::vector<int> getShavingPointIdx(const ContactVector* contacts);
+	type::vector<unsigned int> MoveContactVertex(type::vector<int> ShavingPointIdx);
 	
 	// For interface 
-	Data<sofa::helper::vector<Vec6> > d_alignedBoxes;
+	Data<sofa::type::vector<Vec6> > d_alignedBoxes;
 
 	// Interface output
 	bool Coll_TF;
 	Coord col_coord;
-	helper::vector<Vec6> Boxes;
-	helper::vector<helper::vector<unsigned int>> Indices_inROI;
+	type::vector<Vec6> Boxes;
+	type::vector<type::vector<unsigned int>> Indices_inROI;
 	sofa::component::engine::BoxROI<DataTypes>* targetBox;
 	
 	// Interface - virtual function

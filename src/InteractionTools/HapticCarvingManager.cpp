@@ -110,7 +110,7 @@ void HapticCarvingManager::doCarve()
         }
 
         int nbelems = 0;
-        helper::vector<sofa::Index> elemsToRemove;
+        type::vector<sofa::Index> elemsToRemove;
 
         for (size_t j = 0; j < ncontacts; ++j)
         {

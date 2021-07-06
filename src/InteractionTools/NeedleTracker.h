@@ -78,20 +78,20 @@ protected:
 
 protected:
     /// Vector storing pointer to each mechanicalObject of the target mesh
-    sofa::helper::vector<MechanicalObject3*> m_slices;
+    sofa::type::vector<MechanicalObject3*> m_slices;
     /// Pointer to the MechanicalObject corresponding to the needle position
     MechanicalObject3* m_needle;
 
     /// Vector of min and max of the slice boudingboxes
-    sofa::helper::vector<Coord> m_min;
-    sofa::helper::vector<Coord> m_max;
+    sofa::type::vector<Coord> m_min;
+    sofa::type::vector<Coord> m_max;
     
     /// Origin and direction of the ray (for draw debug only)
     Coord m_rayDirection;
     Coord m_rayOrigin;
 
     /// vector of triangles positions intersected by narrow phase ray.
-    sofa::helper::vector <Coord> m_triPointInter;
+    sofa::type::vector <Coord> m_triPointInter;
 
     bool isInit;
 };

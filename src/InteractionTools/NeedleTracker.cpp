@@ -62,7 +62,7 @@ void NeedleTracker::init()
     }
 
     // get needle position 
-    sofa::helper::vector<MechanicalObject3*> buffer;
+    sofa::type::vector<MechanicalObject3*> buffer;
     getContext()->get<MechanicalObject3>(&buffer, core::objectmodel::Tag("needle"), core::objectmodel::BaseContext::SearchRoot);
     if (buffer.empty())
     {
@@ -296,12 +296,12 @@ void NeedleTracker::draw(const core::visual::VisualParams* vparams)
         for (int i = 0; i < m_slices.size(); ++i)
         {
             float val = (float)i / m_slices.size();
-            sofa::defaulttype::Vec4f colorDefault = sofa::defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0f);
+            sofa::type::RGBAColor colorDefault(0.0f, 1.0f, 0.0f, 1.0f);
 
             if (d_sliceID.getValue() == i)
-                colorDefault = sofa::defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0f);
+                colorDefault = sofa::type::RGBAColor(1.0f, 0.0f, 0.0f, 1.0f);
 
-            sofa::helper::vector<Coord> vertices;
+            sofa::type::vector<Coord> vertices;
             Coord min = m_min[i];
             Coord max = m_max[i];
 
@@ -352,9 +352,9 @@ void NeedleTracker::draw(const core::visual::VisualParams* vparams)
     if (!m_triPointInter.empty())// possible intersection detected
     {
         // Draw ray
-        vparams->drawTool()->drawLine(m_rayOrigin, m_rayOrigin + m_rayDirection * 100, sofa::defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+        vparams->drawTool()->drawLine(m_rayOrigin, m_rayOrigin + m_rayDirection * 100, sofa::type::RGBAColor(1.0f, 0.0f, 0.0f, 1.0f));
 
-        sofa::helper::vector<Coord> vertices;
+        sofa::type::vector<Coord> vertices;
         for (int i = 0; i < (int)(m_triPointInter.size() / 3); ++i)
         {
             vertices.push_back(m_triPointInter[i * 3]);
@@ -367,7 +367,7 @@ void NeedleTracker::draw(const core::visual::VisualParams* vparams)
             vertices.push_back(m_triPointInter[i * 3 + 1]);
         }
 
-        vparams->drawTool()->drawLines(vertices, 10.0f, sofa::defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+        vparams->drawTool()->drawLines(vertices, 10.0f, sofa::type::RGBAColor(1.0f, 0.0f, 0.0f, 1.0f));
     }
 
     vparams->drawTool()->setLightingEnabled(true);

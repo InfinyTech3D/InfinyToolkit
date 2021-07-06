@@ -32,7 +32,7 @@ namespace engine
 {
     using core::behavior::BaseMechanicalState;
     using sofa::defaulttype::Vec3Types;
-    using sofa::defaulttype::Vector3;
+    using sofa::type::Vector3;
     using sofa::core::DataEngine;
 
 class SOFA_INTERACTIONTOOLS_API RotationEngine : public DataEngine

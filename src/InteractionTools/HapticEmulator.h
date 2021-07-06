@@ -66,9 +66,10 @@ public:
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
 
-    typedef defaulttype::Vec4f Vec4f;
-    typedef defaulttype::Vector3 Vector3;
-
+    typedef type::Vec3 Vec3;
+    typedef type::Vec4f Vec4f;
+    typedef type::Vector3 Vector3;
+    typedef type::Quatf Quat;
 
     Data< std::string > d_deviceName; ///< Name of device Configuration
     Data<Vec3> d_positionBase; ///< Position of the interface base in the scene world coordinates
@@ -99,8 +100,8 @@ public:
     ForceFeedback::SPtr m_forceFeedback;
 
 
-    void applyTranslation(sofa::defaulttype::Vec3 translation);
-    void worldToLocal(sofa::defaulttype::Vec3& vector);
+    void applyTranslation(Vec3 translation);
+    void worldToLocal(Vec3& vector);
     void moveUp();
     void moveDown();
     void moveLeft();
@@ -115,7 +116,7 @@ public:
     bool m_isActivated; /// <Boolean storing hte information if Sofa has started the simulation (changed by AnimateBeginEvent)
     bool m_isInContact;
 
-    sofa::helper::fixed_array<bool, 2> oldStates;
+    sofa::type::fixed_array<bool, 2> oldStates;
 
     /**
     * @brief Key Press event callback.
@@ -138,7 +139,7 @@ private:
 public:
     sofa::simulation::TaskScheduler* _taskScheduler;
     sofa::simulation::CpuTask::Status _simStepStatus;
-    sofa::defaulttype::Vector3 m_toolForceFeedBack;
+    sofa::type::Vector3 m_toolForceFeedBack;
 
     std::mutex lockPosition;
 

@@ -59,11 +59,11 @@ public:
 protected:
 	sofa::component::topology::TetrahedronSetTopologyContainer* m_topo;
 
-	Data< helper::vector<sofa::defaulttype::Vec<3, SReal> > > d_positions;
-	Data<sofa::helper::vector<int> > m_tetraTube;
-	Data<sofa::helper::vector<int> > m_tetraFat;
-	Data< helper::vector<sofa::defaulttype::Vec<3, SReal> > > m_tubePositions;
-	Data< helper::vector<sofa::defaulttype::Vec<3, SReal> > > m_grasPositions;
+	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
+	Data<sofa::type::vector<int> > m_tetraTube;
+	Data<sofa::type::vector<int> > m_tetraFat;
+	Data< type::vector<sofa::type::Vec<3, SReal> > > m_tubePositions;
+	Data< type::vector<sofa::type::Vec<3, SReal> > > m_grasPositions;
 };
 
 

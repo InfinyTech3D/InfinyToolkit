@@ -16,7 +16,6 @@
 #include <SofaMeshCollision/PointModel.h>
 
 #include <sofa/core/topology/TopologicalMapping.h>
-#include <sofa/helper/gl/template.h>
 #include <SofaUserInteraction/TopologicalChangeManager.h>
 #include <sofa/helper/AdvancedTimer.h>
 #include <SofaLoader/MeshObjLoader.h>
@@ -49,7 +48,7 @@ SurfaceCarvingManager::SurfaceCarvingManager()
 , d_active(initData(&d_active, false, "active", "Activate this object."))
 , f_factor(initData(&f_factor, 0.015, "f_factor", "ShavigSurface deformation ratio"))
 , nb_iterations(initData(&nb_iterations, (unsigned int)1, "nb_iterations", "Number of iterations of laplacian smoothing"))
-, tip_idx(initData(&tip_idx, sofa::defaulttype::Vector3(4, 0, 12), "ToolTipIndex", "Tool index to calculate moving direction"))
+, tip_idx(initData(&tip_idx, sofa::type::Vector3(4, 0, 12), "ToolTipIndex", "Tool index to calculate moving direction"))
 {
     this->f_listening.setValue(true);
 }
@@ -108,7 +107,7 @@ void SurfaceCarvingManager::getTargetBoxIndices()
 	modelSurface->getContext()->get(targetBox);
 	if (targetBox)
 	{
-		helper::vector<Vec6> Boxes_tmp;
+		type::vector<Vec6> Boxes_tmp;
 		sofa::component::engine::BoxROI<DataTypes>* targetBox_tmp;
 
 		std::vector< core::objectmodel::BaseObject*> listObject;
@@ -167,7 +166,7 @@ void SurfaceCarvingManager::CheckCollisionDetection()
 		else
 			modelSurface->computeBoundingTree(depth);
 
-		sofa::helper::vector<std::pair<core::CollisionModel*, core::CollisionModel*> > vectCMPair;
+		sofa::type::vector<std::pair<core::CollisionModel*, core::CollisionModel*> > vectCMPair;
 		vectCMPair.push_back(std::make_pair(modelSurface->getFirst(), modelTool->getFirst()));
 
 		detectionNP->setInstance(this);
@@ -199,7 +198,7 @@ void SurfaceCarvingManager::CheckCollisionDetection()
 			unsigned int c_point = tip_idx.getValue()[0];// 0
 			col_coord = x_wA[c_point];
 
-			if (dynamic_cast<sofa::component::collision::TriangleModel*>(modelSurface))
+			if (dynamic_cast<sofa::component::collision::TriangleCollisionModel<sofa::defaulttype::Vec3Types>*>(modelSurface))
 				doShave_Burr(contacts);
 		}
 
@@ -217,19 +216,19 @@ void SurfaceCarvingManager::doShave_Burr(const ContactVector* contacts)
 	//Get Moving Direction of Tool to calculate drilling direction
 	//Get Shaving Point index in Surface
 	
-	helper::vector<int> ShavingPointIdx = getShavingPointIdx(contacts);
+	type::vector<int> ShavingPointIdx = getShavingPointIdx(contacts);
 	
 	// Deformation
 	// 1. Find Center point
 	// 2. Compute Point indices within the range range of center point
 	// 3. Smoothing - move indices around of unique_SPI 
-	helper::vector<unsigned int> unique_SPI = MoveContactVertex(ShavingPointIdx);
+	type::vector<unsigned int> unique_SPI = MoveContactVertex(ShavingPointIdx);
 
 	using sofa::core::topology::BaseMeshTopology;
 	sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* mo_coll = NULL;
 	modelSurface->getContext()->get(mo_coll);
 	helper::WriteAccessor< Data<VecCoord> > x_wA = mo_coll->write(core::VecCoordId::position());
-	helper::vector<unsigned int>::iterator it;
+	type::vector<unsigned int>::iterator it;
 
 	for (unsigned int n = 0; n < nb_iterations.getValue(); n++)
 	{
@@ -283,15 +282,15 @@ void SurfaceCarvingManager::doShave_Burr(const ContactVector* contacts)
 	}
 }
 
-helper::vector<int> SurfaceCarvingManager::getShavingPointIdx(const ContactVector* contacts)
+type::vector<int> SurfaceCarvingManager::getShavingPointIdx(const ContactVector* contacts)
 {
 
-	sofa::component::collision::TTriangleModel< sofa::defaulttype::Vec3Types >* surf_TTM = NULL;
+	sofa::component::collision::TriangleCollisionModel< sofa::defaulttype::Vec3Types >* surf_TTM = NULL;
 	modelSurface->getContext()->get(surf_TTM);
 
 	const VecCoord& x_surf = surf_TTM->getX();
 
-	helper::vector<int> ShavingPointIdx;
+	type::vector<int> ShavingPointIdx;
 
 	for (unsigned int j = 0; j < contacts->size(); ++j)
 	{
@@ -307,7 +306,7 @@ helper::vector<int> SurfaceCarvingManager::getShavingPointIdx(const ContactVecto
 	return ShavingPointIdx;
 }
 
-helper::vector<unsigned int> SurfaceCarvingManager::MoveContactVertex(helper::vector<int> ShavingPointIdx)
+type::vector<unsigned int> SurfaceCarvingManager::MoveContactVertex(type::vector<int> ShavingPointIdx)
 {
 	sofa::component::collision::PointCollisionModel< DataTypes >* toolTPM = nullptr;
 	modelTool->getContext()->get(toolTPM);
@@ -329,7 +328,7 @@ helper::vector<unsigned int> SurfaceCarvingManager::MoveContactVertex(helper::ve
 	modelSurface->getContext()->get(mo_coll);
 	helper::WriteAccessor< Data<VecCoord> > x_wA = mo_coll->write(core::VecCoordId::position());
 
-	helper::vector<int> ShavingPointIdx1;
+	type::vector<int> ShavingPointIdx1;
 	for (int ii = 0; ii < x_wA.size(); ii++)
 	{
 		double tmp = (x_surf[ii] - center_of_contact).norm();
@@ -340,8 +339,8 @@ helper::vector<unsigned int> SurfaceCarvingManager::MoveContactVertex(helper::ve
 		}
 	}
 
-	helper::vector<unsigned int> unique_SPI(ShavingPointIdx1.size());
-	helper::vector<unsigned int>::iterator it;
+	type::vector<unsigned int> unique_SPI(ShavingPointIdx1.size());
+	type::vector<unsigned int>::iterator it;
 
 	std::sort(ShavingPointIdx1.begin(), ShavingPointIdx1.end());
 	it = std::unique_copy(ShavingPointIdx1.begin(), ShavingPointIdx1.end(), unique_SPI.begin());

@@ -35,7 +35,7 @@ using namespace defaulttype;
 using namespace sofa::core::topology;
 
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
-using sofa::component::collision::SphereModel;
+using SphereModel = sofa::component::collision::SphereCollisionModel< sofa::defaulttype::Vec3Types >;
 
 using sofa::core::objectmodel::KeypressedEvent;
 using sofa::core::objectmodel::KeyreleasedEvent;
@@ -269,7 +269,7 @@ bool PliersToolManager::reactiveTool()
 }
 
 
-const sofa::helper::vector< int >& PliersToolManager::grabModel()
+const sofa::type::vector< int >& PliersToolManager::grabModel()
 {
     // If no point in the broadphase, nothing to do
     if (m_idBroadPhase.size() == 0)
@@ -469,28 +469,28 @@ int PliersToolManager::createFF(float _stiffness)
 
 void PliersToolManager::computePlierAxis()
 {
-    zero = sofa::defaulttype::Vec3(0, 0, 0);
-    xAxis = sofa::defaulttype::Vec3(1, 0, 0);
-    yAxis = sofa::defaulttype::Vec3(0, 1, 0);
-    zAxis = sofa::defaulttype::Vec3(0, 0, 1);
+    zero = Vec3(0, 0, 0);
+    xAxis = Vec3(1, 0, 0);
+    yAxis = Vec3(0, 1, 0);
+    zAxis = Vec3(0, 0, 1);
 
     if (m_mord1 == NULL)
         return;
 
-    zero = sofa::defaulttype::Vec3(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
-    xAxis = sofa::defaulttype::Vec3(m_mord1->getPX(1), m_mord1->getPY(1), m_mord1->getPZ(1));
-    yAxis = sofa::defaulttype::Vec3(m_mord1->getPX(20), m_mord1->getPY(20), m_mord1->getPZ(20));
-    zAxis = sofa::defaulttype::Vec3(m_mord1->getPX(100), m_mord1->getPY(100), m_mord1->getPZ(100));
+    zero = Vec3(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
+    xAxis = Vec3(m_mord1->getPX(1), m_mord1->getPY(1), m_mord1->getPZ(1));
+    yAxis = Vec3(m_mord1->getPX(20), m_mord1->getPY(20), m_mord1->getPZ(20));
+    zAxis = Vec3(m_mord1->getPX(100), m_mord1->getPY(100), m_mord1->getPZ(100));
 
-    sofa::defaulttype::Vec3 xDir = (xAxis - zero); xDir.normalize();
-    sofa::defaulttype::Vec3 yDir = (yAxis - zero); yDir.normalize();
-    sofa::defaulttype::Vec3 zDir = (zAxis - zero); zDir.normalize();
+    Vec3 xDir = (xAxis - zero); xDir.normalize();
+    Vec3 yDir = (yAxis - zero); yDir.normalize();
+    Vec3 zDir = (zAxis - zero); zDir.normalize();
 
-    matP = sofa::defaulttype::Mat3x3(xDir, yDir, zDir);
+    matP = sofa::type::Mat3x3(xDir, yDir, zDir);
 
-    //sofa::defaulttype::Vec3 test1 = sofa::defaulttype::Vec3(m_mord1->getPX(3), m_mord1->getPY(3), m_mord1->getPZ(3));
-    //sofa::defaulttype::Vec3 test2 = sofa::defaulttype::Vec3(m_mord1->getPX(40), m_mord1->getPY(40), m_mord1->getPZ(40));
-    //sofa::defaulttype::Vec3 test3 = sofa::defaulttype::Vec3(m_mord1->getPX(45), m_mord1->getPY(45), m_mord1->getPZ(45));
+    //Vec3 test1 = Vec3(m_mord1->getPX(3), m_mord1->getPY(3), m_mord1->getPZ(3));
+    //Vec3 test2 = Vec3(m_mord1->getPX(40), m_mord1->getPY(40), m_mord1->getPZ(40));
+    //Vec3 test3 = Vec3(m_mord1->getPX(45), m_mord1->getPY(45), m_mord1->getPZ(45));
     //msg_info() << "test1 : " << test1 << " -> " << matP*(test1 - zero);
     //msg_info() << "test2 : " << test2 << " -> " << matP*(test2 - zero);
     //msg_info() << "test3 : " << test3 << " -> " << matP*(test3 - zero);
@@ -505,11 +505,11 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
 	bool lastCut = true;
 
     // Classify right/left points of the plier
-    sofa::helper::vector<int> idsLeft;
-    sofa::helper::vector<int> idsRight;
+    sofa::type::vector<int> idsLeft;
+    sofa::type::vector<int> idsRight;
     for (int i = 0; i < m_idBroadPhase.size(); i++)
     {
-        sofa::defaulttype::Vec3 vert = sofa::defaulttype::Vec3(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
+        Vec3 vert = Vec3(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
         vert = matP*(vert - zero);
 
 		if (vert[2] < -20.0 || vert[2] > 20.0) // outside on the borders
@@ -554,7 +554,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     }
 
     // First get all tetra that are on the first side
-    sofa::helper::vector<unsigned int> tetraIds;
+    sofa::type::vector<unsigned int> tetraIds;
     for (int i = 0; i < idsLeft.size(); ++i)
     {
         const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(idsLeft[i]);
@@ -616,17 +616,15 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
         }
 
 
-        sofa::helper::vector<unsigned int> vitems;
+        sofa::type::vector<unsigned int> vitems;
         vitems.reserve(items.size());
         vitems.insert(vitems.end(), items.rbegin(), items.rend());
 
         for (int i = 0; i < vitems.size(); i++)
         {
-            sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> its;
+            sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> its;
             its.push_back(vitems[i]);
             tetraModif->removeTetrahedra(its);
-            tetraModif->notifyEndingEvent();
-            tetraModif->propagateTopologicalChanges();
         }
 
         //vitems.resize(30);
@@ -650,7 +648,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
     if (res > 1000)
         return 0;
 
-    sofa::helper::vector<int> tetraIds = m_idBroadPhase;
+    sofa::type::vector<int> tetraIds = m_idBroadPhase;
     m_idgrabed.clear();
     sofa::component::topology::TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
@@ -688,11 +686,11 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
 void PliersToolManager::cutFromTriangles()
 {
     // Classify right/left points of the plier
-    sofa::helper::vector<int> idsLeft;
-    sofa::helper::vector<int> idsRight;
+    sofa::type::vector<int> idsLeft;
+    sofa::type::vector<int> idsRight;
     for (int i = 0; i < m_idgrabed.size(); i++)
     {
-        sofa::defaulttype::Vec3 vert = sofa::defaulttype::Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
+        Vec3 vert = Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
         vert = matP*(vert - zero);
 
         if (vert[0] < 0.0 || vert[0] > 8.0)
@@ -716,7 +714,7 @@ void PliersToolManager::cutFromTriangles()
         return;
     }
 
-    const sofa::helper::vector<BaseMeshTopology::Triangle> & allTri = triCons[1]->getTriangleArray();
+    const sofa::type::vector<BaseMeshTopology::Triangle> & allTri = triCons[1]->getTriangleArray();
     for (int i = 0; i < allTri.size(); ++i)
     {
         const BaseMeshTopology::Triangle& tri = allTri[i];
@@ -862,12 +860,12 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
 
-    sofa::defaulttype::Vec4f color = sofa::defaulttype::Vec4f(0.2f, 1.0f, 1.0f, 1.0f);
-    vparams->drawTool()->drawLine(m_min, m_max, Vec<4, float>(1.0, 0.0, 1.0, 1.0));
+    sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
+    vparams->drawTool()->drawLine(m_min, m_max, sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
     
-    vparams->drawTool()->drawLine(zero, xAxis, sofa::defaulttype::Vec4f(1.0, 0.0, 0.0, 0.0));
-    vparams->drawTool()->drawLine(zero, yAxis, sofa::defaulttype::Vec4f(0.0, 1.0, 0.0, 0.0));
-    vparams->drawTool()->drawLine(zero, zAxis, sofa::defaulttype::Vec4f(0.0, 0.0, 1.0, 0.0));
+    vparams->drawTool()->drawLine(zero, xAxis, sofa::type::RGBAColor(1.0, 0.0, 0.0, 0.0));
+    vparams->drawTool()->drawLine(zero, yAxis, sofa::type::RGBAColor(0.0, 1.0, 0.0, 0.0));
+    vparams->drawTool()->drawLine(zero, zAxis, sofa::type::RGBAColor(0.0, 0.0, 1.0, 0.0));
 
     if (m_model == NULL)
         return;
@@ -877,7 +875,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
         SReal x = m_model->getPX(m_idgrabed[i]);
         SReal y = m_model->getPY(m_idgrabed[i]);
         SReal z = m_model->getPZ(m_idgrabed[i]);
-        vparams->drawTool()->drawPoint(sofa::defaulttype::Vec3(x, y, z), Vec<4, float>(255.0, 0.0, 0.0, 1.0));
+        vparams->drawTool()->drawPoint(Vec3(x, y, z), sofa::type::RGBAColor(255.0, 0.0, 0.0, 1.0));
     }
 
 
@@ -892,10 +890,10 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
         
-        sofa::defaulttype::Vec3 p0 = sofa::defaulttype::Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
-        sofa::defaulttype::Vec3 p1 = sofa::defaulttype::Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
-        sofa::defaulttype::Vec3 p2 = sofa::defaulttype::Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
-        sofa::defaulttype::Vec3 p3 = sofa::defaulttype::Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
+        Vec3 p0 = Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
+        Vec3 p1 = Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
+        Vec3 p2 = Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
+        Vec3 p3 = Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
 
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }

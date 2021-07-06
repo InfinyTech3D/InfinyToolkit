@@ -55,7 +55,7 @@ void RotationEngine::bwdInit()
     }
     
     sofa::simulation::Node::SPtr rootNode = static_cast<simulation::Node*>(this->getContext()->getRootContext());
-    sofa::helper::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
+    sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
 
     for (int i = 0; i < childNodes.size(); ++i)
     {        
@@ -77,7 +77,7 @@ bool RotationEngine::findNode(sofa::simulation::Node::SPtr node)
     }
 
     // check its children
-    sofa::helper::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
+    sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
     for (int i = 0; i < childNodes.size(); ++i)
     {
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);
@@ -110,7 +110,7 @@ void RotationEngine::doUpdate()
     for (int i = 0; i < m_mstates.size(); i++)
     {
         MechanicalObject3* state = m_mstates[i];
-        sofa::defaulttype::Vector3 rot = state->getRotation();
+        sofa::type::Vector3 rot = state->getRotation();
         std::cout << "rot: " << rot << std::endl;
 
         state->setRotation(rot[0] + 1, rot[1], rot[2]);
@@ -127,7 +127,7 @@ void RotationEngine::process()
     for (int i = 0; i < m_mstates.size(); i++)
     {
         MechanicalObject3* state = m_mstates[i];
-        //sofa::defaulttype::Vector3 rot = state->getRotation();
+        //sofa::type::Vector3 rot = state->getRotation();
         //std::cout << "rot: " << rot << std::endl;
         
         state->setRotation(0, 0, 0.5);
@@ -153,7 +153,7 @@ void RotationEngine::handleEvent(sofa::core::objectmodel::Event* event)
             for (int i = 0; i < m_mstates.size(); i++)
             {
                 MechanicalObject3* state = m_mstates[i];
-                //sofa::defaulttype::Vector3 rot = state->getRotation();
+                //sofa::type::Vector3 rot = state->getRotation();
 
                 state->setRotation(0, 0, 0.5);
                 state->reinit();
@@ -163,7 +163,7 @@ void RotationEngine::handleEvent(sofa::core::objectmodel::Event* event)
             for (int i = 0; i < m_mstates.size(); i++)
             {
                 MechanicalObject3* state = m_mstates[i];
-                //sofa::defaulttype::Vector3 rot = state->getRotation();
+                //sofa::type::Vector3 rot = state->getRotation();
 
                 state->setRotation(0, 0, -0.5);
                 state->reinit();

@@ -31,7 +31,7 @@ BruteForceFeedback::BruteForceFeedback()
 void BruteForceFeedback::init()
 {
     this->ForceFeedback::init();
-    currentForce = sofa::defaulttype::Vector3(0, 0, 0);
+    currentForce = sofa::type::Vector3(0, 0, 0);
 
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
     m_ACarving = context->get<sofa::component::collision::AdvanceCarvingManager>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
@@ -45,8 +45,8 @@ void BruteForceFeedback::init()
 void BruteForceFeedback::computeForce(SReal x, SReal y, SReal z, SReal /*u*/, SReal /*v*/, SReal /*w*/, SReal /*q*/, SReal& fx, SReal& fy, SReal& fz)
 {
     const SReal& fCoef = forceCoef.getValue();
-    defaulttype::Vec3 position = defaulttype::Vec3(x, y, z);
-    currentForce = defaulttype::Vec3(0, 0, 0);
+    Vec3 position = Vec3(x, y, z);
+    currentForce = Vec3(0, 0, 0);
     if (m_ACarving)
     {
         currentForce = m_ACarving->computeForceFeedBack(position);

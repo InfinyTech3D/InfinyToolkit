@@ -28,6 +28,7 @@ namespace component
 
 namespace controller
 {
+using namespace sofa::type;
 
 HapticEmulatorTask::HapticEmulatorTask(HapticEmulator* ptr, CpuTask::Status* pStatus)
     :CpuTask(pStatus)
@@ -99,7 +100,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 //constructeur
 HapticEmulator::HapticEmulator()
     : d_deviceName(initData(&d_deviceName, std::string("Default Device"), "deviceName","Name of device Configuration"))
-    , d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
+    , d_positionBase(initData(&d_positionBase, Vec3(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
     , d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
     , d_scale(initData(&d_scale, 1.0, "scale","Default scale applied to the Phantom Coordinates"))
     , d_forceScale(initData(&d_forceScale, 1.0, "forceScale","Default forceScale applied to the force feedback. "))
@@ -154,7 +155,7 @@ bool HapticEmulator::findNode(sofa::simulation::Node::SPtr node)
     }
 
     // check its children
-    sofa::helper::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
+    sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
     for (int i = 0; i < childNodes.size(); ++i)
     {
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);
@@ -178,7 +179,7 @@ void HapticEmulator::bwdInit()
     
 
     sofa::simulation::Node::SPtr rootNode = static_cast<simulation::Node*>(this->getContext()->getRootContext());
-    sofa::helper::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
+    sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
 
     for (int i = 0; i < childNodes.size(); ++i)
     {
@@ -229,7 +230,7 @@ void HapticEmulator::initDevice(int cptInitPass)
 
 void HapticEmulator::updatePosition()
 {
-    Mat3x3d mrot;
+    type::Mat3x3d mrot;
 
     HapticEmulator::Coord & posDevice = *d_posDevice.beginEdit();    
     const Quat & orientationTool = d_orientationTool.getValue();
@@ -291,7 +292,7 @@ void HapticEmulator::updatePosition()
 void HapticEmulator::updateButtonStates(bool emitEvent)
 {
     int nbrButton = 2;
-    sofa::helper::fixed_array<bool, 2> buttons;
+    sofa::type::fixed_array<bool, 2> buttons;
     buttons[0] = d_button_1.getValue();
     buttons[1] = d_button_2.getValue();
    
@@ -327,10 +328,10 @@ void HapticEmulator::updateButtonStates(bool emitEvent)
 
 
 
-void HapticEmulator::applyTranslation(sofa::defaulttype::Vec3 translation)
+void HapticEmulator::applyTranslation(Vec3 translation)
 {
     lockPosition.lock();
-    Vec3d & posDevice = *d_positionBase.beginEdit();
+    Vec3 & posDevice = *d_positionBase.beginEdit();
     const SReal& factor = d_speedFactor.getValue();
     posDevice += translation * factor;
     d_positionBase.endEdit();    
@@ -339,7 +340,7 @@ void HapticEmulator::applyTranslation(sofa::defaulttype::Vec3 translation)
 
 
 
-void HapticEmulator::worldToLocal(sofa::defaulttype::Vec3& vector)
+void HapticEmulator::worldToLocal(Vec3& vector)
 {
     vector = d_orientationTool.getValue().rotate(vector);
 }
@@ -451,8 +452,8 @@ void HapticEmulator::onKeyReleasedEvent(core::objectmodel::KeyreleasedEvent *kEv
 
 void HapticEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 {
-    vparams->drawTool()->drawSphere(m_toolPosition, 0.1f, defaulttype::Vec4f(1.0, 1.0, 1.0, 1.0));
-    vparams->drawTool()->drawLine(m_toolPosition, m_toolPosition + m_toolForceFeedBack, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
+    vparams->drawTool()->drawSphere(m_toolPosition, 0.1f, sofa::type::RGBAColor(1.0, 1.0, 1.0, 1.0));
+    vparams->drawTool()->drawLine(m_toolPosition, m_toolPosition + m_toolForceFeedBack, sofa::type::RGBAColor(1.0, 0.0, 0.0f, 1.0));
 }
 
 

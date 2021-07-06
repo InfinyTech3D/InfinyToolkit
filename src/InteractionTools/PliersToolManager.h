@@ -34,6 +34,8 @@ class SOFA_INTERACTIONTOOLS_API PliersToolManager: public core::objectmodel::Bas
 public:
     SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);
 
+    using Vec3 = sofa::type::Vec3;
+
 protected:
     PliersToolManager();
 
@@ -44,8 +46,8 @@ public:
     virtual void reinit() override;
     int testModels();
     
-    const sofa::helper::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
-    const sofa::helper::vector< int >& vertexIdsGrabed() { return m_idgrabed; }
+    const sofa::type::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
+    const sofa::type::vector< int >& vertexIdsGrabed() { return m_idgrabed; }
 
 
     // global methods    
@@ -57,7 +59,7 @@ public:
 	bool reactiveTool();
 
     // API from grabing
-    const sofa::helper::vector< int >& grabModel();
+    const sofa::type::vector< int >& grabModel();
 
     void releaseGrab();
 
@@ -72,10 +74,10 @@ public:
     virtual void handleEvent(sofa::core::objectmodel::Event* event) override;
     void computePlierAxis();
 
-    void setPlierAxis(sofa::defaulttype::Mat3x3 _matP) { matP = _matP; }
-    void setPlierOrigin(sofa::defaulttype::Vec3 _zero) { zero = _zero; }
+    void setPlierAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
+    void setPlierOrigin(Vec3 _zero) { zero = _zero; }
 
-    sofa::defaulttype::Vector3 m_min, m_max;
+    sofa::type::Vector3 m_min, m_max;
 
 
     void draw(const core::visual::VisualParams* vparams) override;
@@ -99,17 +101,17 @@ public:
 	    
 protected:
     // Buffer of points ids 
-    sofa::helper::vector <int> m_idgrabed;
-    sofa::helper::vector <int> m_idBroadPhase;
+    sofa::type::vector <int> m_idgrabed;
+    sofa::type::vector <int> m_idBroadPhase;
 
     SReal m_oldCollisionStiffness;
 
     // Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
-    sofa::defaulttype::Mat3x3 matP;
-    sofa::defaulttype::Vec3 zero;
-    sofa::defaulttype::Vec3 xAxis;
-    sofa::defaulttype::Vec3 yAxis;
-    sofa::defaulttype::Vec3 zAxis;
+    sofa::type::Mat3x3 matP;
+    Vec3 zero;
+    Vec3 xAxis;
+    Vec3 yAxis;
+    Vec3 zAxis;
 
     // Pointer to the mechanicalObject
     sofa::core::behavior::BaseMechanicalState* m_mord1;
@@ -122,8 +124,8 @@ protected:
     float m_stiffness;
 
     // Keep it for debug drawing
-    sofa::helper::vector<sofa::core::topology::Topology::TetrahedronID> tetraIdsOnCut;
-    sofa::helper::vector<sofa::core::topology::Topology::TriangleID> triIdsOnCut;
+    sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> tetraIdsOnCut;
+    sofa::type::vector<sofa::core::topology::Topology::TriangleID> triIdsOnCut;
 };
 
 

@@ -40,9 +40,9 @@ namespace collision
     {
     public:
         unsigned int elemId; // in global mesh
-        defaulttype::Vector3 pointA;
-        defaulttype::Vector3 pointB;
-        defaulttype::Vector3 normal;
+        Vector3 pointA;
+        Vector3 pointB;
+        Vector3 normal;
         double dist;
         TetrahedronRefinementAlgorithms* tetraAlgo;
     };
@@ -62,7 +62,7 @@ public:
     typedef DataTypes::Coord Coord;
     typedef DataTypes::Real Real;
 
-    typedef helper::vector<core::collision::DetectionOutput> ContactVector;
+    typedef type::vector<core::collision::DetectionOutput> ContactVector;
 
     /// Sofa API init method of the component
     void bwdInit() override;
@@ -76,7 +76,7 @@ public:
     void draw(const core::visual::VisualParams* vparams) override;
     void clearContacts();
 
-    defaulttype::Vector3 computeForceFeedBack(const defaulttype::Vector3& position);
+    Vector3 computeForceFeedBack(const Vector3& position);
 protected:
     /// Default constructor
     AdvanceCarvingManager();
@@ -114,7 +114,7 @@ public:
     Data < std::string > d_activatorName;
 
     Data < bool > d_delayMode;
-    Data<sofa::helper::vector<unsigned int> > m_testID;
+    Data<sofa::type::vector<unsigned int> > m_testID;
 
     Data < bool > d_drawTetra;
     Data < bool > d_drawContacts;
@@ -139,24 +139,24 @@ protected:
     sofa::component::topology::TetrahedronSetTopologyContainer::SPtr m_topoCon;
     sofa::component::topology::TriangleSetTopologyContainer::SPtr m_topoSurface;
 
-    defaulttype::Vector3 m_toolPosition;
+    Vector3 m_toolPosition;
 
-    defaulttype::Vector3 m_toolForceFeedBack;
+    Vector3 m_toolForceFeedBack;
 
     // Bool to store the information if component has well be init and can be used.
     bool m_carvingReady;
 
-    sofa::helper::vector<contactInfo*> m_triangleContacts;
-    sofa::helper::vector<contactInfo*> m_pointContacts;
+    sofa::type::vector<contactInfo*> m_triangleContacts;
+    sofa::type::vector<contactInfo*> m_pointContacts;
 
-    sofa::helper::vector<contactInfo> m_realContacts;
+    sofa::type::vector<contactInfo> m_realContacts;
 
-    sofa::helper::vector<int> m_tetra2remove;
+    sofa::type::vector<int> m_tetra2remove;
 
-    sofa::helper::vector<int> _tetra2remove;
+    sofa::type::vector<int> _tetra2remove;
     std::map <unsigned int, SReal> m_tetraVolumes;
 
-    sofa::helper::vector<defaulttype::Vector3> m_contactPoints;
+    sofa::type::vector<Vector3> m_contactPoints;
 
     bool m_canCarve;
 
