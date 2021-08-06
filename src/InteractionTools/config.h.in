@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <sofa/helper/system/config.h>
+#include <sofa/config.h>
 
 #ifdef SOFA_BUILD_INTERACTIONTOOLS
 #  define SOFA_TARGET SofaInteractionTools
