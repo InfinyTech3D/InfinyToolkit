@@ -10,11 +10,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(InteractionTools VERSION 0.1)
 
-find_package(SofaGeneral REQUIRED)
 find_package(SofaHaptics REQUIRED)
 find_package(SofaCarving REQUIRED)
 #find_package(SofaSphFluid REQUIRED)
-find_package(MeshRefinement REQUIRED)
+
 find_package(SofaEngine REQUIRED)
 find_package(SofaLoader REQUIRED)
 
@@ -30,8 +29,6 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.h    
     ${INTERACTIONTOOLS_SRC_DIR}/HapticCarvingManager.h
     ${INTERACTIONTOOLS_SRC_DIR}/SurfaceCarvingManager.h
-    ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.h
-    ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h
     ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.h
 	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.h
 	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.inl
@@ -44,12 +41,21 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/HapticCarvingManager.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/SurfaceCarvingManager.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.cpp    
-    ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.cpp
 	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
 )
+
+find_package(MeshRefinement QUIET)
+if (MeshRefinement_FOUND)
+    message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
+    list(APPEND HEADER_FILES ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.h)
+	list(APPEND HEADER_FILES ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h)
+	
+    list(APPEND SOURCE_FILES ${INTERACTIONTOOLS_SRC_DIR}/AdvanceCarvingManager.cpp)
+	list(APPEND SOURCE_FILES ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp)
+    add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
+endif()
 
 set(README_FILES PluginInteractionTools.txt)
 
@@ -60,7 +66,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} SofaCore SofaEngine SofaLoader SofaHaptics SofaCarving)
+target_link_libraries(${PROJECT_NAME} SofaEngine SofaLoader SofaHaptics SofaCarving)
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
@@ -71,11 +77,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BIN
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
-sofa_generate_package(
-    NAME ${PROJECT_NAME}
-    TARGETS ${PROJECT_NAME}
-    VERSION ${PROJECT_VERSION}
-    INCLUDE_SOURCE_DIR ${INTERACTIONTOOLS_SRC_DIR}
+sofa_create_package_with_targets(
+    PACKAGE_NAME ${PROJECT_NAME}
+    PACKAGE_VERSION ${PROJECT_VERSION}
+    TARGETS ${PROJECT_NAME} AUTO_SET_TARGET_PROPERTIES
+    INCLUDE_SOURCE_DIR "src"
     INCLUDE_INSTALL_DIR ${PROJECT_NAME}
     RELOCATABLE "plugins"
     )
