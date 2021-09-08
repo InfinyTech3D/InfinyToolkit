@@ -12,7 +12,7 @@ project(InteractionTools VERSION 0.1)
 
 find_package(SofaHaptics REQUIRED)
 find_package(SofaCarving REQUIRED)
-#find_package(SofaSphFluid REQUIRED)
+find_package(SofaGeneralObjectInteraction REQUIRED)
 
 find_package(SofaEngine REQUIRED)
 find_package(SofaLoader REQUIRED)
@@ -66,7 +66,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} SofaEngine SofaLoader SofaHaptics SofaCarving)
+target_link_libraries(${PROJECT_NAME} SofaEngine SofaLoader SofaHaptics SofaCarving SofaGeneralObjectInteraction)
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
