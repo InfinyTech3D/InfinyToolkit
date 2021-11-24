@@ -14,7 +14,7 @@
   <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
   <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
   
-  <CarvingManager active="true" carvingDistance="-0.05"/>
+  <CarvingManager active="true" carvingDistance="0.05"/>
   
   <Node name="carvingElement">
     <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
@@ -41,12 +41,12 @@
     <BoxROI name="box" box="-1 -1 -1 11 0 11" drawBoxes="true" />
     <FixedConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
 
-    <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="1000" poissonRatio="0.3" method="large" />
-
+    <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="100" poissonRatio="0.3" method="large" />
+<!--
     <AdvanceCarvingManager name="ACarving" listening="1" printLog="1" drawScaleTetrahedra="0.6" 
-active="true" carvingDistance="0.0001" refineDistance="0.1" drawTetra="1" drawContacts="1" carvingCriteria="0.001" refineCriteria="0.05" delayMode="0" 
+active="true" carvingDistance="0.05" refineDistance="0.1" drawTetra="1" drawContacts="1" carvingCriteria="0.01" refineCriteria="0.05" delayMode="0" 
 carvingRadius="@../carvingElement/tool.radius"/>
-
+-->
     <Node name="Surface">
       <TriangleSetTopologyContainer  name="Container"/>
       <TriangleSetTopologyModifier   name="Modifier" />

@@ -421,10 +421,10 @@ void AdvanceCarvingManager::processCollision()
         return;
 
     m_topoCon = nullptr;
-   // bool resRef = doRefinement();    
-    //if (resRef == false) // no refinement at this step, carve
-        //doMoveCarve();
-        doMoveCarvePoint();
+    bool resRef = doRefinement();    
+    if (resRef == false) // no refinement at this step, carve
+        doMoveCarve();
+        //doMoveCarvePoint();
 }
 
 
@@ -889,9 +889,7 @@ bool AdvanceCarvingManager::doMoveCarve()
 
     if (!layer_tetra_toRemove.empty())
     {
-       std::cout << "--- START Tetra removed: " << layer_tetra_toRemove.size() << std::endl;
        _tetraAlgo->removeTetrahedra(layer_tetra_toRemove);
-       std::cout << "--- Tetra removed: " << layer_tetra_toRemove.size() << std::endl;
     }
     
     return true;
@@ -951,6 +949,7 @@ void AdvanceCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
 
 void AdvanceCarvingManager::draw(const core::visual::VisualParams* vparams)
 {
+    return;
     if (!m_carvingReady)
         return;
 
