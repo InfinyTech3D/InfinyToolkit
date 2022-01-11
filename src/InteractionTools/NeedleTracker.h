@@ -10,7 +10,7 @@
 
 #include <InteractionTools/config.h>
 #include <sofa/core/behavior/BaseController.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <SofaBaseMechanics/MechanicalObject.h>
 
 namespace sofa
@@ -73,7 +73,7 @@ protected:
     /// Internal method to compute each slice BB
     void computeSlicesBB();
     /// Internal method to test the intersection between a ray and a triangle
-    bool RayIntersectsTriangle(const Coord& origin, const Vector3& rayDirection, const Coord& P0, const Coord& P1, const Coord& P2, Coord& outIntersection);
+    bool RayIntersectsTriangle(const Coord& origin, const type::Vec3& rayDirection, const Coord& P0, const Coord& P1, const Coord& P2, Coord& outIntersection);
 
 
 protected:

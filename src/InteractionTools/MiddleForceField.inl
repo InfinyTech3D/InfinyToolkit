@@ -91,7 +91,7 @@ void MiddleForceField<DataTypes>::addDForce(const core::MechanicalParams* mparam
 }
 
 template<class DataTypes>
-void MiddleForceField<DataTypes>::addKToMatrix(defaulttype::BaseMatrix* matrix, SReal kFact, unsigned int& offset)
+void MiddleForceField<DataTypes>::addKToMatrix(linearalgebra::BaseMatrix* matrix, SReal kFact, unsigned int& offset)
 {
     SOFA_UNUSED(matrix);
     SOFA_UNUSED(kFact);
