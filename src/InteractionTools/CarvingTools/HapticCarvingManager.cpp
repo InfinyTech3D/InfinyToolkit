@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/HapticCarvingManager.h>
+#include <InteractionTools/CarvingTools/HapticCarvingManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/collision/DetectionOutput.h>
 #include <sofa/core/objectmodel/KeypressedEvent.h>
@@ -23,13 +23,7 @@
 #include <sofa/helper/AdvancedTimer.h>
 #include <sofa/helper/ScopedAdvancedTimer.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace collision
+namespace sofa::component::collision
 {
 
 int HapticCarvingManagerClass = core::RegisterObject("Manager handling carving operations between an haptic tool and an object.")
@@ -135,8 +129,4 @@ void HapticCarvingManager::doCarve()
         m_forceFeedback->setLock(false);
 }
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::collision

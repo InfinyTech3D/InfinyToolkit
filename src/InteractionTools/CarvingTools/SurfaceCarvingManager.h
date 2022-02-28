@@ -22,15 +22,7 @@
 
 #include <fstream>
 
-namespace sofa
-{
-
-//using namespace component::collision;
-
-namespace component
-{
-	
-namespace controller
+namespace sofa::component::controller
 {
 
 class SOFA_INTERACTIONTOOLS_API SurfaceCarvingManager : public core::behavior::BaseController
@@ -106,8 +98,5 @@ private:
 	unsigned int p_graspableIdx;
 };
 					
-} // namespace controller
+} // namespace sofa::component::controller
 	
-} // namespace component
-
-} // namespace sofa

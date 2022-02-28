@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/SurfaceCarvingManager.h>
+#include <InteractionTools/CarvingTools/SurfaceCarvingManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/collision/DetectionOutput.h>
 #include <sofa/simulation/AnimateEndEvent.h>
@@ -18,19 +18,13 @@
 #include <sofa/core/topology/TopologicalMapping.h>
 #include <SofaUserInteraction/TopologicalChangeManager.h>
 #include <sofa/helper/AdvancedTimer.h>
-#include <SofaLoader/MeshObjLoader.h>
+#include <sofa/component/io/mesh/MeshOBJLoader.h>
 
 
-namespace sofa
+namespace sofa::component::controller
 {
 
-using namespace component::collision;
-
-namespace component
-{
-
-namespace controller
-{
+using namespace sofa::component::collision;
 
 SOFA_DECL_CLASS(SurfaceCarvingManager)
 
@@ -412,8 +406,4 @@ void SurfaceCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
     }
 }
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::controller

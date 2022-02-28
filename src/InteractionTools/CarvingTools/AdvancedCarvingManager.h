@@ -27,13 +27,7 @@
 #include <thread>
 #include <mutex>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace collision
+namespace sofa::component::collision
 {
 
     class contactInfo
@@ -162,8 +156,4 @@ protected:
     
 };
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::collision
