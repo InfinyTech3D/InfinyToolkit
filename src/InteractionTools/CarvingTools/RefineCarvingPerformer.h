@@ -10,6 +10,8 @@
 
 #include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
 
+#include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
+
 namespace sofa::component::controller
 {
 
@@ -18,11 +20,17 @@ class SOFA_INTERACTIONTOOLS_API RefineCarvingPerformer : public BaseCarvingPerfo
 public:
 	RefineCarvingPerformer();
 
-	virtual ~RefineCarvingPerformer() = default;
+	virtual ~RefineCarvingPerformer();
 
 	bool initPerformer() override;
 
 	bool runPerformer() override;
+
+
+protected:
+	std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
+	TetrahedronRefinementAlgorithms* m_tetraAlgo;
+
 };
 					
 } // namespace sofa::component::controller

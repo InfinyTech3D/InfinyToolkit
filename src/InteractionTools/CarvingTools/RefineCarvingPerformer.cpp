@@ -14,8 +14,20 @@ namespace sofa::component::controller
 
 RefineCarvingPerformer::RefineCarvingPerformer()
     : BaseCarvingPerformer()
+    , m_tetraAlgo(nullptr)
 {
 
+}
+
+
+RefineCarvingPerformer::~RefineCarvingPerformer()
+{
+    for (auto itM = m_tetraAlgos.begin(); itM != m_tetraAlgos.end(); ++itM)
+    {
+        delete itM->second;
+    }
+
+    m_tetraAlgos.clear();
 }
 
 

@@ -58,13 +58,12 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     , d_activatorName(initData(&d_activatorName, "button1", "activatorName", "Name to active the script event parsing. Will look for 'pressed' or 'release' keyword. For example: 'button1_pressed'"))
     , m_toolCollisionModel(nullptr)
     , m_detectionNP(nullptr)
-    , m_topoCon(nullptr)
-    , m_topoSurface(nullptr)
+    //, m_topoCon(nullptr)
     , m_carvingReady(false)    
     , m_canCarve(true)
     , m_mgrStatus(0)
-    , m_tetraAlgo(nullptr)
-    , m_forceFeedback(nullptr)
+    
+    //, m_forceFeedback(nullptr)
 {
     this->f_listening.setValue(true);
 }
@@ -72,12 +71,6 @@ AdvancedCarvingManager::AdvancedCarvingManager()
 
 AdvancedCarvingManager::~AdvancedCarvingManager()
 {
-    for (auto itM = m_tetraAlgos.begin(); itM != m_tetraAlgos.end(); ++itM )
-    {
-        delete itM->second;
-    }
-
-    m_tetraAlgos.clear();
     m_mgrStatus = 0;
 }
 
@@ -120,7 +113,7 @@ void AdvancedCarvingManager::bwdInit()
     if (!m_carvingReady) {
         msg_error() << "AdvancedCarvingManager: initialisation failed.";
         return;
-    }    
+    }
 }
 
 
@@ -143,7 +136,6 @@ void AdvancedCarvingManager::clearContacts()
     m_tetra2remove.clear();
     m_realContacts.clear();
     m_contactPoints.clear();
-    //m_toolForceFeedBack = Vector3(0, 0, 0);
 }
 
 
@@ -157,20 +149,12 @@ void AdvancedCarvingManager::filterCollision()
 
     // get the collision output
     const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = m_detectionNP->getDetectionOutputs();
-    if (detectionOutputs.size() == 0)
+    if (detectionOutputs.size() == 0) // exit if no collision
     {
         lockContraints.unlock();
         return;
     }
 
-
-    // vector of indices and distance found by min proximity pipeline.
-    sofa::type::vector<unsigned int> vIdCarve;
-    sofa::type::vector<unsigned int> vIdRefine;
-
-    // Get distance values
-    const Real& carvingDistance = d_carvingDistance.getValue();
-    const Real& refineDistance = d_refineDistance.getValue();
 
     // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
     const ContactVector* contacts = nullptr;
@@ -196,12 +180,12 @@ void AdvancedCarvingManager::filterCollision()
             continue;
 
         // if not inside the map of tetrahedronRefinementAlgo, or not container, skip
-        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = targetModel->getContext()->get<sofa::component::topology::TetrahedronSetTopologyContainer>();
-        auto itM = m_tetraAlgos.find(topoCon);
-        if (itM == m_tetraAlgos.end()) {
-            msg_error() << "No TetrahedronRefinementAlgorithms found for collision model: " << targetModel->name;
-            continue;
-        }
+        //sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = targetModel->getContext()->get<sofa::component::topology::TetrahedronSetTopologyContainer>();
+        //auto itM = m_tetraAlgos.find(topoCon);
+        //if (itM == m_tetraAlgos.end()) {
+        //    msg_error() << "No TetrahedronRefinementAlgorithms found for collision model: " << targetModel->name;
+        //    continue;
+        //}
 
         int mode = -1; // 0 = triangleModel, 1 = pointModel
         if (targetModel->getTypeName().find("TriangleCollisionModel") != std::string::npos)
@@ -238,7 +222,8 @@ void AdvancedCarvingManager::filterCollision()
             info->pointA = c.point[0];
             info->pointB = c.point[1];
             info->dist = c.value;
-            info->tetraAlgo = itM->second;
+            info->topo = targetModel->getCollisionTopology();
+            //info->tetraAlgo = itM->second;
 
             if (mode == 0)
                 m_triangleContacts.push_back(info);
@@ -249,8 +234,8 @@ void AdvancedCarvingManager::filterCollision()
         // process the collision               
     }
     lockContraints.unlock();
-    if (d_active.getValue())
-        processCollision();
+    //if (d_active.getValue())
+      //  processCollision();
 }
 
 
@@ -291,17 +276,17 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
             d_active.setValue(false);
     }
 
-    if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
-    {
-        if (ev->getKey() == 'C')
-        {
-            for (auto itm : m_tetraAlgos)
-            {
-                const sofa::type::vector <sofa::core::topology::Topology::TetraID>& tetraIds = itm.second->getTopologyGeometry()->computeBadTetrahedron();
-                std::cout << "Bad tetra Nb: " << tetraIds.size() << std::endl;
-            }
-        }
-    }
+    //if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
+    //{
+    //    if (ev->getKey() == 'C')
+    //    {
+    //        for (auto itm : m_tetraAlgos)
+    //        {
+    //            const sofa::type::vector <sofa::core::topology::Topology::TetraID>& tetraIds = itm.second->getTopologyGeometry()->computeBadTetrahedron();
+    //            std::cout << "Bad tetra Nb: " << tetraIds.size() << std::endl;
+    //        }
+    //    }
+    //}
 }
 
 void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
@@ -313,58 +298,57 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
     if (!d_drawContacts.getValue())
         return;
 
-    if (!m_triangleContacts.empty())
-    {
-        //std::vector<Vector3> normals;
-        //std::vector<sofa::type::RGBAColor> colors;
-        const Real& carvingDistance = d_carvingDistance.getValue();
-        const Real& refineDistance = d_refineDistance.getValue();
-        
-        for each (contactInfo* cInfo in m_triangleContacts)
-        {
-            std::vector<Vector3> pos;
+    //if (!m_triangleContacts.empty())
+    //{
+    //    const Real& carvingDistance = d_carvingDistance.getValue();
+    //    const Real& refineDistance = d_refineDistance.getValue();
+    //    
+    //    for each (contactInfo* cInfo in m_triangleContacts)
+    //    {
+    //        std::vector<Vector3> pos;
 
-            sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = cInfo->tetraAlgo->getTopologyContainer();
-            sofa::core::behavior::BaseMechanicalState* mstate = topoCon->getContext()->getMechanicalState();
-            sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(cInfo->elemId);
+    //        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = cInfo->topo;
+    //        sofa::core::behavior::BaseMechanicalState* mstate = topoCon->getContext()->getMechanicalState();
+    //        sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(cInfo->elemId);
 
-            for (unsigned int j = 0; j < 3; j++) {
-                pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
-            }
-            //normals.push_back(cInfo->normal);
+    //        for (unsigned int j = 0; j < 3; j++) {
+    //            pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //        }
+    //        //normals.push_back(cInfo->normal);
 
-            sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < carvingDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < refineDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
-            
-            //colors.push_back(color4);
-            vparams->drawTool()->drawTriangle(pos[0], pos[1], pos[2], cInfo->normal, color4);
-            //vparams->drawTool()->drawSphere(cInfo->pointA, 0.1f, sofa::type::RGBAColor(0.0, 1.0, 0.0f, 1.0));
-        }        
-    }
+    //        sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
+    //        if (cInfo->dist < carvingDistance)
+    //            color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
+    //        else if (cInfo->dist < refineDistance)
+    //            color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
+    //        
+    //        //colors.push_back(color4);
+    //        vparams->drawTool()->drawTriangle(pos[0], pos[1], pos[2], cInfo->normal, color4);
+    //        //vparams->drawTool()->drawSphere(cInfo->pointA, 0.1f, sofa::type::RGBAColor(0.0, 1.0, 0.0f, 1.0));
+    //    }        
+    //}
     
-    if (!m_pointContacts.empty())
-    {
-        const Real& carvingDistance = d_carvingDistance.getValue();
-        const Real& refineDistance = d_refineDistance.getValue();
 
-        for each (contactInfo* cInfo in m_pointContacts)
-        {
-            std::vector<Vector3> pos;
-            sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < carvingDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < refineDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
+    //if (!m_pointContacts.empty())
+    //{
+    //    const Real& carvingDistance = d_carvingDistance.getValue();
+    //    const Real& refineDistance = d_refineDistance.getValue();
 
-            //vparams->drawTool()->drawSphere(cInfo->pointA, 0.1f, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
-            vparams->drawTool()->drawSphere(cInfo->pointB, 0.05f, color4);
+    //    for each (contactInfo* cInfo in m_pointContacts)
+    //    {
+    //        std::vector<Vector3> pos;
+    //        sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
+    //        if (cInfo->dist < carvingDistance)
+    //            color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
+    //        else if (cInfo->dist < refineDistance)
+    //            color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
 
-            vparams->drawTool()->drawLine(cInfo->pointB, cInfo->pointB + cInfo->normal, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
-        }
-    }
+    //        //vparams->drawTool()->drawSphere(cInfo->pointA, 0.1f, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
+    //        vparams->drawTool()->drawSphere(cInfo->pointB, 0.05f, color4);
+
+    //        vparams->drawTool()->drawLine(cInfo->pointB, cInfo->pointB + cInfo->normal, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
+    //    }
+    //}
     
 
     
@@ -375,29 +359,29 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
     //        vparams->drawTool()->drawSphere(triInfo->pointB, 0.01f, green);
 
    
-    if (m_topoCon && !m_tetra2remove.empty())
-    {
-        sofa::core::behavior::BaseMechanicalState* mstate = m_topoCon->getContext()->getMechanicalState();
-        std::vector<Vector3> pos;
-        
-        
-        if (!mstate)
-        {
-            std::cout << "mstate is null" << std::endl;
-            return;
-        }
+    //if (m_topoCon && !m_tetra2remove.empty())
+    //{
+    //    sofa::core::behavior::BaseMechanicalState* mstate = m_topoCon->getContext()->getMechanicalState();
+    //    std::vector<Vector3> pos;
+    //    
+    //    
+    //    if (!mstate)
+    //    {
+    //        std::cout << "mstate is null" << std::endl;
+    //        return;
+    //    }
 
-        for (unsigned int i=0; i<m_tetra2remove.size(); ++i)
-        {
-            const sofa::core::topology::Topology::Tetrahedron& tri = m_topoCon->getTetrahedron(m_tetra2remove[i]);
-            for (unsigned int j = 0; j < 4; j++) {
-                pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
-            }
-        }
+    //    for (unsigned int i=0; i<m_tetra2remove.size(); ++i)
+    //    {
+    //        const sofa::core::topology::Topology::Tetrahedron& tri = m_topoCon->getTetrahedron(m_tetra2remove[i]);
+    //        for (unsigned int j = 0; j < 4; j++) {
+    //            pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //        }
+    //    }
 
-        vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f), 0.7f);
-        //vparams->drawTool()->drawTriangles(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f));
-    }
+    //    vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f), 0.7f);
+    //    //vparams->drawTool()->drawTriangles(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f));
+    //}
     
     // draw refine distance
     //std::vector<Vector3> spheres; spheres.push_back(m_toolPosition);

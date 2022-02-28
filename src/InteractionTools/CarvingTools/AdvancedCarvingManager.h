@@ -9,7 +9,8 @@
 #pragma once
 
 #include <InteractionTools/config.h>
-#include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
+#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <sofa/type/Vec.h>
 
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/collision/Intersection.h>
@@ -30,16 +31,20 @@
 namespace sofa::component::collision
 {
 
-    class contactInfo
-    {
-    public:
-        unsigned int elemId; // in global mesh
-        Vector3 pointA;
-        Vector3 pointB;
-        Vector3 normal;
-        double dist;
-        TetrahedronRefinementAlgorithms* tetraAlgo;
-    };
+using namespace sofa::type;
+
+class contactInfo
+{
+public:
+    unsigned int elemId; // in global mesh
+    Vector3 pointA;
+    Vector3 pointB;
+    Vector3 normal;
+    double dist;
+    //TetrahedronRefinementAlgorithms* tetraAlgo;
+    sofa::core::topology::BaseMeshTopology* topo;
+};
+
 
 /**
 * The AdvancedCarvingManager class will perform topological resection on a triangle surface (could be on top of tetrahedron topology)
@@ -58,8 +63,8 @@ public:
 
     using ToolCollisionModel = sofa::core::CollisionModel;
     using SurfaceCollisionModel = sofa::core::CollisionModel;
-
-    typedef type::vector<core::collision::DetectionOutput> ContactVector;
+    using ContactVector = type::vector<core::collision::DetectionOutput>;
+    using BaseCarvingPerformer = sofa::component::controller::BaseCarvingPerformer;
 
     /// Sofa API init method of the component
     void bwdInit() override;
@@ -111,6 +116,7 @@ public:
 
 protected:
     std::mutex lockContraints;
+
     /// Pointer to the tool collision model
     ToolCollisionModel* m_toolCollisionModel;
 
@@ -118,17 +124,13 @@ protected:
     std::vector<SurfaceCollisionModel*> m_surfaceCollisionModels;
     
     
-    std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
-    TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
-
-    sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
+    //sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
 
     // Pointer to the scene detection Method component (Narrow phase only)
     core::collision::NarrowPhaseDetection* m_detectionNP;
     
-    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr m_topoCon;
-    sofa::component::topology::TriangleSetTopologyContainer::SPtr m_topoSurface;
+    //sofa::component::topology::TetrahedronSetTopologyContainer::SPtr m_topoCon;
 
     Vector3 m_toolPosition;
 
@@ -137,6 +139,7 @@ protected:
     // Bool to store the information if component has well be init and can be used.
     bool m_carvingReady;
 
+    sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
     sofa::type::vector<contactInfo*> m_triangleContacts;
     sofa::type::vector<contactInfo*> m_pointContacts;
 
@@ -152,7 +155,6 @@ protected:
     bool m_canCarve;
 
     int m_mgrStatus;
-    
 };
 
 } // namespace sofa::component::collision
