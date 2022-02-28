@@ -31,6 +31,7 @@ protected:
 	std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
 	TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
+	//sofa::type::vector<int> m_tetra2remove;
 };
 					
 } // namespace sofa::component::controller

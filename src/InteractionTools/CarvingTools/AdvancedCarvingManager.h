@@ -57,10 +57,6 @@ class SOFA_INTERACTIONTOOLS_API AdvancedCarvingManager : public core::behavior::
 public:
     SOFA_CLASS(AdvancedCarvingManager,sofa::core::behavior::BaseController);
 
-    typedef defaulttype::Vec3Types DataTypes;
-    typedef DataTypes::Coord Coord;
-    typedef DataTypes::Real Real;
-
     using ToolCollisionModel = sofa::core::CollisionModel;
     using SurfaceCollisionModel = sofa::core::CollisionModel;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
@@ -95,18 +91,12 @@ public:
 
     Data < bool > d_active;
     /// Collision distance at which cavring will start. Equal to contactDistance by default.
-    Data < Real > d_carvingDistance;
-    Data < Real > d_carvingRadius;
-    Data < Real > d_refineDistance;
-    Data < Real > d_carvingCriteria;
-    Data < Real > d_refineCriteria;
-    Data < Real > d_carvingSpeed;
-    Data < Real > d_refineThreshold;
+    Data < SReal > d_carvingDistance;
+    Data < SReal > d_refineDistance;
+    Data < SReal > d_refineCriteria;
+    Data < SReal > d_carvingSpeed;
+    Data < SReal > d_refineThreshold;
 
-    Data < Real > d_sphereRadius;
-
-    ///< Activate carving with string Event, the activator name has to be inside the script event. Will look for 'pressed' or 'release' keyword. For example: 'button1_pressed'
-    Data < std::string > d_activatorName;
 
     Data<sofa::type::vector<unsigned int> > m_testID;
 
@@ -114,47 +104,29 @@ public:
     Data < bool > d_drawContacts;
     Data <float> d_drawScaleTetrahedra; ///< Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)
 
-protected:
-    std::mutex lockContraints;
+private:
+    /// Mutex to lock constraints for haptic use
+    std::mutex lockConstraints;
 
     /// Pointer to the tool collision model
-    ToolCollisionModel* m_toolCollisionModel;
+    ToolCollisionModel* m_toolCollisionModel = nullptr;
 
     // Pointer to the target object collision model
     std::vector<SurfaceCollisionModel*> m_surfaceCollisionModels;
     
     
-
-    //sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
-
     // Pointer to the scene detection Method component (Narrow phase only)
-    core::collision::NarrowPhaseDetection* m_detectionNP;
+    core::collision::NarrowPhaseDetection* m_detectionNP = nullptr;
     
-    //sofa::component::topology::TetrahedronSetTopologyContainer::SPtr m_topoCon;
-
-    Vector3 m_toolPosition;
-
-    Vector3 m_toolForceFeedBack;
-
     // Bool to store the information if component has well be init and can be used.
-    bool m_carvingReady;
+    bool m_carvingReady = false;
 
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
+    
+    /// List of triangle contacts filter during collision 
     sofa::type::vector<contactInfo*> m_triangleContacts;
+    /// List of point contacts filter during collision 
     sofa::type::vector<contactInfo*> m_pointContacts;
-
-    sofa::type::vector<contactInfo> m_realContacts;
-
-    sofa::type::vector<int> m_tetra2remove;
-
-    sofa::type::vector<int> _tetra2remove;
-    std::map <unsigned int, SReal> m_tetraVolumes;
-
-    sofa::type::vector<Vector3> m_contactPoints;
-
-    bool m_canCarve;
-
-    int m_mgrStatus;
 };
 
 } // namespace sofa::component::collision
