@@ -29,16 +29,10 @@
 #include <SofaBaseTopology/TopologyData.inl>
 
 
-namespace sofa
+namespace sofa::component::collision
 {
 
-namespace component
-{
-
-namespace collision
-{
-
-    using namespace sofa::core::topology;
+using namespace sofa::core::topology;
 
 int AdvanceCarvingManagerClass = core::RegisterObject("Manager handling carving operations between a tool and an object.")
 .add< AdvanceCarvingManager >()
@@ -56,7 +50,6 @@ AdvanceCarvingManager::AdvanceCarvingManager()
     , d_refineCriteria( initData(&d_refineCriteria, 0.5, "refineCriteria", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , d_carvingSpeed(initData(&d_carvingSpeed, 0.001, "carvingSpeed", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , d_refineThreshold(initData(&d_refineThreshold, 1.0, "refineThreshold", "Collision distance at which cavring will start. Equal to contactDistance by default."))
-    , d_delayMode(initData(&d_delayMode, false, "delayMode", "Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)"))
     , m_testID(initData(&m_testID, sofa::type::vector<unsigned int>(), "testID", "Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)"))
     , d_drawTetra( initData(&d_drawTetra, false, "drawTetra", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
     , d_drawContacts( initData(&d_drawContacts, false, "drawContacts", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
@@ -292,126 +285,6 @@ void AdvanceCarvingManager::filterCollision()
     lockContraints.unlock();
     if (d_active.getValue())
         processCollision();
-}
-
-
-Vector3 AdvanceCarvingManager::computeForceFeedBack(const Vector3& position)
-{
-    lockContraints.lock();
-    // todo change that
-    const Real& refineDistance = d_refineDistance.getValue();
-    m_toolForceFeedBack = Vector3(0, 0, 0);
-    m_toolPosition = position;
-    int cpt = 0;
-    SReal facMax = 33;
-    
-    //SReal responseDist = 0.3;
-    SReal responseDist = refineDistance;
-    SReal contactDist = 0.1;
-    const SReal& sphereRadius = d_sphereRadius.getValue();
-
-
-    std::list<unsigned int> idsP;
-
-    if (!m_triangleContacts.empty())
-    {
-        msg_info() << "-------------- TRIANGLE START ----------------";
-        cpt = 0;
-        Vector3 ffTri = Vector3(0, 0, 0);
-        for each (contactInfo* cInfo in m_triangleContacts)
-        {
-            Vector3 vec = position - cInfo->pointA;
-            SReal realDistance = vec.norm();
-            SReal collDistance = realDistance - contactDist - sphereRadius;
-            msg_info() << "id: " << cInfo->elemId << " realDistance: " << realDistance << " | collDistance: " << collDistance << " | cInfo->dist: " << cInfo->dist;
-
-            if (collDistance > responseDist)
-                continue;
-
-            if (collDistance < 0.0)
-            {
-                std::cout << "collDistance: " << collDistance << std::endl;
-                facMax *= (1 + fabs(collDistance));
-                collDistance = 0.0;
-            }
-
-            SReal factorN = (collDistance - responseDist) * (collDistance - responseDist);
-            msg_info() << "(collDistance - responseDist):  " << (collDistance - responseDist) << " | facMax: " << facMax;
-            factorN *= factorN;
-            factorN *= facMax;
-            msg_info() << "factorN:  " << factorN;
-            vec.normalize();
-
-            //cInfo->normal = vec * factorN;
-            m_toolForceFeedBack += cInfo->normal * factorN;
-
-            const sofa::core::topology::Triangle& tri = cInfo->tetraAlgo->getTopologyContainer()->getTriangle(cInfo->elemId);
-            for (unsigned int i = 0; i < 3; ++i)
-                idsP.push_back(tri[i]);
-            
-            cpt++;
-            msg_info() << "collDistance:  " << collDistance << " - " << responseDist << " = " << factorN;
-            msg_info() << "vec: " << cInfo->normal.norm() << " ++ " << m_toolForceFeedBack.norm();
-        }
-
-        msg_info() << " ### force: " << m_toolForceFeedBack.norm();
-        msg_info() << "-------------- TRIANGLE END ----------------";
-    }
-
-    facMax = 33;
-    if (!m_pointContacts.empty())
-    {
-        msg_info() << "-------------- POINT START ----------------";
-        for each (contactInfo* cInfo in m_pointContacts)
-        {
-            Vector3 vec = position - cInfo->pointB;
-            SReal realDistance = vec.norm();
-            SReal collDistance = realDistance - contactDist - sphereRadius;
-            
-            if (collDistance > responseDist)
-                continue;
-
-            bool found = false;
-            for (auto idP : idsP)
-            {
-                if (idP == cInfo->elemId)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-                continue;
-            
-            msg_info() << "id: " << cInfo->elemId << " realDistance: " << realDistance << " | collDistance: " << collDistance << " | cInfo->dist: " << cInfo->dist;
-
-            if (collDistance < 0.0)
-            {
-                std::cout << "collDistance: " << collDistance << std::endl;
-                facMax *= fabs(collDistance);
-                collDistance = 0.0;
-            }
-            
-            SReal factorN = (collDistance - responseDist) * (collDistance - responseDist) * facMax;
-            factorN *= factorN;
-            vec.normalize();
-            
-            //cInfo->normal = vec * factorN;
-            m_toolForceFeedBack += vec * factorN;
-
-            cpt++;
-            msg_info() << "collDistance:  " << collDistance << " - "  << responseDist << " = " << factorN;
-            msg_info() << "vec: " << cInfo->normal.norm() << " ++ " << m_toolForceFeedBack.norm();
-        }
-
-        msg_info() << " ### force: " << m_toolForceFeedBack.norm();
-        msg_info() << "-------------- POINT END ----------------";
-    }
-    
-
-    lockContraints.unlock();
-    return m_toolForceFeedBack;
 }
 
 
@@ -1121,8 +994,4 @@ void AdvanceCarvingManager::draw(const core::visual::VisualParams* vparams)
 }
 
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::collision

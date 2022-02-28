@@ -76,7 +76,6 @@ public:
     void draw(const core::visual::VisualParams* vparams) override;
     void clearContacts();
 
-    Vector3 computeForceFeedBack(const Vector3& position);
 protected:
     /// Default constructor
     AdvanceCarvingManager();
@@ -113,7 +112,6 @@ public:
     ///< Activate carving with string Event, the activator name has to be inside the script event. Will look for 'pressed' or 'release' keyword. For example: 'button1_pressed'
     Data < std::string > d_activatorName;
 
-    Data < bool > d_delayMode;
     Data<sofa::type::vector<unsigned int> > m_testID;
 
     Data < bool > d_drawTetra;
