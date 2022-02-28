@@ -34,12 +34,12 @@ namespace sofa::component::collision
 
 using namespace sofa::core::topology;
 
-int AdvanceCarvingManagerClass = core::RegisterObject("Manager handling carving operations between a tool and an object.")
-.add< AdvanceCarvingManager >()
+int AdvancedCarvingManagerClass = core::RegisterObject("Manager handling carving operations between a tool and an object.")
+.add< AdvancedCarvingManager >()
 ;
 
 
-AdvanceCarvingManager::AdvanceCarvingManager()
+AdvancedCarvingManager::AdvancedCarvingManager()
     : d_toolModelPath( initData(&d_toolModelPath, "toolModelPath", "Tool model path"))
     , d_surfaceModelPath( initData(&d_surfaceModelPath, "surfaceModelPath", "TriangleSetModel or SphereModel path"))
     , d_active( initData(&d_active, false, "active", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
@@ -70,7 +70,7 @@ AdvanceCarvingManager::AdvanceCarvingManager()
 }
 
 
-AdvanceCarvingManager::~AdvanceCarvingManager()
+AdvancedCarvingManager::~AdvancedCarvingManager()
 {
     for (auto itM = m_tetraAlgos.begin(); itM != m_tetraAlgos.end(); ++itM )
     {
@@ -82,29 +82,25 @@ AdvanceCarvingManager::~AdvanceCarvingManager()
 }
 
 
-void AdvanceCarvingManager::bwdInit()
+void AdvancedCarvingManager::bwdInit()
 {
     // Search for collision model corresponding to the tool.
     if (d_toolModelPath.getValue().empty())
-        m_toolCollisionModel = getContext()->get<core::CollisionModel>(core::objectmodel::Tag("CarvingTool"), core::objectmodel::BaseContext::SearchRoot);
+        m_toolCollisionModel = getContext()->get<ToolCollisionModel>(core::objectmodel::Tag("CarvingTool"), core::objectmodel::BaseContext::SearchRoot);
     else
-        m_toolCollisionModel = getContext()->get<core::CollisionModel>(d_toolModelPath.getValue());
+        m_toolCollisionModel = getContext()->get<ToolCollisionModel>(d_toolModelPath.getValue());
 
     // Search for the surface collision model.
     if (d_surfaceModelPath.getValue().empty())
     {
         // we look for a CollisionModel relying on a TetrahedronSetTopology.
-        std::vector<core::CollisionModel*> models;
-        getContext()->get<core::CollisionModel>(&models, core::objectmodel::Tag("CarvingSurface"), core::objectmodel::BaseContext::SearchRoot);
+        std::vector<SurfaceCollisionModel*> models;
+        getContext()->get<SurfaceCollisionModel>(&models, core::objectmodel::Tag("CarvingSurface"), core::objectmodel::BaseContext::SearchRoot);
         
         // If topological mapping, iterate into child Node to find mapped topology
-        for (size_t i=0;i<models.size();++i)
+        for (size_t i=0; i<models.size(); ++i)
         {
-            //sofa::core::topology::TopologicalMapping* topoMapping;
             core::CollisionModel* m = models[i];
-            //m->getContext()->get(topoMapping);
-            //if (topoMapping == nullptr) continue;
-
             m_surfaceCollisionModels.push_back(m);
         }
     }
@@ -113,52 +109,22 @@ void AdvanceCarvingManager::bwdInit()
         m_surfaceCollisionModels.push_back(getContext()->get<core::CollisionModel>(d_surfaceModelPath.getValue()));
     }
 
+
     m_detectionNP = getContext()->get<core::collision::NarrowPhaseDetection>();
     m_carvingReady = true;
 
-    if (m_toolCollisionModel == NULL) { msg_error() << "m_toolCollisionModel not found"; m_carvingReady = false; }
-    if (m_surfaceCollisionModels.empty()) { msg_error() << "CarvingManager: m_surfaceCollisionModels not found"; m_carvingReady = false; }
-    if (m_detectionNP == NULL) { msg_error() << "CarvingManager: NarrowPhaseDetection not found"; m_carvingReady = false; }    
+    if (m_toolCollisionModel == nullptr) { msg_error() << "m_toolCollisionModel not found"; m_carvingReady = false; }
+    if (m_surfaceCollisionModels.empty()) { msg_error() << "m_surfaceCollisionModels not found"; m_carvingReady = false; }
+    if (m_detectionNP == nullptr) { msg_error() << "NarrowPhaseDetection not found"; m_carvingReady = false; }
     
     if (!m_carvingReady) {
-        msg_error() << "AdvanceCarvingManager: initialisation failed.";
+        msg_error() << "AdvancedCarvingManager: initialisation failed.";
         return;
-    }
- 
-    
-    for (unsigned int i = 0; i < m_surfaceCollisionModels.size(); ++i)
-    {
-        const sofa::core::objectmodel::BaseContext* _node = m_surfaceCollisionModels[i]->getContext();
-        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _node->get<sofa::component::topology::TetrahedronSetTopologyContainer>();
-
-        if (topoCon == nullptr)
-        {
-            msg_error() << "no TetrahedronSetTopologyContainer found for collision model: " << m_surfaceCollisionModels[i]->getName();
-        }
-
-        //sofa::core::topology::TopologicalMapping* topoMapping;
-        if (m_tetraAlgos.find(topoCon) != m_tetraAlgos.end()) // already in
-            continue;
-
-        TetrahedronRefinementAlgorithms* tetraAlgo = new TetrahedronRefinementAlgorithms();
-        bool resInit = tetraAlgo->init(_node);
-        m_tetraAlgos[topoCon] = tetraAlgo;
-        if (!resInit)
-        {
-            m_carvingReady = false;
-            return;
-        }        
-    }
-
-    // check if forcefeedback
-    m_forceFeedback = getContext()->get<sofa::component::controller::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-    if (m_forceFeedback)
-        msg_info() << "Forcefeedback found: " << m_forceFeedback->getName();
-    else
-        msg_info() << "NO Forcefeedback found: ";
+    }    
 }
 
-void AdvanceCarvingManager::clearContacts()
+
+void AdvancedCarvingManager::clearContacts()
 {
     for (unsigned int i = 0; i < m_triangleContacts.size(); i++)
     {
@@ -181,7 +147,7 @@ void AdvanceCarvingManager::clearContacts()
 }
 
 
-void AdvanceCarvingManager::filterCollision()
+void AdvancedCarvingManager::filterCollision()
 {
     if (!m_carvingReady)
         return;
@@ -288,510 +254,28 @@ void AdvanceCarvingManager::filterCollision()
 }
 
 
-void AdvanceCarvingManager::processCollision()
+void AdvancedCarvingManager::processCollision()
 {
-    if (m_triangleContacts.empty() && m_pointContacts.empty())
-        return;
-
-    m_topoCon = nullptr;
-    bool resRef = doRefinement();    
-    if (resRef == false) // no refinement at this step, carve
-        doMoveCarve();
-        //doMoveCarvePoint();
-}
-
-
-bool AdvanceCarvingManager::doRefinement()
-{
-    const Real& refineDistance = d_refineDistance.getValue();
-    bool result = false;
-    sofa::type::vector<unsigned int> layer1_tetra;
-    
-    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-    for each (contactInfo* cInfo in m_triangleContacts)
-    {
-        if (cInfo->dist > refineDistance)
-            continue;
-
-        if (_tetraAlgo == nullptr)
-            _tetraAlgo = cInfo->tetraAlgo;
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _tetraAlgo->getTopologyContainer();
-        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle & tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-
-        if (tetraAT.size() != 1)
-        {
-            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-            continue;
-        }
-
-        layer1_tetra.push_back(tetraAT[0]);
-    }
-
-    for each (contactInfo* cInfo in m_pointContacts)
-    {
-        if (cInfo->dist > refineDistance)
-            continue;
-
-        if (_tetraAlgo == nullptr)
-            _tetraAlgo = cInfo->tetraAlgo;
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _tetraAlgo->getTopologyContainer();
-        const core::topology::BaseMeshTopology::TetrahedraAroundVertex & tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-
-        for (auto tetraId: tetraAV)
-            layer1_tetra.push_back(tetraId);
-    }
-
-    if (!layer1_tetra.empty() && _tetraAlgo != nullptr)
-        return _tetraAlgo->refineTetrahedra(layer1_tetra, d_refineCriteria.getValue()); 
-    else
-        return false;
-}
-
-
-bool AdvanceCarvingManager::doMoveCarvePoint()
-{
-    const Real& carvingDistance = d_carvingDistance.getValue();
-    std::map<BaseMeshTopology::PointID, BaseMeshTopology::TetrahedraAroundVertex> layer1_tetraAV;
-    std::set <BaseMeshTopology::TetrahedronID> layer1_tetra;        
-    std::map<BaseMeshTopology::PointID, contactInfo*> contactInfoMap;
-
-    sofa::type::vector<unsigned int> layer2_tetra;
-    sofa::type::vector<contactInfo*> triInfo;
-
-    std::set <BaseMeshTopology::TetrahedronID> surrounding_tetra;
-
-    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon;
-    for each (contactInfo* cInfo in m_pointContacts)
-    {
-        if (cInfo->dist > carvingDistance)
-            continue;
-
-        if (_tetraAlgo == nullptr) {
-            _tetraAlgo = cInfo->tetraAlgo;
-            topoCon = _tetraAlgo->getTopologyContainer();
-        }
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-        const core::topology::BaseMeshTopology::TetrahedraAroundVertex & tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-
-        layer1_tetraAV[cInfo->elemId] = tetraAV;
-        for (auto tetraID : tetraAV) {
-            layer1_tetra.insert(tetraID);
-            surrounding_tetra.insert(tetraID);
-        }
-
-        contactInfoMap[cInfo->elemId] = cInfo;
-    }
-
-
-
-    for each (contactInfo* cInfo in m_triangleContacts)
-    {
-        if (cInfo->dist > carvingDistance)
-            continue;
-
-        if (_tetraAlgo == nullptr) {
-            _tetraAlgo = cInfo->tetraAlgo;
-            topoCon = _tetraAlgo->getTopologyContainer();
-        }
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-
-        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle & tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-
-        if (tetraAT.size() != 1)
-        {
-            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-            continue;
-        }
-
-        layer2_tetra.push_back(tetraAT[0]);
-        triInfo.push_back(cInfo);
-
-        const sofa::core::topology::Triangle& tri = cInfo->tetraAlgo->getTopologyContainer()->getTriangle(cInfo->elemId);
-        for (unsigned int i = 0; i < 3; ++i)
-        {
-            const core::topology::BaseMeshTopology::TetrahedraAroundVertex & tetraAV = topoCon->getTetrahedraAroundVertex(tri[i]);
-            for (auto tetraID : tetraAV) {
-                surrounding_tetra.insert(tetraID);
-            }
-        }
-    }
-
-
-    // nothing todo
-    if (surrounding_tetra.empty())
-        return false;
-
-    if (m_forceFeedback)
-        m_forceFeedback->setLock(true);
-    
-
-    // get write accessor to the position
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
-    topoCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<DataTypes::VecCoord> > pos = meca->write(core::VecCoordId::position());
-
-    // compute tetra barycenters
-    sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>::SPtr topoGeo = _tetraAlgo->getTopologyGeometry();
-    std::map<unsigned int, DataTypes::Coord> barycenter;
-    for (auto tetraID : layer1_tetra)
-    {
-        if (barycenter.find(tetraID) != barycenter.end()) // already in
-            continue;
-
-        const Tetrahedron& t = topoCon->getTetrahedron(tetraID);
-
-        DataTypes::Coord bary = (pos[t[0]] + pos[t[1]] + pos[t[2]] + pos[t[3]]) * (Real) 0.25;
-        barycenter[tetraID] = bary;
-    }
-    
-
-    // move point to the center of their barycenters
-    //std::cout << "--------------" << std::endl;
-    m_topoCon = topoCon;
-    m_tetra2remove.clear();
-    SReal carveFactor = d_carvingSpeed.getValue();
-
-    // reduce touched tetra
-    for (unsigned int i = 0; i<layer2_tetra.size(); ++i)
-    {
-        sofa::core::topology::Topology::Tetrahedron tetra = topoCon->getTetrahedron(layer2_tetra[i]);
-        sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(triInfo[i]->elemId);
-        unsigned int pId = sofa::core::topology::Topology::InvalidID;
-        for (unsigned int i = 0; i < 4; i++)
-        {
-            bool found = false;
-            for (unsigned int j = 0; j < 3; j++)
-                if (tetra[i] == tri[j])
-                {
-                    found = true;
-                    break;
-                }
-
-            if (!found) {
-                pId = tetra[i];
-                break;
-            }
-        }
-
-        if (pId == sofa::core::topology::Topology::InvalidID)
-        {
-            msg_error() << "Point id not found in tetra: " << tetra << "and triangle: " << tri;
-            continue;
-        }
-
-        DataTypes::Coord posOppo = pos[pId];
-        for (auto vId : tri)
-        {
-            //pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor;
-            pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor - triInfo[i]->normal * carveFactor *0.5;
-        }
-    }
-
-
-
-    for (auto it : layer1_tetraAV)
-    {
-        DataTypes::Coord bbary;
-        for (auto tetraID : it.second)
-        {
-            auto itB = barycenter.find(tetraID);
-            if (itB == barycenter.end())
-            {
-                msg_error() << "barycenter not found for tetra: " << tetraID;
-                continue;
-            }
-            bbary += itB->second;
-        }
-
-        bbary /= it.second.size();
-        double dist = (bbary - pos[it.first]).norm2();
-        auto itM = contactInfoMap.find(it.first);
-        if (itM == contactInfoMap.end())
-        {
-            msg_error() << "point not found in contact map: " << it.first;
-            continue;
-        }
-
-        if (dist < 0.01)
-        {
-            std::cout << "dist: " << dist << std::endl;
-            
-            // compute direction from tool to point to move
-
-            DataTypes::Coord pointProjection = DataTypes::Coord(0.0, 0.0, 0.0);
-            pointProjection = pos[it.first] + itM->second->normal/* * itM->second->dist*/;
-            pos[it.first] = pos[it.first] * (1 - carveFactor) + (pointProjection)* carveFactor*0.5;
-        }
-        else
-        {
-            pos[it.first] = pos[it.first] * (1 - carveFactor) + (bbary)* carveFactor + (itM->second->normal)* carveFactor*0.5;
-        }
-        
-       
-        //int fac = int(std::round(it.second.size() / 3));
-
-        //bbary += pointProjection * fac;
-        //bbary /= it.second.size();
-
-        //pointProjection = (1 - factorN*2) * bbary + factorN*2 * pointProjection;
-        //bbary /= (it.second.size() + fac);
-        //std::cout << "- final: " << pointProjection << " -> " << pos[it.first] * (1 - carveFactor) + (pointProjection)* carveFactor << std::endl;
-        
-        //std::cout << "- bef: idV: " << it.first << " = " << pos[it.first] << " | bary: " << pointProjection  << std::endl;
-        //pos[it.first] = pos[it.first] * (1 - carveFactor) + (bbary) * carveFactor /*- triInfo[i]->normal * carveFactor*/;
-        //std::cout << "- after idV: " << it.first << " = " << pos[it.first] << std::endl;
-
-        m_contactPoints.push_back(pos[it.first]);
-        m_contactPoints.push_back(bbary);
-    }
-
-
-   
-
-
-    // check tetra size to remove them
-    std::set<unsigned int> layer_tetra_toRemove;
-    SReal minVolume = d_carvingCriteria.getValue();
-    for (auto tetraId : surrounding_tetra)
-    {        
-        SReal volume = topoGeo->computeTetrahedronVolume(tetraId);
-
-        if (volume < minVolume) {
-            layer_tetra_toRemove.insert(tetraId);
-        }
-
-        bool goodT = topoGeo->checkTetrahedronValidity(tetraId);
-        if (!goodT)
-            layer_tetra_toRemove.insert(tetraId);
-    }
-
-    if (!layer_tetra_toRemove.empty())
-    {
-        //std::cout << "--- START Tetra removed: " << layer_tetra_toRemove.size() << std::endl;
-        _tetraAlgo->removeTetrahedra(layer_tetra_toRemove);
-        //std::cout << "--- Tetra removed: " << layer_tetra_toRemove.size() << std::endl;
-    }
-
-    if (m_forceFeedback)
-        m_forceFeedback->setLock(false);
-
-    return true;
-}
-
-
-bool AdvanceCarvingManager::doMoveCarve()
-{
-    // compute the list of tetra touched by the touched triangles
-    const Real& carvingDistance = d_carvingDistance.getValue();
-    sofa::type::vector<unsigned int> layer1_tetra;
-    std::set <BaseMeshTopology::TetrahedronID> layer2_tetra;
-    sofa::type::vector<contactInfo*> triInfo;
-    sofa::type::vector<contactInfo*> pointInfo;
-    std::list<unsigned int> idsP;
-
-    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon;
-
-    for each (contactInfo* cInfo in m_triangleContacts)
-    {
-        if (cInfo->dist > carvingDistance)
-            continue;
-
-        if (_tetraAlgo == nullptr) {
-            _tetraAlgo = cInfo->tetraAlgo;
-            topoCon = _tetraAlgo->getTopologyContainer();
-        }
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-         
-        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle & tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-
-        if (tetraAT.size() != 1)
-        {
-            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-            continue;
-        }
-
-        layer1_tetra.push_back(tetraAT[0]);
-        layer2_tetra.insert(tetraAT[0]);
-        triInfo.push_back(cInfo);
-
-        const sofa::core::topology::Triangle& tri = cInfo->tetraAlgo->getTopologyContainer()->getTriangle(cInfo->elemId);
-        for (unsigned int i = 0; i < 3; ++i)
-            idsP.push_back(tri[i]);
-    }
-
-    for each (contactInfo* cInfo in m_pointContacts)
-    {
-        if (cInfo->dist > carvingDistance)
-            continue;
-
-        bool found = false;
-        for (auto idP : idsP)
-        {
-            if (idP == cInfo->elemId)
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if (found)
-            continue;
-
-        if (_tetraAlgo == nullptr) {
-            _tetraAlgo = cInfo->tetraAlgo;
-            topoCon = _tetraAlgo->getTopologyContainer();
-        }
-        else if (_tetraAlgo != cInfo->tetraAlgo)
-        {
-            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-            continue;
-        }
-
-        const core::topology::BaseMeshTopology::TetrahedraAroundVertex & tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-
-        for (auto tetraID : tetraAV)
-            layer2_tetra.insert(tetraID);
-
-        pointInfo.push_back(cInfo);
-    }
-
-
-    if (pointInfo.empty() && triInfo.empty())
-        return false;
-
-    // get write accessor to the position
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
-    topoCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<DataTypes::VecCoord> > pos = meca->write(core::VecCoordId::position());
-
-    SReal carveFactor = d_carvingSpeed.getValue();
-    // reduce touched tetra
-    for (unsigned int i = 0; i<layer1_tetra.size(); ++i)
-    {
-        sofa::core::topology::Topology::Tetrahedron tetra = topoCon->getTetrahedron(layer1_tetra[i]);
-        sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(triInfo[i]->elemId);
-        unsigned int pId = sofa::core::topology::Topology::InvalidID;
-        for (unsigned int i = 0; i < 4; i++)
-        {
-            bool found = false;
-            for (unsigned int j = 0; j < 3; j++)
-                if (tetra[i] == tri[j])
-                {
-                    found = true;
-                    break;
-                }
-
-            if (!found) {
-                pId = tetra[i];
-                break;
-            }
-        }
-
-        if (pId == sofa::core::topology::Topology::InvalidID)
-        {
-            msg_error() << "Point id not found in tetra: " << tetra << "and triangle: " << tri;
-            continue;
-        }
-
-        DataTypes::Coord posOppo = pos[pId];
-        for (auto vId : tri)
-        {
-            //pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * factor1;
-            pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor -triInfo[i]->normal * carveFactor;
-        }
-    }
-
-
-    
-    for (unsigned int i = 0; i < pointInfo.size(); ++i)
-    {
-        
-        unsigned int idP = pointInfo[i]->elemId;
-        pos[idP] = pos[idP] + pointInfo[i]->normal * carveFactor;
-    }
-
-
-    sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>::SPtr topoGeo;
-    topoGeo = topoCon->getContext()->get<sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>>();
-
-
-    // check tetra size to remove them
-    std::set<unsigned int> layer_tetra_toRemove;
-    SReal minVolume = d_carvingCriteria.getValue();
-    for (auto tetraId : layer2_tetra)
-    {
-        SReal volume = topoGeo->computeTetrahedronVolume(tetraId);
-        
-        if (volume < minVolume) {
-            layer_tetra_toRemove.insert(tetraId);
-        }
-
-        bool goodT = topoGeo->checkTetrahedronValidity(tetraId);
-        if (!goodT)
-            layer_tetra_toRemove.insert(tetraId);
-    }
-
-    if (!layer_tetra_toRemove.empty())
-    {
-       _tetraAlgo->removeTetrahedra(layer_tetra_toRemove);
-    }
-    
-    return true;
+    //if (m_triangleContacts.empty() && m_pointContacts.empty())
+    //    return;
+
+    //m_topoCon = nullptr;
+    //bool resRef = doRefinement();    
+    //if (resRef == false) // no refinement at this step, carve
+    //    doMoveCarve();
+    //    //doMoveCarvePoint();
 }
 
 
 
-
-void AdvanceCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
+void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
     if (!m_carvingReady)
         return;
 
     if (simulation::AnimateEndEvent::checkEventType(event))
     {
-        //clearContacts();
-        //if (d_active.getValue())
         filterCollision();
-        /*
-        if (m_toolCollisionModel)
-        {
-            core::behavior::BaseMechanicalState* state = m_toolCollisionModel->getContext()->getMechanicalState();
-            if(state->getSize() > 0)
-                m_toolPosition = Vector3(state->getPX(1), state->getPY(1), state->getPZ(1));
-            //std::cout << "handleEvent: " << state->getSize() << std::endl;
-            //std::cout << "handleEvent: " << state->getPX(0) << " - " << state->getPY(0) << " - " << state->getPZ(0) << std::endl;
-            //if (dynamic_cast<core::behavior::MechanicalState<TDataTypes>*>(context->getMechanicalState())
-        }
-        */
     }
     else if (sofa::core::objectmodel::HapticDeviceEvent * ev = dynamic_cast<sofa::core::objectmodel::HapticDeviceEvent *>(event))
     {
@@ -820,7 +304,7 @@ void AdvanceCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
     }
 }
 
-void AdvanceCarvingManager::draw(const core::visual::VisualParams* vparams)
+void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
 {
     return;
     if (!m_carvingReady)

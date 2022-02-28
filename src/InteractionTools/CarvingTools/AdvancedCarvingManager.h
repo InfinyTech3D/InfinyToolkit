@@ -42,19 +42,22 @@ namespace sofa::component::collision
     };
 
 /**
-* The AdvanceCarvingManager class will perform topological resection on a triangle surface (could be on top of tetrahedron topology)
+* The AdvancedCarvingManager class will perform topological resection on a triangle surface (could be on top of tetrahedron topology)
 * The tool performing the carving need to be represented by a collision model @sa toolCollisionModel
 * The surface to be carved are also mapped on collision models @sa surfaceCollisionModels
 * Detecting the collision is done using the scene Intersection and NarrowPhaseDetection pipeline.
 */
-class SOFA_INTERACTIONTOOLS_API AdvanceCarvingManager : public core::behavior::BaseController
+class SOFA_INTERACTIONTOOLS_API AdvancedCarvingManager : public core::behavior::BaseController
 {
 public:
-    SOFA_CLASS(AdvanceCarvingManager,sofa::core::behavior::BaseController);
+    SOFA_CLASS(AdvancedCarvingManager,sofa::core::behavior::BaseController);
 
     typedef defaulttype::Vec3Types DataTypes;
     typedef DataTypes::Coord Coord;
     typedef DataTypes::Real Real;
+
+    using ToolCollisionModel = sofa::core::CollisionModel;
+    using SurfaceCollisionModel = sofa::core::CollisionModel;
 
     typedef type::vector<core::collision::DetectionOutput> ContactVector;
 
@@ -72,16 +75,10 @@ public:
 
 protected:
     /// Default constructor
-    AdvanceCarvingManager();
+    AdvancedCarvingManager();
 
     /// Default destructor
-    ~AdvanceCarvingManager() override;
-
-    bool doRefinement();
-
-    bool doMoveCarve();
-
-    bool doMoveCarvePoint();
+    ~AdvancedCarvingManager() override;
 
     void processCollision();
 
@@ -115,10 +112,12 @@ public:
 protected:
     std::mutex lockContraints;
     /// Pointer to the tool collision model
-    core::CollisionModel* m_toolCollisionModel;
+    ToolCollisionModel* m_toolCollisionModel;
 
     // Pointer to the target object collision model
-    std::vector<core::CollisionModel*> m_surfaceCollisionModels;
+    std::vector<SurfaceCollisionModel*> m_surfaceCollisionModels;
+    
+    
     std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
     TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
