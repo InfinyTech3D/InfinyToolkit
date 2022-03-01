@@ -18,7 +18,7 @@ namespace sofa::component::controller
 class SOFA_INTERACTIONTOOLS_API RefineCarvingPerformer : public BaseCarvingPerformer
 {
 public:
-	RefineCarvingPerformer();
+	RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance);
 
 	virtual ~RefineCarvingPerformer();
 
@@ -26,6 +26,7 @@ public:
 
 	bool runPerformer() override;
 
+	void draw(const core::visual::VisualParams* vparams) override {}
 
 protected:
 	std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;

@@ -10,6 +10,8 @@
 
 #include <InteractionTools/config.h>
 #include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
+
 #include <sofa/type/Vec.h>
 
 #include <sofa/core/behavior/MechanicalState.h>
@@ -32,19 +34,8 @@ namespace sofa::component::collision
 {
 
 using namespace sofa::type;
-
-class contactInfo
-{
-public:
-    unsigned int elemId; // in global mesh
-    Vector3 pointA;
-    Vector3 pointB;
-    Vector3 normal;
-    double dist;
-    //TetrahedronRefinementAlgorithms* tetraAlgo;
-    sofa::core::topology::BaseMeshTopology* topo;
-};
-
+using namespace sofa::component::controller;
+using namespace sofa::core::topology;
 
 /**
 * The AdvancedCarvingManager class will perform topological resection on a triangle surface (could be on top of tetrahedron topology)
@@ -121,14 +112,7 @@ private:
     // Bool to store the information if component has well be init and can be used.
     bool m_carvingReady = false;
 
-    Vector3 m_toolPosition;
-
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
-    
-    /// List of triangle contacts filter during collision 
-    sofa::type::vector<contactInfo*> m_triangleContacts;
-    /// List of point contacts filter during collision 
-    sofa::type::vector<contactInfo*> m_pointContacts;
 };
 
 } // namespace sofa::component::collision

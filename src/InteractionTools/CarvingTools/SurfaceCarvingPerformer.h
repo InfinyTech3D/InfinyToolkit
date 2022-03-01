@@ -12,17 +12,24 @@
 
 namespace sofa::component::controller
 {
+using namespace sofa::core::topology;
 
 class SOFA_INTERACTIONTOOLS_API SurfaceCarvingPerformer : public BaseCarvingPerformer
 {
 public:
-	SurfaceCarvingPerformer();
+	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance);
 
 	virtual ~SurfaceCarvingPerformer() = default;
 
 	bool initPerformer() override;
 
 	bool runPerformer() override;
+
+	void draw(const core::visual::VisualParams* vparams) override;
+
+private:
+	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2refine;
+	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2remove;
 };
 					
 } // namespace sofa::component::controller

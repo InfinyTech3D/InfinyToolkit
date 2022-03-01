@@ -12,8 +12,8 @@
 namespace sofa::component::controller
 {
 
-RefineCarvingPerformer::RefineCarvingPerformer()
-    : BaseCarvingPerformer()
+RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance)
+    : BaseCarvingPerformer(topo, carvingDistance, refineDistance)
     , m_tetraAlgo(nullptr)
 {
 

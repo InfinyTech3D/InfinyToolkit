@@ -23,7 +23,6 @@
 #include <sofa/helper/AdvancedTimer.h>
 
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
-#include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 
 #include <SofaBaseTopology/TopologyData.inl>
@@ -60,7 +59,12 @@ AdvancedCarvingManager::AdvancedCarvingManager()
 
 AdvancedCarvingManager::~AdvancedCarvingManager()
 {
-    
+    for (unsigned int i = 0; i < m_carvingPerformer.size(); i++)
+    {
+        delete m_carvingPerformer[i];
+        m_carvingPerformer[i] = nullptr;
+    }
+    m_carvingPerformer.clear();
 }
 
 
@@ -103,24 +107,55 @@ void AdvancedCarvingManager::bwdInit()
         msg_error() << "AdvancedCarvingManager: initialisation failed.";
         return;
     }
+
+    for (auto surfCol : m_surfaceCollisionModels)
+    {
+        // check if mapping is present
+        sofa::core::topology::TopologicalMapping* topoMapping;
+        surfCol->getContext()->get(topoMapping);
+
+        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topo = nullptr;
+        if (topoMapping != nullptr)
+        {
+            topo = dynamic_cast<sofa::component::topology::TetrahedronSetTopologyContainer*> (topoMapping->getFrom());
+        }
+        else
+            topo = dynamic_cast<sofa::component::topology::TetrahedronSetTopologyContainer*> (surfCol->getCollisionTopology());
+
+        if (topo == nullptr)
+        {
+            msg_error() << "m_surfaceCollisionModels: " << surfCol->getName() << " doesn't have a TetrahedronSetTopologyContainer. No carving will be performed";
+            continue;
+        }
+        
+        bool alreadyRegistered = false;
+        for (auto carvingPerformer : m_carvingPerformer)
+        {
+            if (carvingPerformer->getTopology() == topo)
+            {
+                alreadyRegistered = true;
+                break;
+            }
+        }
+
+        if (!alreadyRegistered)
+            m_carvingPerformer.push_back(new SurfaceCarvingPerformer(topo, d_carvingDistance.getValue(), d_refineDistance.getValue()));
+    }
+
+
+    for (auto carvingPerformer : m_carvingPerformer)
+    {
+        carvingPerformer->initPerformer();
+    }
 }
 
 
 void AdvancedCarvingManager::clearContacts()
 {
-    for (unsigned int i = 0; i < m_triangleContacts.size(); i++)
+    for (auto carvingPerformer : m_carvingPerformer)
     {
-        delete m_triangleContacts[i];
-        m_triangleContacts[i] = nullptr;
+        carvingPerformer->clearContacts();
     }
-    m_triangleContacts.clear();
-
-    for (unsigned int i = 0; i < m_pointContacts.size(); i++)
-    {
-        delete m_pointContacts[i];
-        m_pointContacts[i] = nullptr;
-    }
-    m_pointContacts.clear();
 }
 
 
@@ -188,6 +223,26 @@ void AdvancedCarvingManager::filterCollision()
         // check if mapping is present
         sofa::core::topology::TopologicalMapping* topoMapping;
         targetModel->getContext()->get(topoMapping);
+
+        auto currentTopo = targetModel->getCollisionTopology();
+        if (topoMapping != nullptr)
+            currentTopo = topoMapping->getFrom();
+
+        BaseCarvingPerformer* performer = nullptr;
+        for (auto carvingPerformer : m_carvingPerformer)
+        {
+            if (carvingPerformer->getTopology() == currentTopo)
+            {
+                performer = carvingPerformer;
+                break;
+            }
+        }
+
+        if (performer == nullptr)
+        {
+            msg_warning() << "CarvingPerformer topology not found";
+            continue;
+        }
         
         for (size_t j = 0; j < ncontacts; ++j)
         {
@@ -200,11 +255,7 @@ void AdvancedCarvingManager::filterCollision()
             if (mode == 0 && topoMapping != nullptr)
             {
                 elemIdx = topoMapping->getGlobIndex(elemIdx);
-                info->topo = topoMapping->getFrom();
             }
-            else
-                info->topo = targetModel->getCollisionTopology();
-
             
             info->elemId = elemIdx;
             info->normal = c.normal;
@@ -213,16 +264,25 @@ void AdvancedCarvingManager::filterCollision()
             info->dist = c.value;
 
             if (mode == 0)
-                m_triangleContacts.push_back(info);
+                performer->m_triangleContacts.push_back(info);
             else if (mode == 1)
-                m_pointContacts.push_back(info);
+                performer->m_pointContacts.push_back(info);
         }
         
         // process the collision
     }
+
     lockConstraints.unlock();
-    //if (d_active.getValue())
-      //  processCollision();
+
+
+    if (d_active.getValue())
+    {
+        for (auto carvingPerformer : m_carvingPerformer)
+        {
+            carvingPerformer->runPerformer();
+        }
+    }
+    
 }
 
 
@@ -276,54 +336,9 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
     if (!d_drawContacts.getValue())
         return;
 
-    if (!m_triangleContacts.empty())
+    for (auto carvingPerformer : m_carvingPerformer)
     {
-        const SReal& carvingDistance = d_carvingDistance.getValue();
-        const SReal& refineDistance = d_refineDistance.getValue();
-
-        for each (contactInfo* cInfo in m_triangleContacts)
-        {
-            std::vector<Vector3> pos;
-
-            sofa::core::topology::BaseMeshTopology* topoCon = cInfo->topo;
-            sofa::core::behavior::BaseMechanicalState* mstate = topoCon->getContext()->getMechanicalState();
-            sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(cInfo->elemId);
-
-            for (unsigned int j = 0; j < 3; j++) {
-                pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
-            }
-
-            sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < carvingDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < refineDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
-            
-            vparams->drawTool()->drawTriangle(pos[0], pos[1], pos[2], cInfo->normal, color4);
-        }
-    }
-
-    if (!m_pointContacts.empty())
-    {
-        const SReal& carvingDistance = d_carvingDistance.getValue();
-        const SReal& refineDistance = d_refineDistance.getValue();
-
-        for each (contactInfo* cInfo in m_pointContacts)
-        {
-            std::vector<Vector3> pos;
-            sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < carvingDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < refineDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);            
-
-            vparams->drawTool()->drawSphere(cInfo->pointB, 0.05f, color4);
-            vparams->drawTool()->drawLine(cInfo->pointB, cInfo->pointB + cInfo->normal, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
-        }
-
-        contactInfo* cInfo = m_pointContacts[0];
-        vparams->drawTool()->drawSphere(cInfo->pointA, refineDistance, sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
-        vparams->drawTool()->drawSphere(cInfo->pointA, carvingDistance, sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
+        carvingPerformer->draw(vparams);
     }
 }
 

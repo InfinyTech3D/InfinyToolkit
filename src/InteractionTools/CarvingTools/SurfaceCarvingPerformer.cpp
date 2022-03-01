@@ -8,27 +8,90 @@
  ****************************************************************************/
 
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
+#include <sofa/core/behavior/BaseMechanicalState.h>
 
 namespace sofa::component::controller
 {
 
-SurfaceCarvingPerformer::SurfaceCarvingPerformer()
-    : BaseCarvingPerformer()
+SurfaceCarvingPerformer::SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance)
+    : BaseCarvingPerformer(topo, carvingDistance, refineDistance)
 {
 
 }
 
 bool SurfaceCarvingPerformer::initPerformer()
 {
+    std::cout << "SurfaceCarvingPerformer::initPerformer: " << m_topologyCon->getName() << std::endl;
     return true;
 }
 
 bool SurfaceCarvingPerformer::runPerformer()
 {
+    m_tetraId2remove.clear();
+    m_tetraId2refine.clear();
+
+    // Filter tetra
+    for each (contactInfo * cInfo in m_pointContacts)
+    {
+        if (cInfo->dist > m_refineDistance)
+            continue;
+
+        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
+        bool toFilter = false;
+        if (cInfo->dist < m_carvingDistance)
+        {
+            for (auto tetraID : tetraAV)
+                m_tetraId2remove.insert(tetraID);
+        }
+        else
+        {
+            for (auto tetraID : tetraAV)
+            {
+                if (m_tetraId2remove.find(tetraID) != m_tetraId2remove.end())
+                    continue;
+                    
+                m_tetraId2refine.insert(tetraID);
+            }
+        }
+    }
+
     return true;
 }
 
+void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
+{
+    BaseCarvingPerformer::draw(vparams);
 
+    if (!m_tetraId2remove.empty())
+    {
+        std::vector<Vector3> pos;
+        sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
+
+        for (auto tetraId : m_tetraId2remove)
+        {
+            const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
+            for (unsigned int k = 0; k < 4; ++k)
+                pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
+
+            vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 1.0), 0.7f);
+        }
+    }
+
+    if (!m_tetraId2refine.empty())
+    {
+        std::vector<Vector3> pos;
+        sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
+
+        for (auto tetraId : m_tetraId2refine)
+        {
+            const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
+            for (unsigned int k = 0; k < 4; ++k)
+                pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
+
+            vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0), 0.7f);
+        }
+    }
+}
 
 //bool AdvancedCarvingManager::doMoveCarvePoint()
 //{
@@ -270,8 +333,11 @@ bool SurfaceCarvingPerformer::runPerformer()
 //
 //    return true;
 //}
-//
-//
+
+
+
+
+
 //bool AdvancedCarvingManager::doMoveCarve()
 //{
 //    // compute the list of tetra touched by the touched triangles
