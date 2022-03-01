@@ -151,9 +151,13 @@ void AdvancedCarvingManager::filterCollision()
 
         // get the good collision contact
         if (collMod1 == m_toolCollisionModel && collMod2->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
+        {
             targetModel = collMod2;
+        }
         else if (collMod2 == m_toolCollisionModel && collMod1->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
+        {
             targetModel = collMod1;
+        }
         else
             continue;
 
@@ -191,16 +195,22 @@ void AdvancedCarvingManager::filterCollision()
             int elemIdx = (c.elem.first.getCollisionModel() == m_toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
 
             // update the triangle id if a mapping is present
-            if (mode == 0 && topoMapping != nullptr)
-                elemIdx = topoMapping->getGlobIndex(elemIdx);
-
             contactInfo* info = new contactInfo();
+            
+            if (mode == 0 && topoMapping != nullptr)
+            {
+                elemIdx = topoMapping->getGlobIndex(elemIdx);
+                info->topo = topoMapping->getFrom();
+            }
+            else
+                info->topo = targetModel->getCollisionTopology();
+
+            
             info->elemId = elemIdx;
             info->normal = c.normal;
             info->pointA = c.point[0];
             info->pointB = c.point[1];
             info->dist = c.value;
-            info->topo = targetModel->getCollisionTopology();
 
             if (mode == 0)
                 m_triangleContacts.push_back(info);
@@ -208,7 +218,7 @@ void AdvancedCarvingManager::filterCollision()
                 m_pointContacts.push_back(info);
         }
         
-        // process the collision               
+        // process the collision
     }
     lockConstraints.unlock();
     //if (d_active.getValue())
@@ -260,7 +270,6 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
 
 void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
 {
-    return;
     if (!m_carvingReady)
         return;
 
@@ -271,7 +280,7 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
     {
         const SReal& carvingDistance = d_carvingDistance.getValue();
         const SReal& refineDistance = d_refineDistance.getValue();
-        
+
         for each (contactInfo* cInfo in m_triangleContacts)
         {
             std::vector<Vector3> pos;
@@ -291,7 +300,7 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
                 color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
             
             vparams->drawTool()->drawTriangle(pos[0], pos[1], pos[2], cInfo->normal, color4);
-        }        
+        }
     }
 
     if (!m_pointContacts.empty())
@@ -306,11 +315,15 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
             if (cInfo->dist < carvingDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
             else if (cInfo->dist < refineDistance)
-                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
+                color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);            
 
             vparams->drawTool()->drawSphere(cInfo->pointB, 0.05f, color4);
             vparams->drawTool()->drawLine(cInfo->pointB, cInfo->pointB + cInfo->normal, sofa::type::RGBAColor(1.0, 0.0, 1.0f, 1.0));
         }
+
+        contactInfo* cInfo = m_pointContacts[0];
+        vparams->drawTool()->drawSphere(cInfo->pointA, refineDistance, sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
+        vparams->drawTool()->drawSphere(cInfo->pointA, carvingDistance, sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
     }
 }
 

@@ -121,6 +121,8 @@ private:
     // Bool to store the information if component has well be init and can be used.
     bool m_carvingReady = false;
 
+    Vector3 m_toolPosition;
+
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
     
     /// List of triangle contacts filter during collision 
