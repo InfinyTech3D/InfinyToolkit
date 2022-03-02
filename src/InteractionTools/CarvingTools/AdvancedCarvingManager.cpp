@@ -274,6 +274,11 @@ void AdvancedCarvingManager::filterCollision()
 
     lockConstraints.unlock();
 
+    for (auto carvingPerformer : m_carvingPerformer)
+    {
+        carvingPerformer->filterContacts();
+    }
+
 
     if (d_active.getValue())
     {
@@ -281,6 +286,7 @@ void AdvancedCarvingManager::filterCollision()
         {
             carvingPerformer->runPerformer();
         }
+        d_active.setValue(false);
     }
     
 }
@@ -315,17 +321,14 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
         else if (ev->getButtonState() == 0) d_active.setValue(false);
     }
 
-    //if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
-    //{
-    //    if (ev->getKey() == 'C')
-    //    {
-    //        for (auto itm : m_tetraAlgos)
-    //        {
-    //            const sofa::type::vector <sofa::core::topology::Topology::TetraID>& tetraIds = itm.second->getTopologyGeometry()->computeBadTetrahedron();
-    //            std::cout << "Bad tetra Nb: " << tetraIds.size() << std::endl;
-    //        }
-    //    }
-    //}
+    if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
+    {
+        if (ev->getKey() == 'C')
+        {
+            std::cout << "Burn, baby burn!" << std::endl;
+            d_active.setValue(true);
+        }
+    }
 }
 
 void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)

@@ -9,6 +9,7 @@
 
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
+#include <SofaBaseMechanics/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
@@ -19,41 +20,61 @@ SurfaceCarvingPerformer::SurfaceCarvingPerformer(TetrahedronSetTopologyContainer
 
 }
 
+
 bool SurfaceCarvingPerformer::initPerformer()
 {
     std::cout << "SurfaceCarvingPerformer::initPerformer: " << m_topologyCon->getName() << std::endl;
     return true;
 }
 
-bool SurfaceCarvingPerformer::runPerformer()
+
+void SurfaceCarvingPerformer::filterContacts()
 {
     m_tetraId2remove.clear();
     m_tetraId2refine.clear();
 
+    sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
+
     // Filter tetra
     for each (contactInfo * cInfo in m_pointContacts)
     {
-        if (cInfo->dist > m_refineDistance)
+        if (cInfo->dist > m_carvingDistance) // only carving points
             continue;
 
         const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
-        bool toFilter = false;
-        if (cInfo->dist < m_carvingDistance)
+        for (auto tetraID : tetraAV)
         {
-            for (auto tetraID : tetraAV)
-                m_tetraId2remove.insert(tetraID);
-        }
-        else
-        {
-            for (auto tetraID : tetraAV)
+            m_tetraId2remove.insert(tetraID);
+
+            if (m_baryMap.find(tetraID) != m_baryMap.end()) // already in
+                continue;
+
+            const BaseMeshTopology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraID);
+
+            Vec3 bary = Vec3(0, 0, 0);
+            for (unsigned int k = 0; k < 4; ++k)
             {
-                if (m_tetraId2remove.find(tetraID) != m_tetraId2remove.end())
-                    continue;
-                    
-                m_tetraId2refine.insert(tetraID);
+                bary[0] += mstate->getPX(tetra[k]);
+                bary[1] += mstate->getPY(tetra[k]);
+                bary[2] += mstate->getPZ(tetra[k]);
             }
+            bary *= 0.25;
+
+            m_baryMap[tetraID] = bary;
         }
     }
+
+    
+
+}
+
+
+bool SurfaceCarvingPerformer::runPerformer()
+{
+    std::cout << "SurfaceCarvingPerformer::runPerformer" << std::endl;
+    //doMoveCarve1();
+
+    doMoveCarve2();
 
     return true;
 }
@@ -93,155 +114,151 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
     }
 }
 
+
+void SurfaceCarvingPerformer::doMoveCarve1()
+{
+    SReal carveFactor = 0.1f; // d_carvingSpeed.getValue();
+    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    m_topologyCon->getContext()->get(meca);
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+
+    std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
+    std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
+
+    SReal carv2x3 = m_carvingDistance * m_carvingDistance * 4;
+    SReal invCarv2x3 = 1 / carv2x3;
+
+    for each (contactInfo * cInfo in m_pointContacts)
+    {
+        if (cInfo->dist > m_carvingDistance) // only carving points
+            continue;
+
+        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
+
+        Vec3 toolPos = cInfo->pointA;
+        for (auto tetraID : tetraAV)
+        {
+            const BaseMeshTopology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraID);
+
+            Vec3 bary = m_baryMap[tetraID];
+            for (unsigned int k = 0; k < 4; ++k)
+            {
+                BaseMeshTopology::PointID vId = tetra[k];
+                Vec3 currentPos = vertices[vId];
+                SReal dist2 = (currentPos - toolPos).norm2();
+
+                SReal coef = 0.0f;
+                if (dist2 < carv2x3)
+                    coef = (1 - dist2 * invCarv2x3) * 0.5;
+                else
+                    continue;
+
+                std::cout << "dist2: " << dist2 << " | coef: " << coef << std::endl;
+
+                Vec3 newPos = currentPos + (bary - currentPos) * coef;
+
+                auto itM = tmpVertices.find(vId);
+                if (itM == tmpVertices.end())
+                {
+                    tmpVertices[vId] = newPos;
+                    coefVertices[vId] = 1;
+                }
+                else
+                {
+                    tmpVertices[vId] += newPos;
+                    coefVertices[vId] += 1;
+                }
+            }
+        }
+    }
+
+    for (auto itM : tmpVertices)
+    {
+        BaseMeshTopology::PointID vId = itM.first;
+        unsigned int nbr = coefVertices[vId];
+        Vec3 value = itM.second / nbr;
+        vertices[vId] = value;
+    }
+}
+
+void SurfaceCarvingPerformer::doMoveCarve2()
+{
+    SReal carveFactor = 1.0f; // d_carvingSpeed.getValue();
+    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    m_topologyCon->getContext()->get(meca);
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > restVertices = meca->write(core::VecCoordId::resetPosition());
+
+    std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
+    std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
+
+    SReal carv2x3 = m_carvingDistance * m_carvingDistance * 4;
+    SReal invCarv2x3 = 1 / carv2x3;
+
+    for each (contactInfo * cInfo in m_pointContacts)
+    {
+        if (cInfo->dist > m_carvingDistance) // only carving points
+            continue;
+
+        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
+
+        Vec3 toolPos = cInfo->pointA;
+        Vec3 dir = cInfo->normal;
+        std::cout << "toolPos: " << toolPos << " | dir: " << dir << " | dist: " << cInfo->dist << std::endl;
+        std::set <BaseMeshTopology::PointID> indices;
+
+        for (auto tetraID : tetraAV)
+        {
+            const BaseMeshTopology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraID);
+            for (unsigned int k = 0; k < 4; ++k)
+            {
+                BaseMeshTopology::PointID vId = tetra[k];
+                indices.insert(vId);
+            }
+        }
+
+        for (auto vId : indices)
+        {
+            Vec3 currentPos = vertices[vId];
+            SReal dist2 = (currentPos - toolPos).norm2();
+
+            SReal coef = 0.0f;
+            if (dist2 < carv2x3)
+                coef = (1 - dist2 * invCarv2x3);
+            else
+                continue;
+
+            std::cout << vId << " | dist2: " << dist2 << " | coef: " << coef << std::endl;
+
+            Vec3 newPos = currentPos + dir * coef * carveFactor;
+
+            auto itM = tmpVertices.find(vId);
+            if (itM == tmpVertices.end())
+            {
+                tmpVertices[vId] = newPos;
+                coefVertices[vId] = 1;
+            }
+            else
+            {
+                tmpVertices[vId] += newPos;
+                coefVertices[vId] += 1;
+            }
+        }
+    }
+
+    for (auto itM : tmpVertices)
+    {
+        BaseMeshTopology::PointID vId = itM.first;
+        unsigned int nbr = coefVertices[vId];
+        Vec3 value = itM.second / nbr;
+        restVertices[vId] = value;
+    }
+}
+
 //bool AdvancedCarvingManager::doMoveCarvePoint()
 //{
-//    const Real& carvingDistance = d_carvingDistance.getValue();
-//    std::map<BaseMeshTopology::PointID, BaseMeshTopology::TetrahedraAroundVertex> layer1_tetraAV;
-//    std::set <BaseMeshTopology::TetrahedronID> layer1_tetra;
-//    std::map<BaseMeshTopology::PointID, contactInfo*> contactInfoMap;
-//
-//    sofa::type::vector<unsigned int> layer2_tetra;
-//    sofa::type::vector<contactInfo*> triInfo;
-//
-//    std::set <BaseMeshTopology::TetrahedronID> surrounding_tetra;
-//
-//    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-//    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon;
-//    for each (contactInfo * cInfo in m_pointContacts)
-//    {
-//        if (cInfo->dist > carvingDistance)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr) {
-//            _tetraAlgo = cInfo->tetraAlgo;
-//            topoCon = _tetraAlgo->getTopologyContainer();
-//        }
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-//
-//        layer1_tetraAV[cInfo->elemId] = tetraAV;
-//        for (auto tetraID : tetraAV) {
-//            layer1_tetra.insert(tetraID);
-//            surrounding_tetra.insert(tetraID);
-//        }
-//
-//        contactInfoMap[cInfo->elemId] = cInfo;
-//    }
 //
 //
-//
-//    for each (contactInfo * cInfo in m_triangleContacts)
-//    {
-//        if (cInfo->dist > carvingDistance)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr) {
-//            _tetraAlgo = cInfo->tetraAlgo;
-//            topoCon = _tetraAlgo->getTopologyContainer();
-//        }
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//
-//        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle& tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-//
-//        if (tetraAT.size() != 1)
-//        {
-//            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        layer2_tetra.push_back(tetraAT[0]);
-//        triInfo.push_back(cInfo);
-//
-//        const sofa::core::topology::Triangle& tri = cInfo->tetraAlgo->getTopologyContainer()->getTriangle(cInfo->elemId);
-//        for (unsigned int i = 0; i < 3; ++i)
-//        {
-//            const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = topoCon->getTetrahedraAroundVertex(tri[i]);
-//            for (auto tetraID : tetraAV) {
-//                surrounding_tetra.insert(tetraID);
-//            }
-//        }
-//    }
-//
-//
-//    // nothing todo
-//    if (surrounding_tetra.empty())
-//        return false;
-//
-//    if (m_forceFeedback)
-//        m_forceFeedback->setLock(true);
-//
-//
-//    // get write accessor to the position
-//    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
-//    topoCon->getContext()->get(meca);
-//    helper::WriteAccessor< Data<DataTypes::VecCoord> > pos = meca->write(core::VecCoordId::position());
-//
-//    // compute tetra barycenters
-//    sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>::SPtr topoGeo = _tetraAlgo->getTopologyGeometry();
-//    std::map<unsigned int, DataTypes::Coord> barycenter;
-//    for (auto tetraID : layer1_tetra)
-//    {
-//        if (barycenter.find(tetraID) != barycenter.end()) // already in
-//            continue;
-//
-//        const Tetrahedron& t = topoCon->getTetrahedron(tetraID);
-//
-//        DataTypes::Coord bary = (pos[t[0]] + pos[t[1]] + pos[t[2]] + pos[t[3]]) * (Real)0.25;
-//        barycenter[tetraID] = bary;
-//    }
-//
-//
-//    // move point to the center of their barycenters
-//    //std::cout << "--------------" << std::endl;
-//    m_topoCon = topoCon;
-//    m_tetra2remove.clear();
-//    SReal carveFactor = d_carvingSpeed.getValue();
-//
-//    // reduce touched tetra
-//    for (unsigned int i = 0; i < layer2_tetra.size(); ++i)
-//    {
-//        sofa::core::topology::Topology::Tetrahedron tetra = topoCon->getTetrahedron(layer2_tetra[i]);
-//        sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(triInfo[i]->elemId);
-//        unsigned int pId = sofa::core::topology::Topology::InvalidID;
-//        for (unsigned int i = 0; i < 4; i++)
-//        {
-//            bool found = false;
-//            for (unsigned int j = 0; j < 3; j++)
-//                if (tetra[i] == tri[j])
-//                {
-//                    found = true;
-//                    break;
-//                }
-//
-//            if (!found) {
-//                pId = tetra[i];
-//                break;
-//            }
-//        }
-//
-//        if (pId == sofa::core::topology::Topology::InvalidID)
-//        {
-//            msg_error() << "Point id not found in tetra: " << tetra << "and triangle: " << tri;
-//            continue;
-//        }
-//
-//        DataTypes::Coord posOppo = pos[pId];
-//        for (auto vId : tri)
-//        {
-//            //pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor;
-//            pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor - triInfo[i]->normal * carveFactor * 0.5;
-//        }
-//    }
 //
 //
 //
@@ -340,142 +357,6 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
 //bool AdvancedCarvingManager::doMoveCarve()
 //{
-//    // compute the list of tetra touched by the touched triangles
-//    const Real& carvingDistance = d_carvingDistance.getValue();
-//    sofa::type::vector<unsigned int> layer1_tetra;
-//    std::set <BaseMeshTopology::TetrahedronID> layer2_tetra;
-//    sofa::type::vector<contactInfo*> triInfo;
-//    sofa::type::vector<contactInfo*> pointInfo;
-//    std::list<unsigned int> idsP;
-//
-//    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-//    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon;
-//
-//    for each (contactInfo * cInfo in m_triangleContacts)
-//    {
-//        if (cInfo->dist > carvingDistance)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr) {
-//            _tetraAlgo = cInfo->tetraAlgo;
-//            topoCon = _tetraAlgo->getTopologyContainer();
-//        }
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//
-//        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle& tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-//
-//        if (tetraAT.size() != 1)
-//        {
-//            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        layer1_tetra.push_back(tetraAT[0]);
-//        layer2_tetra.insert(tetraAT[0]);
-//        triInfo.push_back(cInfo);
-//
-//        const sofa::core::topology::Triangle& tri = cInfo->tetraAlgo->getTopologyContainer()->getTriangle(cInfo->elemId);
-//        for (unsigned int i = 0; i < 3; ++i)
-//            idsP.push_back(tri[i]);
-//    }
-//
-//    for each (contactInfo * cInfo in m_pointContacts)
-//    {
-//        if (cInfo->dist > carvingDistance)
-//            continue;
-//
-//        bool found = false;
-//        for (auto idP : idsP)
-//        {
-//            if (idP == cInfo->elemId)
-//            {
-//                found = true;
-//                break;
-//            }
-//        }
-//
-//        if (found)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr) {
-//            _tetraAlgo = cInfo->tetraAlgo;
-//            topoCon = _tetraAlgo->getTopologyContainer();
-//        }
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-//
-//        for (auto tetraID : tetraAV)
-//            layer2_tetra.insert(tetraID);
-//
-//        pointInfo.push_back(cInfo);
-//    }
-//
-//
-//    if (pointInfo.empty() && triInfo.empty())
-//        return false;
-//
-//    // get write accessor to the position
-//    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
-//    topoCon->getContext()->get(meca);
-//    helper::WriteAccessor< Data<DataTypes::VecCoord> > pos = meca->write(core::VecCoordId::position());
-//
-//    SReal carveFactor = d_carvingSpeed.getValue();
-//    // reduce touched tetra
-//    for (unsigned int i = 0; i < layer1_tetra.size(); ++i)
-//    {
-//        sofa::core::topology::Topology::Tetrahedron tetra = topoCon->getTetrahedron(layer1_tetra[i]);
-//        sofa::core::topology::Topology::Triangle tri = topoCon->getTriangle(triInfo[i]->elemId);
-//        unsigned int pId = sofa::core::topology::Topology::InvalidID;
-//        for (unsigned int i = 0; i < 4; i++)
-//        {
-//            bool found = false;
-//            for (unsigned int j = 0; j < 3; j++)
-//                if (tetra[i] == tri[j])
-//                {
-//                    found = true;
-//                    break;
-//                }
-//
-//            if (!found) {
-//                pId = tetra[i];
-//                break;
-//            }
-//        }
-//
-//        if (pId == sofa::core::topology::Topology::InvalidID)
-//        {
-//            msg_error() << "Point id not found in tetra: " << tetra << "and triangle: " << tri;
-//            continue;
-//        }
-//
-//        DataTypes::Coord posOppo = pos[pId];
-//        for (auto vId : tri)
-//        {
-//            //pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * factor1;
-//            pos[vId] = pos[vId] * (1 - carveFactor) + posOppo * carveFactor - triInfo[i]->normal * carveFactor;
-//        }
-//    }
-//
-//
-//
-//    for (unsigned int i = 0; i < pointInfo.size(); ++i)
-//    {
-//
-//        unsigned int idP = pointInfo[i]->elemId;
-//        pos[idP] = pos[idP] + pointInfo[i]->normal * carveFactor;
-//    }
-//
-//
 //    sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>::SPtr topoGeo;
 //    topoGeo = topoCon->getContext()->get<sofa::component::topology::TetrahedronSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>>();
 //
@@ -503,7 +384,6 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 //
 //    return true;
 //}
-
 
 
 

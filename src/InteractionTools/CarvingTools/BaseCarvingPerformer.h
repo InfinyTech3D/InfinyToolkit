@@ -28,6 +28,7 @@ public:
 namespace sofa::component::controller
 {
     using namespace sofa::component::topology;
+    using namespace sofa::core::topology;
 
 class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer
 {
@@ -40,6 +41,8 @@ public:
     
     virtual bool initPerformer() = 0;
 
+    virtual void filterContacts() {}
+
 	virtual bool runPerformer() = 0;
 
     virtual void draw(const core::visual::VisualParams* vparams);
@@ -50,6 +53,8 @@ public:
     sofa::type::vector<contactInfo*> m_triangleContacts;
     /// List of point contacts filter during collision 
     sofa::type::vector<contactInfo*> m_pointContacts;
+
+    std::map<BaseMeshTopology::TetrahedronID, Vec3> m_baryMap;
 
 protected:
     TetrahedronSetTopologyContainer::SPtr m_topologyCon = nullptr;

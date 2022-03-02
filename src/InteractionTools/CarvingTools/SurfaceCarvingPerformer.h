@@ -23,9 +23,16 @@ public:
 
 	bool initPerformer() override;
 
+	void filterContacts() override;
+
 	bool runPerformer() override;
 
 	void draw(const core::visual::VisualParams* vparams) override;
+
+protected:
+	void doMoveCarve1();
+
+	void doMoveCarve2();
 
 private:
 	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2refine;
