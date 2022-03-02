@@ -386,5 +386,77 @@ void SurfaceCarvingPerformer::doMoveCarve2()
 //}
 
 
+//void SurfaceCarvingManager::doShave_Burr(const ContactVector* contacts)
+//{
+//    //Get Moving Direction of Tool to calculate drilling direction
+//    //Get Shaving Point index in Surface
+//
+//    type::vector<int> ShavingPointIdx = getShavingPointIdx(contacts);
+//
+//    // Deformation
+//    // 1. Find Center point
+//    // 2. Compute Point indices within the range range of center point
+//    // 3. Smoothing - move indices around of unique_SPI 
+//    type::vector<unsigned int> unique_SPI = MoveContactVertex(ShavingPointIdx);
+//
+//    using sofa::core::topology::BaseMeshTopology;
+//    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* mo_coll = NULL;
+//    modelSurface->getContext()->get(mo_coll);
+//    helper::WriteAccessor< Data<VecCoord> > x_wA = mo_coll->write(core::VecCoordId::position());
+//    type::vector<unsigned int>::iterator it;
+//
+//    for (unsigned int n = 0; n < nb_iterations.getValue(); n++)
+//    {
+//        VecCoord t;
+//        t.resize(x_wA.size());
+//        for (unsigned int i = 0; i < x_wA.size(); i++)
+//        {
+//            t[i] = x_wA[i];
+//        }
+//        for (it = unique_SPI.begin(); it != unique_SPI.end(); ++it)
+//        {
+//            BaseMeshTopology::VerticesAroundVertex v1 = modelSurface->getContext()->getMeshTopology()->getVerticesAroundVertex(*it);
+//            if (v1.size() > 0)
+//            {
+//                for (unsigned int k = 0; k < v1.size(); k++)
+//                {
+//                    BaseMeshTopology::VerticesAroundVertex v2 = modelSurface->getContext()->getMeshTopology()->getVerticesAroundVertex(v1[k]);
+//                    unsigned int* tmp_v2 = new unsigned int[v2.size()];
+//
+//                    for (unsigned int j = 0; j < v2.size(); j++)
+//                    {
+//                        tmp_v2[j] = v2[j];
+//                        for (unsigned int l = 0; l < v1.size(); l++)
+//                            if (v2[j] == v1[l])
+//                                tmp_v2[j] = 0;
+//                    }
+//
+//                    std::vector<unsigned int> new_v2(v2.size());
+//                    std::vector<unsigned int>::iterator its;
+//                    its = std::remove_copy_if(tmp_v2, tmp_v2 + v2.size(), new_v2.begin(), equal0);
+//                    new_v2.resize(std::distance(new_v2.begin(), its));
+//
+//                    if (new_v2.size())
+//                    {
+//                        Coord p = Coord();
+//                        for (unsigned int j = 0; j < new_v2.size(); j++)
+//                            p += x_wA[new_v2[j]];
+//                        t[v1[k]] = p / new_v2.size();
+//                    }
+//                    delete[] tmp_v2;
+//                }
+//
+//            }
+//        }
+//
+//        for (unsigned int i = 0; i < x_wA.size(); i++)
+//        {
+//
+//            x_wA[i] = t[i];
+//        }
+//    }
+//}
+
+
 
 } // namespace sofa::component::controller

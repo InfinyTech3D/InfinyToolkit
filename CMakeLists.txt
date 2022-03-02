@@ -28,15 +28,14 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.h
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.h    
     ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.h
-	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.h
-	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.inl
+    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.h
+    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.inl
     
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
 
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.h
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingManager.h
 )
 
 set(SOURCE_FILES
@@ -45,7 +44,7 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.cpp
-	${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
     
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
@@ -53,7 +52,6 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
 
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingManager.cpp
 )
 
 find_package(MeshRefinement QUIET)
