@@ -10,8 +10,6 @@
 
 #include <InteractionTools/config.h>
 #include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
-#include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
-
 #include <sofa/type/Vec.h>
 
 #include <sofa/core/behavior/MechanicalState.h>
@@ -22,6 +20,8 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/core/objectmodel/HapticDeviceEvent.h>
+
+#include <sofa/core/topology/TopologyData.inl>
 
 #include <SofaBaseTopology/TopologyData.h>
 #include <SofaHaptics/ForceFeedback.h>
@@ -52,6 +52,7 @@ public:
     using SurfaceCollisionModel = sofa::core::CollisionModel;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
     using BaseCarvingPerformer = sofa::component::controller::BaseCarvingPerformer;
+    
 
     /// Sofa API init method of the component
     void bwdInit() override;
@@ -72,8 +73,6 @@ protected:
     /// Default destructor
     ~AdvancedCarvingManager() override;
 
-    void processCollision();
-
 public:
     /// Tool model path
     Data < std::string > d_toolModelPath;
@@ -81,19 +80,19 @@ public:
     Data < std::string > d_surfaceModelPath;
 
     Data < bool > d_active;
+    Data < bool > d_carvingWithBurning;
+    Data < bool > d_carvingWithRefinement;
+    
+    
     /// Collision distance at which cavring will start. Equal to contactDistance by default.
     Data < SReal > d_carvingDistance;
     Data < SReal > d_refineDistance;
     Data < SReal > d_refineCriteria;
     Data < SReal > d_carvingSpeed;
     Data < SReal > d_refineThreshold;
-
-
-    Data<sofa::type::vector<unsigned int> > m_testID;
-
-    Data < bool > d_drawTetra;
+    Data<sofa::type::vector<unsigned int> > m_testID;    
+    
     Data < bool > d_drawContacts;
-    Data <float> d_drawScaleTetrahedra; ///< Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)
 
 private:
     /// Mutex to lock constraints for haptic use
@@ -111,6 +110,8 @@ private:
     
     // Bool to store the information if component has well be init and can be used.
     bool m_carvingReady = false;
+    
+    bool m_texCoordsHandling = false;
 
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
 };

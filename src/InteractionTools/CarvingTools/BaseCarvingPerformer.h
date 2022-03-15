@@ -9,6 +9,7 @@
 #pragma once
 
 #include <InteractionTools/config.h>
+#include <sofa/core/objectmodel/BaseObject.h>
 #include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/visual/VisualParams.h>
@@ -30,9 +31,11 @@ namespace sofa::component::controller
     using namespace sofa::component::topology;
     using namespace sofa::core::topology;
 
-class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer
+class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer : public sofa::core::objectmodel::BaseObject
 {
 public:
+    SOFA_CLASS(BaseCarvingPerformer, sofa::core::objectmodel::BaseObject);
+
 	BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance);
 
     ~BaseCarvingPerformer();
