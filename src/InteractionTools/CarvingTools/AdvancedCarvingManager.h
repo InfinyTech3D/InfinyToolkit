@@ -53,6 +53,8 @@ public:
     using ContactVector = type::vector<core::collision::DetectionOutput>;
     using BaseCarvingPerformer = sofa::component::controller::BaseCarvingPerformer;
     
+    using TexCoord = sofa::type::Vec<2, float>;
+    using VecTexCoord = type::vector<TexCoord>;
 
     /// Sofa API init method of the component
     void bwdInit() override;
@@ -92,6 +94,8 @@ public:
     Data < SReal > d_refineThreshold;
     Data<sofa::type::vector<unsigned int> > m_testID;    
     
+    core::topology::PointData< VecTexCoord > m_vtexcoords; ///< coordinates of the texture
+
     Data < bool > d_drawContacts;
 
 private:

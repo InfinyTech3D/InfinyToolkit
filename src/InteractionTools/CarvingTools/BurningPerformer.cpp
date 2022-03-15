@@ -8,16 +8,15 @@
  ****************************************************************************/
 
 #include <InteractionTools/CarvingTools/BurningPerformer.h>
-#include <sofa/core/behavior/BaseMechanicalState.h>
-#include <sofa/core/behavior/BaseMechanicalState.h>
+#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+
 #include <SofaBaseMechanics/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
 
-BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& burningDistance)
-    : BaseCarvingPerformer(topo, burningDistance, burningDistance)
-    , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
+BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
+    : BaseCarvingPerformer(topo, _carvingMgr)
 {
 
 }
@@ -25,17 +24,9 @@ BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, c
 
 bool BurningPerformer::initPerformer()
 {
-    std::cout << "BurningPerformer::initPerformer: " << m_topologyCon->getName() << std::endl;
-
-    //if (m_surfaceCollisionModels.size() != 1)
-    //{
-    //    msg_error() << "textcoord handling is only possible with only one target model for the moment. Found: " << m_surfaceCollisionModels.size();
-    //    m_texCoordsHandling = false;
-    //    return;
-    //}
+    m_carvingMgr->m_vtexcoords.createTopologyHandler(m_topologyCon.get());
     
-    m_vtexcoords.createTopologyHandler(m_topologyCon.get());
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
     texcoords.resize(m_topologyCon->getNbPoints());
 
     return true;
@@ -44,17 +35,18 @@ bool BurningPerformer::initPerformer()
 
 bool BurningPerformer::runPerformer()
 {
-    std::cout << "BurningPerformer::runPerformer" << std::endl;
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
-    SReal invRefDistance = 1 / m_carvingDistance;
+    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
+
+    const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
+    const SReal invRefDistance = 1 / _refineDistance;
 
     for each (contactInfo * cInfo in m_pointContacts)
     {
         SReal dist = (cInfo->pointB - cInfo->pointA).norm();
-        if (dist > m_carvingDistance)
+        if (dist > _refineDistance)
             continue;
 
-        float coef = float((m_carvingDistance - dist) * invRefDistance);
+        float coef = float((_refineDistance - dist) * invRefDistance);
         float& val = texcoords[cInfo->elemId][0];
         if (coef > val)
         {

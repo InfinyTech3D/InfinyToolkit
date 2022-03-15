@@ -8,12 +8,13 @@
  ****************************************************************************/
 
 #include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
+#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
 namespace sofa::component::controller
 {
 
-RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance)
-    : BaseCarvingPerformer(topo, carvingDistance, refineDistance)
+RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
+    : BaseCarvingPerformer(topo, _carvingMgr)
     , m_tetraAlgo(nullptr)
 {
 

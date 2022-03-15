@@ -17,7 +17,7 @@ using namespace sofa::core::topology;
 class SOFA_INTERACTIONTOOLS_API SurfaceCarvingPerformer : public BaseCarvingPerformer
 {
 public:
-	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance);
+	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
 
 	virtual ~SurfaceCarvingPerformer() = default;
 

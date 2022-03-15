@@ -53,6 +53,7 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     , d_carvingSpeed(initData(&d_carvingSpeed, 0.001, "carvingSpeed", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , d_refineThreshold(initData(&d_refineThreshold, 1.0, "refineThreshold", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , m_testID(initData(&m_testID, sofa::type::vector<unsigned int>(), "testID", "Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)"))
+    , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
     , d_drawContacts( initData(&d_drawContacts, false, "drawContacts", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
 {
     this->f_listening.setValue(true);
@@ -140,8 +141,8 @@ void AdvancedCarvingManager::bwdInit()
             }
         }
 
-        if (alreadyRegistered && d_carvingWithBurning.getValue()) {
-            m_carvingPerformer.push_back(new BurningPerformer(topo, d_refineDistance.getValue()));
+        if (!alreadyRegistered && d_carvingWithBurning.getValue()) {
+            m_carvingPerformer.push_back(new BurningPerformer(topo, this));
         }
 
             //if (d_)
