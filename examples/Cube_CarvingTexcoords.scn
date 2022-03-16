@@ -10,7 +10,7 @@
     <RequiredPlugin name="SofaMeshCollision"/> <!-- Needed to use components [PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
     <RequiredPlugin name="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
-    <VisualStyle displayFlags="showCollisionModels hideVisual" />
+    <VisualStyle displayFlags="hideCollisionModels showVisual" />
   
     <DefaultAnimationLoop />
     <DefaultVisualManagerLoop />
@@ -23,8 +23,7 @@
     <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
-    <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="1"/>
+    <AdvancedCarvingManager name="ACarving" active="0" refineDistance="1.0" carvingDistance="0.5" drawContacts="1"/>
 
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
@@ -59,11 +58,11 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="triangleCol" tags="CarvingSurface"/>
+            <TriangleCollisionModel name="triangleCol" />
             <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
-                <OglModel name="Visual" color="green" />
+                <OglModel name="Visual" texcoords="@../../../ACarving.texcoords" texturename="textures/colorMap.png" />
                 <IdentityMapping input="@../../Volume" output="@Visual" />
             </Node>
         </Node>
