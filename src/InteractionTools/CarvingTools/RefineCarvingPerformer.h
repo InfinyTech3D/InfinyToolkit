@@ -24,15 +24,16 @@ public:
 
 	bool initPerformer() override;
 
+	void filterContacts();
+
 	bool runPerformer() override;
 
-	void draw(const core::visual::VisualParams* vparams) override {}
+	void draw(const core::visual::VisualParams* vparams) override;
 
 protected:
-	std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
 	TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
-	//sofa::type::vector<int> m_tetra2remove;
+	sofa::type::vector<unsigned int> m_tetra2remove;
 };
 					
 } // namespace sofa::component::controller
