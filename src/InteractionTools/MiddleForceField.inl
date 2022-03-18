@@ -14,7 +14,7 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/BaseVector.h>
 
-#include <SofaBaseTopology/TopologySubsetData.inl>
+#include <sofa/core/topology/TopologySubsetData.inl>
 
 namespace sofa
 {

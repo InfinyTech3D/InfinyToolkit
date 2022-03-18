@@ -11,20 +11,16 @@
 #include <InteractionTools/config.h>
 #include <sofa/core/DataEngine.h>
 
-namespace sofa
-{
 
-namespace component
-{
-
-namespace topology
+namespace sofa::component::topology::container::dynamic
 {
     class TetrahedronSetTopologyContainer;
 }
 
-namespace engine
+namespace sofa::component::engine
 {
 
+using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
 /** 
 *
 */
@@ -32,6 +28,7 @@ class SOFA_INTERACTIONTOOLS_API PliersPositionsMapper: public sofa::core::DataEn
 {
 public:
     SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
+    
 
 protected:
     PliersPositionsMapper();
@@ -57,7 +54,7 @@ public:
     }
 
 protected:
-	sofa::component::topology::TetrahedronSetTopologyContainer* m_topo;
+	TetrahedronSetTopologyContainer* m_topo;
 
 	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
 	Data<sofa::type::vector<int> > m_tetraTube;
@@ -67,8 +64,4 @@ protected:
 };
 
 
-} // namespace misc
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::engine
