@@ -34,6 +34,8 @@ protected:
 	TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
 	sofa::type::vector<unsigned int> m_tetra2remove;
+
+	Vec3 carvingPosition;
 };
 					
 } // namespace sofa::component::controller
