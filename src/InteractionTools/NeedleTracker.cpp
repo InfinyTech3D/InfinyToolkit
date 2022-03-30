@@ -206,10 +206,10 @@ bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPo
     for (int i = 0; i < triangles.size(); ++i)
     {
         const BaseMeshTopology::Triangle& tri = triangles[i];
-        Vector3 out;
-        Vector3 p0 = Vector3(meca->getPX(tri[0]), meca->getPY(tri[0]), meca->getPZ(tri[0]));
-        Vector3 p1 = Vector3(meca->getPX(tri[1]), meca->getPY(tri[1]), meca->getPZ(tri[1]));
-        Vector3 p2 = Vector3(meca->getPX(tri[2]), meca->getPY(tri[2]), meca->getPZ(tri[2]));
+        type::Vec3 out;
+        auto p0 = type::Vec3(meca->getPX(tri[0]), meca->getPY(tri[0]), meca->getPZ(tri[0]));
+        auto p1 = type::Vec3(meca->getPX(tri[1]), meca->getPY(tri[1]), meca->getPZ(tri[1]));
+        auto p2 = type::Vec3(meca->getPX(tri[2]), meca->getPY(tri[2]), meca->getPZ(tri[2]));
        
         bool intersect = RayIntersectsTriangle(m_rayOrigin, m_rayDirection, p0, p1, p2, out);
 
@@ -232,11 +232,11 @@ bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPo
 
 
 
-bool NeedleTracker::RayIntersectsTriangle(const Coord& origin, const Vector3& rayDirection, const Coord& P0, const Coord& P1, const Coord& P2, Coord& outIntersection)
+bool NeedleTracker::RayIntersectsTriangle(const Coord& origin, const type::Vec3& rayDirection, const Coord& P0, const Coord& P1, const Coord& P2, Coord& outIntersection)
 {
     const float EPSILON = 0.0000001;
 
-    Vector3 edge1, edge2, h, s, q;
+    type::Vec3 edge1, edge2, h, s, q;
     float a, f, u, v;
     edge1 = P1 - P0;
     edge2 = P2 - P0;
