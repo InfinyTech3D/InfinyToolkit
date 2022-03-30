@@ -31,9 +31,20 @@ public:
 	void draw(const core::visual::VisualParams* vparams) override;
 
 protected:
+	void simpleCarving();
+
+	void surfaceCarving();
+
+	void surfaceCarving2();
+
+protected:
 	TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
-	sofa::type::vector<unsigned int> m_tetra2remove;
+	std::set<unsigned int> m_tetra2Filter;
+
+	sofa::type::vector<unsigned int> m_tetra2Filter2;
+	std::set<unsigned int> m_triIdsToFilter;
+	std::set<unsigned int> m_triIds;
 
 	Vec3 carvingPosition;
 };

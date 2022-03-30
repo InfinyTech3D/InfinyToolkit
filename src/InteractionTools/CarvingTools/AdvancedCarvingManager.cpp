@@ -149,9 +149,6 @@ void AdvancedCarvingManager::bwdInit()
         if (!alreadyRegistered && d_carvingWithRefinement.getValue()) {
             m_carvingPerformer.push_back(new RefineCarvingPerformer(topo, this));
         }
-            //if (d_)
-            //m_carvingPerformer.push_back(new SurfaceCarvingPerformer(topo, d_carvingDistance.getValue(), d_refineDistance.getValue()));
-
     }
 
 
