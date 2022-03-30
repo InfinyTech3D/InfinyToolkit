@@ -21,9 +21,8 @@
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/core/objectmodel/HapticDeviceEvent.h>
 
-#include <sofa/core/topology/TopologyData.inl>
+#include <sofa/core/topology/TopologyData.h>
 
-#include <SofaBaseTopology/TopologyData.h>
 #include <SofaHaptics/ForceFeedback.h>
 
 #include <fstream>
@@ -52,6 +51,7 @@ public:
     using SurfaceCollisionModel = sofa::core::CollisionModel;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
     using BaseCarvingPerformer = sofa::component::controller::BaseCarvingPerformer;
+    using TetrahedronSetTopologyContainer = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
     
     using TexCoord = sofa::type::Vec<2, float>;
     using VecTexCoord = type::vector<TexCoord>;

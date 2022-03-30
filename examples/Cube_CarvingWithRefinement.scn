@@ -24,7 +24,7 @@
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
     <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="1"/>
+    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0"/>
 
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>

@@ -14,8 +14,8 @@
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
 
-#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
-#include <SofaBaseTopology/TetrahedronSetTopologyModifier.h>
+#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
+#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
 
 #include <SofaBaseCollision/SphereModel.h>
 
@@ -33,6 +33,7 @@ SOFA_DECL_CLASS(PliersToolManager)
 
 using namespace defaulttype;
 using namespace sofa::core::topology;
+using namespace sofa::component::topology::container::dynamic;
 
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
 using SphereModel = sofa::component::collision::SphereCollisionModel< sofa::defaulttype::Vec3Types >;
@@ -546,7 +547,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     msg_info() << "idsRight: " << idsRight.size();
 
     // Detect all tetra on the cut path
-    sofa::component::topology::TetrahedronSetTopologyContainer* tetraCon;
+    TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
     if (tetraCon == NULL) {
         msg_info() << "Error: NO tetraCon";
@@ -607,7 +608,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     if (cut)
     {
         msg_info() << "tetraIdsOnCut: " << tetraIdsOnCut.size();
-        sofa::component::topology::TetrahedronSetTopologyModifier* tetraModif;
+        TetrahedronSetTopologyModifier* tetraModif;
         m_model->getContext()->get(tetraModif);
 
         if (tetraModif == NULL) {
@@ -650,7 +651,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
 
     sofa::type::vector<int> tetraIds = m_idBroadPhase;
     m_idgrabed.clear();
-    sofa::component::topology::TetrahedronSetTopologyContainer* tetraCon;
+    TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
     if (tetraCon == NULL) {
         msg_info() << "Error: NO tetraCon";
@@ -706,8 +707,8 @@ void PliersToolManager::cutFromTriangles()
     msg_info() << "idsRight: " << idsRight.size();
 
     // Detect all tetra on the cut path
-    std::vector<sofa::component::topology::TriangleSetTopologyContainer*> triCons;
-    m_model->getContext()->get<sofa::component::topology::TriangleSetTopologyContainer>(&triCons, sofa::core::objectmodel::BaseContext::SearchDown);
+    std::vector<TriangleSetTopologyContainer*> triCons;
+    m_model->getContext()->get<TriangleSetTopologyContainer>(&triCons, sofa::core::objectmodel::BaseContext::SearchDown);
 
     if (triCons.size() < 2) {
         msg_info() << "Error: NO triCons";
@@ -760,8 +761,8 @@ void PliersToolManager::cutFromTriangles()
     }
 
     msg_info() << "triIdsOnCut: " << triIdsOnCut.size();
-    std::vector<sofa::component::topology::TriangleSetTopologyModifier*> triModifs;
-    m_model->getContext()->get<sofa::component::topology::TriangleSetTopologyModifier>(&triModifs, sofa::core::objectmodel::BaseContext::SearchDown);
+    std::vector<TriangleSetTopologyModifier*> triModifs;
+    m_model->getContext()->get<TriangleSetTopologyModifier>(&triModifs, sofa::core::objectmodel::BaseContext::SearchDown);
 
     if (triModifs.size() < 2 ) {
         msg_info() << "Error: NO triModif";
@@ -879,7 +880,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     }
 
 
-    sofa::component::topology::TetrahedronSetTopologyContainer* tetraCon;
+    TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
     if (tetraCon == NULL) {
         msg_info() << "Error: NO tetraCon";

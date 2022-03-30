@@ -29,7 +29,7 @@
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 
-#include <SofaBaseTopology/TopologyData.inl>
+#include <sofa/core/topology/TopologyData.inl>
 
 
 namespace sofa::component::collision
@@ -118,13 +118,13 @@ void AdvancedCarvingManager::bwdInit()
         sofa::core::topology::TopologicalMapping* topoMapping;
         surfCol->getContext()->get(topoMapping);
 
-        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topo = nullptr;
+        TetrahedronSetTopologyContainer::SPtr topo = nullptr;
         if (topoMapping != nullptr)
         {
-            topo = dynamic_cast<sofa::component::topology::TetrahedronSetTopologyContainer*> (topoMapping->getFrom());
+            topo = dynamic_cast<TetrahedronSetTopologyContainer*> (topoMapping->getFrom());
         }
         else
-            topo = dynamic_cast<sofa::component::topology::TetrahedronSetTopologyContainer*> (surfCol->getCollisionTopology());
+            topo = dynamic_cast<TetrahedronSetTopologyContainer*> (surfCol->getCollisionTopology());
 
         if (topo == nullptr)
         {

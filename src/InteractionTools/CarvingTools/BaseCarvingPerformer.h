@@ -11,9 +11,10 @@
 #include <InteractionTools/config.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
+#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
 
 using namespace sofa::type;
+using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
 
 class contactInfo
 {
