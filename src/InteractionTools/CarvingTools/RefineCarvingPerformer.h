@@ -24,15 +24,29 @@ public:
 
 	bool initPerformer() override;
 
+	void filterContacts();
+
 	bool runPerformer() override;
 
-	void draw(const core::visual::VisualParams* vparams) override {}
+	void draw(const core::visual::VisualParams* vparams) override;
 
 protected:
-	std::map<sofa::component::topology::TetrahedronSetTopologyContainer::SPtr, TetrahedronRefinementAlgorithms*> m_tetraAlgos;
+	void simpleCarving();
+
+	void surfaceCarving();
+
+	void surfaceCarving2();
+
+protected:
 	TetrahedronRefinementAlgorithms* m_tetraAlgo;
 
-	//sofa::type::vector<int> m_tetra2remove;
+	std::set<unsigned int> m_tetra2Filter;
+
+	sofa::type::vector<unsigned int> m_tetra2Filter2;
+	std::set<unsigned int> m_triIdsToFilter;
+	std::set<unsigned int> m_triIds;
+
+	Vec3 carvingPosition;
 };
 					
 } // namespace sofa::component::controller

@@ -24,7 +24,7 @@
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
     <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="1"/>
+    carvingWithBurning="1" carvingWithRefinement="1" drawContacts="0"/>
 
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
@@ -33,7 +33,7 @@
     </Node>
 
     <Node name="Hexa2Tetra" >
-        <RegularGridTopology name="HexaTop" n="11 11 11" min="0 0 0" max="10 10 10" />
+        <RegularGridTopology name="HexaTop" n="5 5 5" min="0 0 0" max="10 10 10" />
         <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
         <TetrahedronSetTopologyModifier name="Modifier"/>
         <Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />
@@ -63,7 +63,7 @@
             <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
-                <OglModel name="Visual" color="green" />
+                <OglModel name="Visual" texcoords="@../../../ACarving.texcoords" texturename="textures/colorMap.png"/>
                 <IdentityMapping input="@../../Volume" output="@Visual" />
             </Node>
         </Node>

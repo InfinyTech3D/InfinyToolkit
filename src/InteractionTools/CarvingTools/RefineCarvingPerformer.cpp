@@ -9,9 +9,11 @@
 
 #include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
 #include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <SofaBaseMechanics/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
+    using namespace sofa::core::topology;
 
 RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
@@ -23,223 +25,342 @@ RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::
 
 RefineCarvingPerformer::~RefineCarvingPerformer()
 {
-    for (auto itM = m_tetraAlgos.begin(); itM != m_tetraAlgos.end(); ++itM)
+    if (m_tetraAlgo != nullptr)
     {
-        delete itM->second;
+        delete m_tetraAlgo;
+        m_tetraAlgo = nullptr;
     }
-
-    m_tetraAlgos.clear();
-    //m_tetra2remove.clear();
 }
 
 
 bool RefineCarvingPerformer::initPerformer()
 {
+    m_tetraAlgo = new TetrahedronRefinementAlgorithms();
+    bool resInit = m_tetraAlgo->init(m_topologyCon->getContext());
+
+    return resInit;
+}
 
 
-    //for (unsigned int i = 0; i < m_surfaceCollisionModels.size(); ++i)
-    //{
-    //    const sofa::core::objectmodel::BaseContext* _node = m_surfaceCollisionModels[i]->getContext();
-    //    sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _node->get<sofa::component::topology::TetrahedronSetTopologyContainer>();
+void RefineCarvingPerformer::filterContacts()
+{
+    if (m_tetraAlgo == nullptr)
+        return;
 
-    //    if (topoCon == nullptr)
-    //    {
-    //        msg_error() << "no TetrahedronSetTopologyContainer found for collision model: " << m_surfaceCollisionModels[i]->getName();
-    //    }
+    const SReal& refineDistance = m_carvingMgr->d_refineDistance.getValue();
+    const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+    m_tetra2Filter.clear();
+    //m_tetra2Filter2.clear();
+    m_triIdsToFilter.clear();
 
-    //    //sofa::core::topology::TopologicalMapping* topoMapping;
-    //    if (m_tetraAlgos.find(topoCon) != m_tetraAlgos.end()) // already in
-    //        continue;
+    for each (contactInfo * cInfo in m_triangleContacts)
+    {
+        if (cInfo->dist > refineDistance)
+            continue;
 
-    //    TetrahedronRefinementAlgorithms* tetraAlgo = new TetrahedronRefinementAlgorithms();
-    //    bool resInit = tetraAlgo->init(_node);
-    //    m_tetraAlgos[topoCon] = tetraAlgo;
-    //    if (!resInit)
-    //    {
-    //        m_carvingReady = false;
-    //        return;
-    //    }
-    //}
+        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle& tetraAT = m_topologyCon->getTetrahedraAroundTriangle(cInfo->elemId);
 
-    //// check if forcefeedback
-    //m_forceFeedback = getContext()->get<sofa::component::controller::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-    //if (m_forceFeedback)
-    //    msg_info() << "Forcefeedback found: " << m_forceFeedback->getName();
-    //else
-    //    msg_info() << "NO Forcefeedback found: ";
+        if (tetraAT.size() != 1)
+        {
+            msg_error("RefineCarvingPerformer") << "More than one tetra around tri: " << cInfo->elemId;
+            continue;
+        }
 
-    return true;
+        m_tetra2Filter.insert(tetraAT[0]);
+
+        //if (cInfo->dist <= carvingDistance)
+        //    m_tetra2Filter2.push_back(tetraAT[0]);
+
+       
+        carvingPosition = cInfo->pointA;
+    }
+
+    for each (contactInfo * cInfo in m_pointContacts)
+    {
+        if (cInfo->dist > refineDistance)
+            continue;
+
+        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
+
+        for (auto tetraId : tetraAV)
+            m_tetra2Filter.insert(tetraId);
+
+        if (cInfo->dist <= carvingDistance) {
+            const core::topology::BaseMeshTopology::TrianglesAroundVertex& triAV = m_topologyCon->getTrianglesAroundVertex(cInfo->elemId);
+
+            for (auto triId : triAV)
+                m_triIdsToFilter.insert(triId);
+        }
+
+        carvingPosition = cInfo->pointA;
+    }
 }
 
 
 bool RefineCarvingPerformer::runPerformer()
 {
-    // if not inside the map of tetrahedronRefinementAlgo, or not container, skip
-//sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = targetModel->getContext()->get<sofa::component::topology::TetrahedronSetTopologyContainer>();
-//auto itM = m_tetraAlgos.find(topoCon);
-//if (itM == m_tetraAlgos.end()) {
-//    msg_error() << "No TetrahedronRefinementAlgorithms found for collision model: " << targetModel->name;
-//    continue;
-//}
+    if (!m_tetra2Filter.empty())
+    {
+        sofa::Size nbrTetra = m_topologyCon->getNbTetrahedra();
+        bool res = m_tetraAlgo->refineTetrahedra(m_tetra2Filter, m_carvingMgr->d_refineCriteria.getValue());
 
+        if (res)
+        {
+            std::cout << "RefineCarvingPerformer::refineTetrahedra()" << std::endl;
+#if 0
+            return res;
+#else
+            sofa::Size nbrTetraNew = m_topologyCon->getNbTetrahedra();
+            for (sofa::Index tetraId = nbrTetra; tetraId < nbrTetraNew; ++tetraId)
+                m_tetra2Filter.insert(tetraId);
+#endif
+        }
+#if 0
+        else
+        {
+            surfaceCarving2();
+        }
+#else
+        simpleCarving();
+#endif
+        
+        
+        return res;
+    }
 
-    return true;
+    return false;
 }
 
-//bool AdvancedCarvingManager::doRefinement()
-//{
-//    const Real& refineDistance = d_refineDistance.getValue();
-//    bool result = false;
-//    sofa::type::vector<unsigned int> layer1_tetra;
-//
-//    TetrahedronRefinementAlgorithms* _tetraAlgo = nullptr;
-//    for each (contactInfo * cInfo in m_triangleContacts)
-//    {
-//        if (cInfo->dist > refineDistance)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr)
-//            _tetraAlgo = cInfo->tetraAlgo;
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _tetraAlgo->getTopologyContainer();
-//        const core::topology::BaseMeshTopology::TetrahedraAroundTriangle& tetraAT = topoCon->getTetrahedraAroundTriangle(cInfo->elemId);
-//
-//        if (tetraAT.size() != 1)
-//        {
-//            msg_error() << "More than one tetra around tri: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        layer1_tetra.push_back(tetraAT[0]);
-//    }
-//
-//    for each (contactInfo * cInfo in m_pointContacts)
-//    {
-//        if (cInfo->dist > refineDistance)
-//            continue;
-//
-//        if (_tetraAlgo == nullptr)
-//            _tetraAlgo = cInfo->tetraAlgo;
-//        else if (_tetraAlgo != cInfo->tetraAlgo)
-//        {
-//            msg_error() << "More than one TetrahedronRefinementAlgorithms in the list of contact. Case not handled yet: " << cInfo->elemId;
-//            continue;
-//        }
-//
-//        sofa::component::topology::TetrahedronSetTopologyContainer::SPtr topoCon = _tetraAlgo->getTopologyContainer();
-//        const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = topoCon->getTetrahedraAroundVertex(cInfo->elemId);
-//
-//        for (auto tetraId : tetraAV)
-//            layer1_tetra.push_back(tetraId);
-//    }
-//
-//    if (!layer1_tetra.empty() && _tetraAlgo != nullptr)
-//        return _tetraAlgo->refineTetrahedra(layer1_tetra, d_refineCriteria.getValue());
-//    else
-//        return false;
-//}
+
+void RefineCarvingPerformer::simpleCarving()
+{
+    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    m_topologyCon->getContext()->get(meca);
+    helper::ReadAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->read(core::VecCoordId::position());
+    const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+
+    // check all tetra dist from carving element
+    std::set<unsigned int> tetraToremove;
+    for (auto tetraId : m_tetra2Filter)
+    {
+        const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
+        Vec3 bary = { 0, 0, 0 };
+        for (unsigned int j = 0; j < 4; j++) {
+            bary += vertices[tetra[j]];
+        }
+        bary *= 0.25;
+        SReal dist = (carvingPosition - bary).norm();
+
+        if (dist < carvingDistance)
+            tetraToremove.insert(tetraId);
+    }
+
+    if (!tetraToremove.empty())
+    {
+        m_tetraAlgo->removeTetrahedra(tetraToremove);
+    }
+}
+
+void RefineCarvingPerformer::surfaceCarving()
+{
+    std::cout << "RefineCarvingPerformer::surfaceCarving()" << std::endl;
+    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    m_topologyCon->getContext()->get(meca);
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+    const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+
+    // check all point to be considered
+    std::set<unsigned int> pointsToCheck;
+    for (auto tetraId : m_tetra2Filter)
+    {
+        const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
+        for (unsigned int j = 0; j < 4; j++) {
+            pointsToCheck.insert(tetra[j]);
+        }
+    }
+
+    // check all point dist from carving element
+    const SReal invCarv = 1 / carvingDistance * 0.5;
+    for (auto pointId : pointsToCheck)
+    {
+        Vec3& vertex = vertices[pointId];
+        Vec3 dir = vertex - carvingPosition;
+        const SReal dist = dir.norm();
+
+        if (dist > carvingDistance)
+            continue;
+
+        SReal factor = (carvingDistance - dist)* invCarv; // ]0, carvingDistance]
+        std::cout << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist << std::endl;
+        vertex = vertex + dir * factor;
+    }
+}
 
 
+void RefineCarvingPerformer::surfaceCarving2()
+{
+    const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+    std::cout << "m_triIdsToFilter: " << m_triIdsToFilter.size() << std::endl;
+
+    if (m_triIdsToFilter.empty())
+        return;
+
+    std::map<Topology::TriangleID, Topology::TetrahedronID> triIds_surf;
+    m_triIds.clear();
+
+    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    m_topologyCon->getContext()->get(meca);
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+
+    sofa::component::topology::container::dynamic::TetrahedronSetGeometryAlgorithms< sofa::defaulttype::Vec3Types>* tetraGeo = nullptr;
+    m_topologyCon->getContext()->get(tetraGeo);
+    
+    // filter triangles on border
+    for (auto triId : m_triIdsToFilter)
+    {
+        const TetrahedronSetTopologyContainer::TetrahedraAroundTriangle& tetraATri = m_topologyCon->getTetrahedraAroundTriangle(triId);
+        if (tetraATri.size() == 1)
+        {
+            triIds_surf[triId] = tetraATri[0];
+            m_triIds.insert(triId);
+        }
+    }
+
+    struct newPoint
+    {
+        sofa::defaulttype::Vec3Types::Coord AccPosition = { 0, 0, 0 };
+        int nbP = 0;
+    };
+   
+    const TetrahedronSetTopologyContainer::SeqTetrahedra& tetrahedra = m_topologyCon->getTetrahedra();
+    const TetrahedronSetTopologyContainer::SeqTriangles& triangles = m_topologyCon->getTriangles();
+    std::map<Topology::PointID, newPoint> newPoints;
+    const SReal invCarv = 1 / carvingDistance * 0.5;
+
+    for (const auto& [key, value] : triIds_surf)
+    {
+        const Triangle& tri = triangles[key];
+        const Tetrahedron& tetra = tetrahedra[value];
+        
+        Topology::PointID oppoPoint;
+        bool found = false;
+        for (int i = 0; i < 4; i++)
+        {
+            oppoPoint = tetra[i];
+            for (int j = 0; j < 3; j++)
+                if (tetra[i] == tri[j])
+                {
+                    found = true;
+                    continue;
+                }
+
+            if (!found)
+                break;
+        }
+
+        const Vec3& oppoPCoord = vertices[oppoPoint];
+        // move the 3 points from surface triangle
+        for (auto pId : tri)
+        {
+            Vec3 vertex = vertices[pId];
+            Vec3 dir = oppoPCoord - vertex; // normalise??
+            const SReal dist = (vertex - carvingPosition).norm();
+
+            if (dist > carvingDistance)
+                continue;
+
+            SReal factor = (carvingDistance - dist) * invCarv; // ]0, carvingDistance]
+            vertex = vertex + dir * factor;
+            std::cout << "factor: " << factor << std::endl;
+
+            auto it = newPoints.find(pId);
+            if (it == newPoints.end()) // new point
+            {
+                newPoint nP;
+                nP.AccPosition = vertex;
+                nP.nbP = 1;
+                newPoints[pId] = nP;
+            }
+            else
+            {
+                newPoint& nP = it->second;
+                nP.AccPosition += vertex;
+                nP.nbP++;
+            }
+        }
+    }
+
+    // replace new positions
+    for (const auto& [key, value] : newPoints)
+    {
+        vertices[key] = value.AccPosition / value.nbP;
+    }
+
+    std::set<unsigned int> tetra2Remove;
+    for (const auto& [key, value] : triIds_surf)
+    {
+        bool valid = tetraGeo->checkTetrahedronValidity(value);
+        if (!valid) {
+            std::cout << "Not valid: " << value << std::endl;
+            tetra2Remove.insert(value);
+        }
+    }
+
+    if (!tetra2Remove.empty())
+    {
+        std::cout << "remove tetra: " << tetra2Remove << std::endl;
+        m_tetraAlgo->removeTetrahedra(tetra2Remove);
+    }
+
+    std::cout << "RefineCarvingPerformer::surfaceCarving2() : " << m_triangleContacts.size() << std::endl;
+    
+}
 
 
+void RefineCarvingPerformer::draw(const core::visual::VisualParams* vparams)
+{
+    BaseCarvingPerformer::draw(vparams);
 
-    //if (m_topoCon && !m_tetra2remove.empty())
+    //if (m_topologyCon && !m_tetra2Filter.empty())
     //{
-    //    sofa::core::behavior::BaseMechanicalState* mstate = m_topoCon->getContext()->getMechanicalState();
+    //    sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
     //    std::vector<Vector3> pos;
     //    
-    //    
-    //    if (!mstate)
+    //    for (auto tetraId : m_tetra2Filter)
     //    {
-    //        std::cout << "mstate is null" << std::endl;
-    //        return;
-    //    }
-
-    //    for (unsigned int i=0; i<m_tetra2remove.size(); ++i)
-    //    {
-    //        const sofa::core::topology::Topology::Tetrahedron& tri = m_topoCon->getTetrahedron(m_tetra2remove[i]);
+    //        const sofa::core::topology::Topology::Tetrahedron& tri = m_topologyCon->getTetrahedron(tetraId);
     //        for (unsigned int j = 0; j < 4; j++) {
     //            pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
     //        }
     //    }
 
-    //    vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f), 0.7f);
-    //    //vparams->drawTool()->drawTriangles(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f));
+    //    vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f), 0.5f);
+
+
+    //    std::vector<Vector3> pos2;
+    //    for (auto triId : m_triIds)
+    //    {
+    //        const sofa::core::topology::Topology::Triangle& tri = m_topologyCon->getTriangle(triId);
+    //        for (unsigned int j = 0; j < 3; j++) {
+    //            pos2.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //        }
+    //    }
+    //    vparams->drawTool()->drawTriangles(pos2, sofa::type::RGBAColor(1.0f, 0.5f, 1.0f, 1.0f));
+
+
+    //    std::vector<Vector3> pos3;
+
+    //    //for (unsigned int i = 0; i < m_tetra2Filter2.size(); ++i)
+    //    //{
+    //    //    const sofa::core::topology::Topology::Tetrahedron& tri = m_topologyCon->getTetrahedron(m_tetra2Filter2[i]);
+    //    //    for (unsigned int j = 0; j < 4; j++) {
+    //    //        pos3.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //    //    }
+    //    //}
+
+    //    //vparams->drawTool()->drawScaledTetrahedra(pos3, sofa::type::RGBAColor(1.0f, 0.5f, 1.0f, 1.0f), 0.8f);
+
     //}
-
-    // draw refine distance
-    //vparams->drawTool()->drawSpheres(spheres, d_refineDistance.getValue() + d_carvingRadius.getValue(), sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 0.5));
-
-/*
-
-
-    if (d_drawTetra.getValue() && m_topoCon != nullptr)
-    {
-        const sofa::helper::fixed_array<sofa::type::vector<TetraToSplit*>, 2>& neighTable = m_tetraAlgo->getNeighboorhoodTable();
-        const sofa::type::vector<sofa::core::topology::Topology::Tetrahedron>& tetraArray = m_topoCon->getTetrahedra();
-
-        sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-        const float& scale = d_drawScaleTetrahedra.getValue();
-
-        vparams->drawTool()->setPolygonMode(0,false);
-
-        for (unsigned int i=0; i<neighTable.size(); ++i)
-        {
-            for (unsigned int j=0; j<neighTable[i].size(); ++j)
-            {
-                std::vector<Vector3> pos;
-                const TetraToSplit* tetraStruc = neighTable[i][j];
-                const sofa::core::topology::Topology::Tetrahedron& tetra = tetraArray[tetraStruc->m_tetraId];
-                for (unsigned int k = 0; k < 4; ++k)
-                    pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k]) ));
-
-                unsigned int nbrP = tetraStruc->m_points.size();
-                if ( nbrP == 6)
-                    color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-                else if (nbrP == 5)
-                    color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.2f, 1.0);
-                else if (nbrP == 4)
-                    color4 = sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 1.0);
-                else if (nbrP == 3)
-                    color4 = sofa::type::RGBAColor(0.0f, 0.8, 0.5f, 1.0);
-                else if (nbrP == 2)
-                    color4 = sofa::type::RGBAColor(0.0f, 0.5, 0.8f, 1.0);
-                else if (nbrP == 1)
-                    color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
-
-                if (scale >= 1.0 || scale < 0.001)
-                    vparams->drawTool()->drawTetrahedra(pos, color4);
-                else
-                    vparams->drawTool()->drawScaledTetrahedra(pos, color4, scale);
-            }
-        }
-
-        if (!m_tetra2remove.empty())
-        {
-            std::vector<Vector3> pos;
-            for (unsigned int i=0; i<m_tetra2remove.size(); ++i)
-            {
-                const sofa::core::topology::Topology::Tetrahedron& tetra = tetraArray[m_tetra2remove[i]];
-                for (unsigned int k = 0; k < 4; ++k)
-                    pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k]) ));
-            }
-
-            if (scale >= 1.0 || scale < 0.001)
-                vparams->drawTool()->drawTetrahedra(pos, sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 1.0));
-            else
-                vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 1.0), scale);
-        }
-
-
-        vparams->drawTool()->setPolygonMode(0,vparams->displayFlags().getShowWireFrame());
-    }
-
-    */
-
+}
 
 } // namespace sofa::component::controller
