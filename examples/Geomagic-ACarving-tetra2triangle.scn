@@ -64,7 +64,7 @@
         <UncoupledConstraintCorrection/>
         
         <Node name="CollisionModel" >
-            <MeshObjLoader filename="./mesh/drill_collision.obj"  name="loader"/>
+            <MeshOBJLoader filename="./mesh/drill_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="-180" rz="-90" dz="3.5" dx="-0.3" />
             <LineCollisionModel name="instrumentLine" contactStiffness="10" />

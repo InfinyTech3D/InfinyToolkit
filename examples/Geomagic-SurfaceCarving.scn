@@ -25,7 +25,7 @@
 	-->
 	
 	<Node name="heart">
-        <MeshObjLoader name="loader" filename="./mesh/crane_visu.obj" />
+        <MeshOBJLoader name="loader" filename="./mesh/crane_visu.obj" />
         <MechanicalObject name="dofs"  />
         
         <TriangleSetTopologyContainer  name="Container" src="@loader"/>
@@ -58,7 +58,7 @@
         <UncoupledConstraintCorrection/>
         
         <Node name="CollisionModel" >
-            <MeshObjLoader filename="./mesh/drill_collision.obj"  name="loader"/>
+            <MeshOBJLoader filename="./mesh/drill_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="3.5" dx="0.0" />
             <LineCollisionModel name="instrumentLine" contactStiffness="10" />
