@@ -12,13 +12,7 @@
 #include <SofaCarving/CarvingManager.h>
 #include <SofaHaptics/ForceFeedback.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace collision
+namespace sofa::component::collision
 {
 
 /**
@@ -58,8 +52,4 @@ protected:
     
 };
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::collision

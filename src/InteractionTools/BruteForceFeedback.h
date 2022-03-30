@@ -11,7 +11,7 @@
 #include <InteractionTools/config.h>
 #include <SofaHaptics/ForceFeedback.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <InteractionTools/AdvanceCarvingManager.h>
+#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
 namespace sofa
 {
@@ -40,7 +40,7 @@ public:
 protected:
     BruteForceFeedback();
 protected:
-    sofa::component::collision::AdvanceCarvingManager::SPtr m_ACarving;
+    sofa::component::collision::AdvancedCarvingManager::SPtr m_ACarving;
 
     sofa::type::Vector3 currentForce;
 };
