@@ -22,6 +22,9 @@
 #include <SofaUserInteraction/TopologicalChangeManager.h>
 #include <sofa/helper/AdvancedTimer.h>
 
+#include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
+#include <InteractionTools/CarvingTools/BurningPerformer.h>
+
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 
@@ -42,16 +45,16 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     : d_toolModelPath( initData(&d_toolModelPath, "toolModelPath", "Tool model path"))
     , d_surfaceModelPath( initData(&d_surfaceModelPath, "surfaceModelPath", "TriangleSetModel or SphereModel path"))
     , d_active( initData(&d_active, false, "active", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
+    , d_carvingWithBurning(initData(&d_carvingWithBurning, true, "carvingWithBurning", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
+    , d_carvingWithRefinement(initData(&d_carvingWithRefinement, false, "carvingWithRefinement", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
     , d_carvingDistance( initData(&d_carvingDistance, 0.0, "carvingDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineDistance(initData(&d_refineDistance, 0.0, "refineDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineCriteria( initData(&d_refineCriteria, 0.5, "refineCriteria", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , d_carvingSpeed(initData(&d_carvingSpeed, 0.001, "carvingSpeed", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , d_refineThreshold(initData(&d_refineThreshold, 1.0, "refineThreshold", "Collision distance at which cavring will start. Equal to contactDistance by default."))
     , m_testID(initData(&m_testID, sofa::type::vector<unsigned int>(), "testID", "Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)"))
-    
-    , d_drawTetra( initData(&d_drawTetra, false, "drawTetra", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
+    , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
     , d_drawContacts( initData(&d_drawContacts, false, "drawContacts", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
-    , d_drawScaleTetrahedra(initData(&d_drawScaleTetrahedra, (float) 1.0, "drawScaleTetrahedra", "Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)"))
 {
     this->f_listening.setValue(true);
 }
@@ -138,8 +141,13 @@ void AdvancedCarvingManager::bwdInit()
             }
         }
 
-        if (!alreadyRegistered)
-            m_carvingPerformer.push_back(new SurfaceCarvingPerformer(topo, d_carvingDistance.getValue(), d_refineDistance.getValue()));
+        if (!alreadyRegistered && d_carvingWithBurning.getValue()) {
+            m_carvingPerformer.push_back(new BurningPerformer(topo, this));
+        }
+
+            //if (d_)
+            //m_carvingPerformer.push_back(new SurfaceCarvingPerformer(topo, d_carvingDistance.getValue(), d_refineDistance.getValue()));
+
     }
 
 
@@ -147,6 +155,8 @@ void AdvancedCarvingManager::bwdInit()
     {
         carvingPerformer->initPerformer();
     }
+
+    msg_warning() << "bwdInit!";
 }
 
 
@@ -164,6 +174,9 @@ void AdvancedCarvingManager::filterCollision()
     if (!m_carvingReady)
         return;
 
+    if (!d_active.getValue())
+        return;
+
     lockConstraints.lock();
     clearContacts();
 
@@ -175,6 +188,8 @@ void AdvancedCarvingManager::filterCollision()
         return;
     }
 
+    const SReal& refDistance = d_refineDistance.getValue();
+    SReal invRefDistance = 1 / refDistance;
 
     // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
     const ContactVector* contacts = nullptr;
@@ -228,48 +243,41 @@ void AdvancedCarvingManager::filterCollision()
         if (topoMapping != nullptr)
             currentTopo = topoMapping->getFrom();
 
-        BaseCarvingPerformer* performer = nullptr;
+
         for (auto carvingPerformer : m_carvingPerformer)
         {
-            if (carvingPerformer->getTopology() == currentTopo)
+            if (carvingPerformer->getTopology() != currentTopo) // not the same topo, carving performer not on this collisionModel
+                continue;
+
+            BaseCarvingPerformer* performer = carvingPerformer;
+
+            for (size_t j = 0; j < ncontacts; ++j)
             {
-                performer = carvingPerformer;
-                break;
+                const ContactVector::value_type& c = (*contacts)[j];
+                int elemIdx = (c.elem.first.getCollisionModel() == m_toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
+
+                // update the triangle id if a mapping is present
+                contactInfo* info = new contactInfo();
+
+                if (mode == 0 && topoMapping != nullptr)
+                {
+                    elemIdx = topoMapping->getGlobIndex(elemIdx);
+                }
+
+                info->elemId = elemIdx;
+                info->normal = c.normal;
+                info->pointA = c.point[0];
+                info->pointB = c.point[1];
+                info->dist = c.value;
+
+
+                if (mode == 0)
+                    performer->m_triangleContacts.push_back(info);
+                else if (mode == 1)
+                    performer->m_pointContacts.push_back(info);
             }
-        }
 
-        if (performer == nullptr)
-        {
-            msg_warning() << "CarvingPerformer topology not found";
-            continue;
-        }
-        
-        for (size_t j = 0; j < ncontacts; ++j)
-        {
-            const ContactVector::value_type& c = (*contacts)[j];
-            int elemIdx = (c.elem.first.getCollisionModel() == m_toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
-
-            // update the triangle id if a mapping is present
-            contactInfo* info = new contactInfo();
-            
-            if (mode == 0 && topoMapping != nullptr)
-            {
-                elemIdx = topoMapping->getGlobIndex(elemIdx);
-            }
-            
-            info->elemId = elemIdx;
-            info->normal = c.normal;
-            info->pointA = c.point[0];
-            info->pointB = c.point[1];
-            info->dist = c.value;
-
-            if (mode == 0)
-                performer->m_triangleContacts.push_back(info);
-            else if (mode == 1)
-                performer->m_pointContacts.push_back(info);
-        }
-        
-        // process the collision
+        }      
     }
 
     lockConstraints.unlock();
@@ -278,30 +286,12 @@ void AdvancedCarvingManager::filterCollision()
     {
         carvingPerformer->filterContacts();
     }
-
-
-    if (d_active.getValue())
-    {
-        for (auto carvingPerformer : m_carvingPerformer)
-        {
-            carvingPerformer->runPerformer();
-        }
-        d_active.setValue(false);
-    }
     
-}
-
-
-void AdvancedCarvingManager::processCollision()
-{
-    //if (m_triangleContacts.empty() && m_pointContacts.empty())
-    //    return;
-
-    //m_topoCon = nullptr;
-    //bool resRef = doRefinement();    
-    //if (resRef == false) // no refinement at this step, carve
-    //    doMoveCarve();
-    //    //doMoveCarvePoint();
+    // process the collision
+    for (auto carvingPerformer : m_carvingPerformer)
+    {
+        carvingPerformer->runPerformer();
+    }
 }
 
 
@@ -325,7 +315,7 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
     {
         if (ev->getKey() == 'C')
         {
-            std::cout << "Burn, baby burn!" << std::endl;
+            msg_warning() << "Burn, baby burn!";
             d_active.setValue(true);
         }
     }

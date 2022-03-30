@@ -9,9 +9,9 @@
 #pragma once
 
 #include <InteractionTools/config.h>
-#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
-#include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/defaulttype/VecTypes.h>
+#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 
 using namespace sofa::type;
 
@@ -25,15 +25,22 @@ public:
     double dist;
 };
 
+namespace sofa::component::collision
+{
+class AdvancedCarvingManager;
+}
+
 namespace sofa::component::controller
 {
     using namespace sofa::component::topology;
     using namespace sofa::core::topology;
+    using namespace sofa::component::collision;
+
 
 class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer
 {
 public:
-	BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance);
+	BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
 
     ~BaseCarvingPerformer();
 
@@ -59,9 +66,7 @@ public:
 protected:
     TetrahedronSetTopologyContainer::SPtr m_topologyCon = nullptr;
 
-    SReal m_carvingDistance = 0.0f;
-    SReal m_refineDistance = 0.0f;
-
+    AdvancedCarvingManager* m_carvingMgr = nullptr;
 };
 					
 } // namespace sofa::component::controller

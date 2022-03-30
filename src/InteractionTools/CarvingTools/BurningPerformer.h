@@ -14,29 +14,22 @@ namespace sofa::component::controller
 {
 using namespace sofa::core::topology;
 
-class SOFA_INTERACTIONTOOLS_API SurfaceCarvingPerformer : public BaseCarvingPerformer
+class SOFA_INTERACTIONTOOLS_API BurningPerformer : public BaseCarvingPerformer
 {
 public:
-	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
+	using TexCoord = sofa::type::Vec<2, float>;
+	using VecTexCoord = type::vector<TexCoord>;
 
-	virtual ~SurfaceCarvingPerformer() = default;
+	BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
+
+	virtual ~BurningPerformer() = default;
 
 	bool initPerformer() override;
-
-	void filterContacts() override;
 
 	bool runPerformer() override;
 
 	void draw(const core::visual::VisualParams* vparams) override;
 
-protected:
-	void doMoveCarve1();
-
-	void doMoveCarve2();
-
-private:
-	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2refine;
-	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2remove;
 };
 					
 } // namespace sofa::component::controller

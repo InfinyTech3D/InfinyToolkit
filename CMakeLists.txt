@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
+    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.h
 
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.h
 )
@@ -50,6 +51,8 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
+    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+
 
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
 )

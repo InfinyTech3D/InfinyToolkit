@@ -8,14 +8,15 @@
  ****************************************************************************/
 
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
-#include <sofa/core/behavior/BaseMechanicalState.h>
+#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+
 #include <SofaBaseMechanics/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
 
-SurfaceCarvingPerformer::SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance)
-    : BaseCarvingPerformer(topo, carvingDistance, refineDistance)
+SurfaceCarvingPerformer::SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
+    : BaseCarvingPerformer(topo, _carvingMgr)
 {
 
 }
@@ -33,12 +34,13 @@ void SurfaceCarvingPerformer::filterContacts()
     m_tetraId2remove.clear();
     m_tetraId2refine.clear();
 
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
     sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
 
     // Filter tetra
     for each (contactInfo * cInfo in m_pointContacts)
     {
-        if (cInfo->dist > m_carvingDistance) // only carving points
+        if (cInfo->dist > _carvingDistance) // only carving points
             continue;
 
         const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
@@ -125,12 +127,13 @@ void SurfaceCarvingPerformer::doMoveCarve1()
     std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
     std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
 
-    SReal carv2x3 = m_carvingDistance * m_carvingDistance * 4;
-    SReal invCarv2x3 = 1 / carv2x3;
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+    const SReal carv2x3 = _carvingDistance * _carvingDistance * 4;
+    const SReal invCarv2x3 = 1 / carv2x3;
 
     for each (contactInfo * cInfo in m_pointContacts)
     {
-        if (cInfo->dist > m_carvingDistance) // only carving points
+        if (cInfo->dist > _carvingDistance) // only carving points
             continue;
 
         const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
@@ -192,12 +195,13 @@ void SurfaceCarvingPerformer::doMoveCarve2()
     std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
     std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
 
-    SReal carv2x3 = m_carvingDistance * m_carvingDistance * 4;
-    SReal invCarv2x3 = 1 / carv2x3;
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+    const SReal carv2x3 = _carvingDistance * _carvingDistance * 4;
+    const SReal invCarv2x3 = 1 / carv2x3;
 
     for each (contactInfo * cInfo in m_pointContacts)
     {
-        if (cInfo->dist > m_carvingDistance) // only carving points
+        if (cInfo->dist > _carvingDistance) // only carving points
             continue;
 
         const core::topology::BaseMeshTopology::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);

@@ -7,17 +7,18 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/visual/VisualParams.h>
+
+#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
 namespace sofa::component::controller
 {
 
-BaseCarvingPerformer::BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, const SReal& carvingDistance, const SReal& refineDistance)
+BaseCarvingPerformer::BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : m_topologyCon(topo)
-    , m_carvingDistance(carvingDistance)
-    , m_refineDistance(refineDistance)
+    , m_carvingMgr(_carvingMgr)
 {
 
 }
@@ -52,6 +53,9 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 {
     if (!m_triangleContacts.empty())
     {
+        const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+        const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
+
         for each (contactInfo * cInfo in m_triangleContacts)
         {
             std::vector<Vector3> pos;
@@ -63,9 +67,9 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
             }
 
             sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < m_carvingDistance)
+            if (cInfo->dist < _carvingDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < m_refineDistance)
+            else if (cInfo->dist < _refineDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
 
             vparams->drawTool()->drawTriangle(pos[0], pos[1], pos[2], cInfo->normal, color4);
@@ -74,14 +78,16 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
     if (!m_pointContacts.empty())
     {
+        const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+        const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
 
         for each (contactInfo * cInfo in m_pointContacts)
         {
             std::vector<Vector3> pos;
             sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
-            if (cInfo->dist < m_carvingDistance)
+            if (cInfo->dist < _carvingDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
-            else if (cInfo->dist < m_refineDistance)
+            else if (cInfo->dist < _refineDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0);
 
             vparams->drawTool()->drawSphere(cInfo->pointB, 0.05f, color4);
@@ -89,8 +95,8 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
         }
 
         contactInfo* cInfo = m_pointContacts[0];
-        vparams->drawTool()->drawSphere(cInfo->pointA, m_refineDistance, sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
-        vparams->drawTool()->drawSphere(cInfo->pointA, m_carvingDistance, sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
+        vparams->drawTool()->drawSphere(cInfo->pointA, _refineDistance, sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
+        vparams->drawTool()->drawSphere(cInfo->pointA, _carvingDistance, sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
     }
 }
 
