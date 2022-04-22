@@ -53,7 +53,7 @@ void RefineCarvingPerformer::filterContacts()
     //m_tetra2Filter2.clear();
     m_triIdsToFilter.clear();
 
-    for each (contactInfo * cInfo in m_triangleContacts)
+    for (contactInfo * cInfo : m_triangleContacts)
     {
         if (cInfo->dist > refineDistance)
             continue;
@@ -75,7 +75,7 @@ void RefineCarvingPerformer::filterContacts()
         carvingPosition = cInfo->pointA;
     }
 
-    for each (contactInfo * cInfo in m_pointContacts)
+    for (contactInfo * cInfo : m_pointContacts)
     {
         if (cInfo->dist > refineDistance)
             continue;

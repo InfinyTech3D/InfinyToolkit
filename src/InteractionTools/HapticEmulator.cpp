@@ -91,7 +91,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
     if (m_driver->m_terminate == false)
     {
         TaskScheduler::getInstance()->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
-        Sleep(100);
+        sleep(100);
     }
 
     return MemoryAlloc::Dynamic;
@@ -139,7 +139,7 @@ void HapticEmulator::clearDevice()
     while (_simStepStatus.isBusy())
     {
         std::cout << "Waiting to finish" << std::endl;
-        Sleep(1);
+        sleep(1);
     }
     _taskScheduler->stop();
 }

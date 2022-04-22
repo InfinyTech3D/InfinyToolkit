@@ -40,7 +40,7 @@ bool BurningPerformer::runPerformer()
     const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
     const SReal invRefDistance = 1 / _refineDistance;
 
-    for each (contactInfo * cInfo in m_pointContacts)
+    for (contactInfo * cInfo : m_pointContacts)
     {
         SReal dist = (cInfo->pointB - cInfo->pointA).norm();
         if (dist > _refineDistance)

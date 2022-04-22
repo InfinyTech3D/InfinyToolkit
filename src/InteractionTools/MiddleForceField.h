@@ -29,12 +29,14 @@ class MiddleForceField : public core::behavior::ForceField<DataTypes>
 public:
     SOFA_CLASS(SOFA_TEMPLATE(MiddleForceField, DataTypes), SOFA_TEMPLATE(core::behavior::ForceField, DataTypes));
 
-    typedef core::behavior::ForceField<DataTypes> Inherit;
-    typedef typename DataTypes::VecCoord VecCoord;
-    typedef typename DataTypes::VecDeriv VecDeriv;
-    typedef typename DataTypes::Coord Coord;
-    typedef typename DataTypes::Deriv Deriv;
-    typedef typename Coord::value_type Real;
+    using Inherit = core::behavior::ForceField<DataTypes>;
+    using VecCoord = typename DataTypes::VecCoord;
+    using VecDeriv = typename DataTypes::VecDeriv;
+    using Coord = typename DataTypes::Coord;
+    using Deriv = typename DataTypes::Deriv;
+    using Real = typename Coord::value_type;
+    using DataVecCoord = core::objectmodel::Data<VecCoord>;
+    using DataVecDeriv = core::objectmodel::Data<VecDeriv>;
     
     /// applied force for all the points
     Data< Real > d_force;

@@ -87,8 +87,8 @@ void NeedleTracker::computeSlicesBB()
         Coord& sliceMax = m_max[i];
 
         // init max BB values
-        sliceMin = Coord(FLT_MAX, FLT_MAX, FLT_MAX);
-        sliceMax = Coord(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+        sliceMin = Coord(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+        sliceMax = Coord(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
         size_t nbrDof = meca->getSize();
         for (int j = 0; j < nbrDof; ++j)

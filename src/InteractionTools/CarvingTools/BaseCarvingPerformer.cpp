@@ -56,7 +56,7 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
         const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
         const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
 
-        for each (contactInfo * cInfo in m_triangleContacts)
+        for (contactInfo * cInfo : m_triangleContacts)
         {
             std::vector<Vector3> pos;
             sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
@@ -81,7 +81,7 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
         const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
         const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
 
-        for each (contactInfo * cInfo in m_pointContacts)
+        for (contactInfo * cInfo : m_pointContacts)
         {
             std::vector<Vector3> pos;
             sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);

@@ -38,7 +38,7 @@ void SurfaceCarvingPerformer::filterContacts()
     sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
 
     // Filter tetra
-    for each (contactInfo * cInfo in m_pointContacts)
+    for (contactInfo * cInfo : m_pointContacts)
     {
         if (cInfo->dist > _carvingDistance) // only carving points
             continue;
@@ -131,7 +131,7 @@ void SurfaceCarvingPerformer::doMoveCarve1()
     const SReal carv2x3 = _carvingDistance * _carvingDistance * 4;
     const SReal invCarv2x3 = 1 / carv2x3;
 
-    for each (contactInfo * cInfo in m_pointContacts)
+    for (contactInfo * cInfo : m_pointContacts)
     {
         if (cInfo->dist > _carvingDistance) // only carving points
             continue;
@@ -199,7 +199,7 @@ void SurfaceCarvingPerformer::doMoveCarve2()
     const SReal carv2x3 = _carvingDistance * _carvingDistance * 4;
     const SReal invCarv2x3 = 1 / carv2x3;
 
-    for each (contactInfo * cInfo in m_pointContacts)
+    for (contactInfo * cInfo : m_pointContacts)
     {
         if (cInfo->dist > _carvingDistance) // only carving points
             continue;
