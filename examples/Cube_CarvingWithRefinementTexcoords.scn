@@ -10,7 +10,7 @@
     <RequiredPlugin name="SofaMeshCollision"/> <!-- Needed to use components [PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
     <RequiredPlugin name="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
-    <VisualStyle displayFlags="showCollisionModels hideVisual" />
+    <VisualStyle displayFlags="hideCollisionModels showVisual" />
   
     <DefaultAnimationLoop />
     <DefaultVisualManagerLoop />
@@ -24,16 +24,21 @@
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
     <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="1" carvingWithRefinement="1" drawContacts="0"/>
+        carvingWithBurning="1" carvingWithRefinement="1" drawContacts="0"/>
 
     <Node name="carvingElement">
-        <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
-        <UniformMass name="Mass" totalMass="10.0" />
+        <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
+        <UniformMass name="Mass" totalMass="10.0" template="Rigid3d"/>
         <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+        <Node name="VisuTool" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/sphere.obj" scale3d="0.1 0.1 0.1"/>
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1" color="0.0 1.0 0.0 1.0" />
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
+        </Node>        
     </Node>
 
     <Node name="Hexa2Tetra" >
-        <RegularGridTopology name="HexaTop" n="5 5 5" min="0 0 0" max="10 10 10" />
+        <RegularGridTopology name="HexaTop" n="8 8 8" min="0 0 0" max="10 10 10" />
         <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
         <TetrahedronSetTopologyModifier name="Modifier"/>
         <Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />

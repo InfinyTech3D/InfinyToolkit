@@ -10,7 +10,7 @@
     <RequiredPlugin name="SofaMeshCollision"/> <!-- Needed to use components [PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
     <RequiredPlugin name="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
-    <VisualStyle displayFlags="showCollisionModels hideVisual" />
+    <VisualStyle displayFlags="hideCollisionModels showVisual" />
   
     <DefaultAnimationLoop />
     <DefaultVisualManagerLoop />
@@ -27,9 +27,14 @@
     carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0"/>
 
     <Node name="carvingElement">
-        <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
-        <UniformMass name="Mass" totalMass="10.0" />
+        <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
+        <UniformMass name="Mass" totalMass="10.0" template="Rigid3d"/>
         <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+        <Node name="VisuTool" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/sphere.obj" scale3d="0.1 0.1 0.1"/>
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1" color="0.0 1.0 0.0 1.0" />
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
+        </Node>        
     </Node>
 
     <Node name="Hexa2Tetra" >
@@ -63,7 +68,7 @@
             <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
-                <OglModel name="Visual" color="green" />
+                <OglModel name="Visual" color="red" />
                 <IdentityMapping input="@../../Volume" output="@Visual" />
             </Node>
         </Node>

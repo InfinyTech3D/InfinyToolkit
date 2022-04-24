@@ -23,12 +23,18 @@
     <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
-    <AdvancedCarvingManager name="ACarving" active="0" refineDistance="1.0" carvingDistance="0.5" drawContacts="1"/>
+    <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" carvingDistance="0.5" 
+        carvingWithBurning="1" drawContacts="1"/>
 
     <Node name="carvingElement">
-        <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
-        <UniformMass name="Mass" totalMass="10.0" />
+        <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
+        <UniformMass name="Mass" totalMass="10.0" template="Rigid3d"/>
         <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+        <Node name="VisuTool" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/sphere.obj" scale3d="0.1 0.1 0.1"/>
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1" color="0.0 1.0 0.0 1.0" />
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
+        </Node>        
     </Node>
 
     <Node name="Hexa2Tetra" >
