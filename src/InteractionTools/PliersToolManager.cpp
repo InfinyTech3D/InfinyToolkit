@@ -14,8 +14,8 @@
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
 
-#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
-#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
+#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
+#include <SofaBaseTopology/TetrahedronSetTopologyModifier.h>
 
 #include <SofaBaseCollision/SphereModel.h>
 
@@ -33,7 +33,7 @@ SOFA_DECL_CLASS(PliersToolManager)
 
 using namespace defaulttype;
 using namespace sofa::core::topology;
-using namespace sofa::component::topology::container::dynamic;
+using namespace sofa::component::topology;
 
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
 using SphereModel = sofa::component::collision::SphereCollisionModel< sofa::defaulttype::Vec3Types >;

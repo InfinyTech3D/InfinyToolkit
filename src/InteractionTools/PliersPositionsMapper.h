@@ -12,7 +12,7 @@
 #include <sofa/core/DataEngine.h>
 
 
-namespace sofa::component::topology::container::dynamic
+namespace sofa::component::topology
 {
     class TetrahedronSetTopologyContainer;
 }
@@ -20,7 +20,7 @@ namespace sofa::component::topology::container::dynamic
 namespace sofa::component::engine
 {
 
-using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
+using sofa::component::topology::TetrahedronSetTopologyContainer;
 /** 
 *
 */

@@ -212,7 +212,7 @@ void RefineCarvingPerformer::surfaceCarving2()
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
 
-    sofa::component::topology::container::dynamic::TetrahedronSetGeometryAlgorithms< sofa::defaulttype::Vec3Types>* tetraGeo = nullptr;
+    sofa::component::topology::TetrahedronSetGeometryAlgorithms< sofa::defaulttype::Vec3Types>* tetraGeo = nullptr;
     m_topologyCon->getContext()->get(tetraGeo);
     
     // filter triangles on border

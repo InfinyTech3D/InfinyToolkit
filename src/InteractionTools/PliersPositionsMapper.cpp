@@ -12,7 +12,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 
-#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
+#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
 #include <sofa/type/Vec.h>
 
 
