@@ -19,6 +19,7 @@
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/helper/system/thread/CTime.h>
 
 namespace sofa
 {
@@ -29,6 +30,7 @@ namespace component
 namespace controller
 {
 using namespace sofa::type;
+using namespace sofa::helper::system::thread;
 
 HapticEmulatorTask::HapticEmulatorTask(HapticEmulator* ptr, CpuTask::Status* pStatus)
     :CpuTask(pStatus)
@@ -91,7 +93,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
     if (m_driver->m_terminate == false)
     {
         TaskScheduler::getInstance()->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
-        sleep(100);
+        CTime::sleep(100);
     }
 
     return MemoryAlloc::Dynamic;
@@ -139,7 +141,7 @@ void HapticEmulator::clearDevice()
     while (_simStepStatus.isBusy())
     {
         std::cout << "Waiting to finish" << std::endl;
-        sleep(1);
+        CTime::sleep(1);
     }
     _taskScheduler->stop();
 }
