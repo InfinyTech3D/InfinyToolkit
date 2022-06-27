@@ -11,7 +11,7 @@
 #include <InteractionTools/config.h>
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/type/Vec.h>
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 
 namespace sofa
 {
@@ -39,7 +39,7 @@ public:
     typedef defaulttype::Vec3Types DataTypes;
     typedef DataTypes::Coord Coord;
     typedef DataTypes::Real Real;
-    typedef sofa::component::container::MechanicalObject<sofa::defaulttype::Vec3Types> MechanicalObject3;
+    typedef sofa::component::statecontainer::MechanicalObject<sofa::defaulttype::Vec3Types> MechanicalObject3;
 
     NeedleTracker();
     virtual ~NeedleTracker();

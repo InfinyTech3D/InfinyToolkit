@@ -19,7 +19,6 @@
 #include <sofa/simulation/CollisionEndEvent.h>
 
 #include <sofa/core/topology/TopologicalMapping.h>
-#include <SofaUserInteraction/TopologicalChangeManager.h>
 #include <sofa/helper/AdvancedTimer.h>
 
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>

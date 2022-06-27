@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace sofa::component::controller
+namespace sofa::component::haptics
 {
 
 using namespace sofa::type;
@@ -186,4 +186,4 @@ void BruteForceFeedback::computeWrench(const sofa::defaulttype::SolidTypes<SReal
 static int nullForceFeedbackClass = sofa::core::RegisterObject("Null force feedback for haptic feedback device")
         .add< BruteForceFeedback >();
 
-} // namespace sofa::component::controller
+} // namespace sofa::component::haptics

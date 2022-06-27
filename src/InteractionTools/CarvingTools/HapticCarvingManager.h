@@ -10,7 +10,7 @@
 
 #include <InteractionTools/config.h>
 #include <SofaCarving/CarvingManager.h>
-#include <SofaHaptics/ForceFeedback.h>
+#include <sofa/component/haptics/ForceFeedback.h>
 
 namespace sofa::component::collision
 {
@@ -48,7 +48,7 @@ protected:
 
     
 protected:
-    sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
+    sofa::component::haptics::ForceFeedback::SPtr m_forceFeedback;
     
 };
 

@@ -9,7 +9,7 @@
 
 #include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
 #include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
@@ -134,7 +134,7 @@ bool RefineCarvingPerformer::runPerformer()
 
 void RefineCarvingPerformer::simpleCarving()
 {
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::ReadAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->read(core::VecCoordId::position());
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
@@ -164,7 +164,7 @@ void RefineCarvingPerformer::simpleCarving()
 void RefineCarvingPerformer::surfaceCarving()
 {
     std::cout << "RefineCarvingPerformer::surfaceCarving()" << std::endl;
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
@@ -208,7 +208,7 @@ void RefineCarvingPerformer::surfaceCarving2()
     std::map<Topology::TriangleID, Topology::TetrahedronID> triIds_surf;
     m_triIds.clear();
 
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
 

@@ -12,7 +12,6 @@
 #include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/BaseVector.h>
 
 #include <sofa/core/topology/TopologySubsetData.inl>
 

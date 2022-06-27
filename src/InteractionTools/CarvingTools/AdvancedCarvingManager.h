@@ -23,8 +23,6 @@
 
 #include <sofa/core/topology/TopologyData.h>
 
-#include <SofaHaptics/ForceFeedback.h>
-
 #include <fstream>
 #include <thread>
 #include <mutex>

@@ -10,7 +10,7 @@
 #include <InteractionTools/CarvingTools/BurningPerformer.h>
 #include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 
 namespace sofa::component::controller
 {

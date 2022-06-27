@@ -15,7 +15,7 @@
 #include <sofa/core/objectmodel/Event.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/BaseController.h>
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 #include <sofa/simulation/Node.h>
 
 #include <fstream>
@@ -44,7 +44,7 @@ public:
 	typedef DataTypes::Coord Coord;
 	typedef DataTypes::Real Real;
 	typedef DataTypes::VecCoord VecCoord;
-    typedef sofa::component::container::MechanicalObject<Vec3Types> MechanicalObject3;
+    typedef sofa::component::statecontainer::MechanicalObject<Vec3Types> MechanicalObject3;
 			
 	
 public:

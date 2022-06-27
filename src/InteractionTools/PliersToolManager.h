@@ -10,8 +10,8 @@
 
 #include <InteractionTools/config.h>
 
-#include <SofaDeformable/StiffSpringForceField.h>
-#include <SofaGeneralObjectInteraction/AttachConstraint.h>
+#include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
+#include <sofa/component/constraint/projective/AttachConstraint.h>
 
 namespace sofa
 {
@@ -22,9 +22,9 @@ namespace component
 namespace misc
 {
 
-typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
-typedef sofa::component::interactionforcefield::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
-typedef sofa::component::projectiveconstraintset::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
+typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
+typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
+typedef sofa::component::constraint::projective::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
 
 /** 
 *

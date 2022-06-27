@@ -17,7 +17,7 @@
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
 
-#include <SofaBaseCollision/SphereModel.h>
+#include <sofa/component/collision/geometry/SphereModel.h>
 
 
 namespace sofa
@@ -36,7 +36,7 @@ using namespace sofa::core::topology;
 using namespace sofa::component::topology::container::dynamic;
 
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;
-using SphereModel = sofa::component::collision::SphereCollisionModel< sofa::defaulttype::Vec3Types >;
+using SphereModel = sofa::component::collision::geometry::SphereCollisionModel< sofa::defaulttype::Vec3Types >;
 
 using sofa::core::objectmodel::KeypressedEvent;
 using sofa::core::objectmodel::KeyreleasedEvent;

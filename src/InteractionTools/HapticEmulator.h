@@ -14,14 +14,14 @@
 #include <sofa/defaulttype/SolidTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
 
-#include <SofaUserInteraction/Controller.h>
-#include <SofaHaptics/ForceFeedback.h>
+#include <sofa/component/controller/Controller.h>
+#include <sofa/component/haptics/ForceFeedback.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
 
 #include <sofa/simulation/Node.h>
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 
 
 namespace sofa 
@@ -97,7 +97,7 @@ public:
     void initDevice(int cptInitPass = 0);
     void clearDevice();
     void activateTool(bool value);
-    ForceFeedback::SPtr m_forceFeedback;
+    sofa::component::haptics::ForceFeedback::SPtr m_forceFeedback;
 
 
     void applyTranslation(Vec3 translation);
@@ -110,7 +110,7 @@ public:
     void moveBackward();
 
     simulation::Node::SPtr m_omniVisualNode;
-    component::container::MechanicalObject<sofa::defaulttype::Rigid3dTypes>::SPtr rigidDOF;
+    sofa::component::statecontainer::MechanicalObject<sofa::defaulttype::Rigid3dTypes>::SPtr rigidDOF;
 
     int m_errorDevice; ///< Int detecting any error coming from device / detection
     bool m_isActivated; /// <Boolean storing hte information if Sofa has started the simulation (changed by AnimateBeginEvent)

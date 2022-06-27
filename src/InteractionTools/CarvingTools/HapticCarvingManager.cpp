@@ -19,7 +19,7 @@
 #include <sofa/simulation/CollisionEndEvent.h>
 
 #include <sofa/core/topology/TopologicalMapping.h>
-#include <SofaUserInteraction/TopologicalChangeManager.h>
+#include <sofa/gui/component/performer/TopologicalChangeManager.h>
 #include <sofa/helper/AdvancedTimer.h>
 #include <sofa/helper/ScopedAdvancedTimer.h>
 
@@ -49,7 +49,7 @@ void HapticCarvingManager::init()
     CarvingManager::init();
 
     // check if forcefeedback
-    m_forceFeedback = getContext()->get<sofa::component::controller::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    m_forceFeedback = getContext()->get<sofa::component::haptics::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
     if (m_forceFeedback)
         msg_info() << "Forcefeedback found: " << m_forceFeedback->getName();
     else
@@ -120,7 +120,7 @@ void HapticCarvingManager::doCarve()
 
         if (!elemsToRemove.empty())
         {
-            static TopologicalChangeManager manager;
+            static sofa::gui::component::performer::TopologicalChangeManager manager;
             nbelems += manager.removeItemsFromCollisionModel(targetModel, elemsToRemove);
         }
     }

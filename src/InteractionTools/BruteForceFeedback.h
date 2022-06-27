@@ -9,7 +9,7 @@
 #pragma once
 
 #include <InteractionTools/config.h>
-#include <SofaHaptics/ForceFeedback.h>
+#include <sofa/component/haptics/ForceFeedback.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
@@ -19,15 +19,15 @@ namespace sofa
 namespace component
 {
 
-namespace controller
+namespace haptics
 {
 
 
 /// @brief Null force feedback for haptic feedback device
-class SOFA_INTERACTIONTOOLS_API BruteForceFeedback : public sofa::component::controller::ForceFeedback
+class SOFA_INTERACTIONTOOLS_API BruteForceFeedback : public sofa::component::haptics::ForceFeedback
 {
 public:
-    SOFA_CLASS(BruteForceFeedback,sofa::component::controller::ForceFeedback);
+    SOFA_CLASS(BruteForceFeedback,sofa::component::haptics::ForceFeedback);
     void init() override;
 
     void computeForce(SReal x, SReal y, SReal z, SReal u, SReal v, SReal w, SReal q, SReal& fx, SReal& fy, SReal& fz) override;
@@ -45,7 +45,7 @@ protected:
     sofa::type::Vector3 currentForce;
 };
 
-} // namespace controller
+} // namespace haptics
 
 } // namespace component
 

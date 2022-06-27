@@ -2,7 +2,12 @@
 
 @PACKAGE_INIT@
 
-find_package(SofaGeneral REQUIRED)
+find_package(Sofa.Component.MechanicalLoad REQUIRED)
+find_package(Sofa.Component.StateContainer REQUIRED)
+find_package(Sofa.Component.Controller REQUIRED)
+find_package(Sofa.Component.Haptics REQUIRED)
+find_package(Sofa.Component.Constraint.Projective REQUIRED)
+find_package(SofaCarving REQUIRED)
 
 if(NOT TARGET @PROJECT_NAME@)
 	include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")

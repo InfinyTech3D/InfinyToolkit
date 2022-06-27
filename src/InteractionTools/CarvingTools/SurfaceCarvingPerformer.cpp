@@ -10,7 +10,7 @@
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
 #include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
 
-#include <SofaBaseMechanics/MechanicalObject.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
 
 namespace sofa::component::controller
 {
@@ -120,7 +120,7 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 void SurfaceCarvingPerformer::doMoveCarve1()
 {
     SReal carveFactor = 0.1f; // d_carvingSpeed.getValue();
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
 
@@ -187,7 +187,7 @@ void SurfaceCarvingPerformer::doMoveCarve1()
 void SurfaceCarvingPerformer::doMoveCarve2()
 {
     SReal carveFactor = 1.0f; // d_carvingSpeed.getValue();
-    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
+    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > restVertices = meca->write(core::VecCoordId::resetPosition());
@@ -404,7 +404,7 @@ void SurfaceCarvingPerformer::doMoveCarve2()
 //    type::vector<unsigned int> unique_SPI = MoveContactVertex(ShavingPointIdx);
 //
 //    using sofa::core::topology::BaseMeshTopology;
-//    sofa::component::container::MechanicalObject< sofa::defaulttype::Vec3Types>* mo_coll = NULL;
+//    component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* mo_coll = NULL;
 //    modelSurface->getContext()->get(mo_coll);
 //    helper::WriteAccessor< Data<VecCoord> > x_wA = mo_coll->write(core::VecCoordId::position());
 //    type::vector<unsigned int>::iterator it;
