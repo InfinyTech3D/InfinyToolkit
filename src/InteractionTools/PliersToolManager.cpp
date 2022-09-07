@@ -375,9 +375,6 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
 
     }
 
-    sout << m_idgrabed;
-
-
 	// Reduce collision spheres
 	if (m_idgrabed.size() > 0)
 	{
