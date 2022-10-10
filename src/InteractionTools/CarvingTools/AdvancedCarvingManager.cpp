@@ -23,9 +23,11 @@
 
 #include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
 #include <InteractionTools/CarvingTools/BurningPerformer.h>
-#include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
 
-#include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
+#ifdef HAS_MESHREFINEMENT_PLUGIN
+#include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
+#endif
+
 #include <sofa/core/behavior/BaseMechanicalState.h>
 
 #include <sofa/core/topology/TopologyData.inl>
@@ -146,7 +148,11 @@ void AdvancedCarvingManager::bwdInit()
         }
 
         if (!alreadyRegistered && d_carvingWithRefinement.getValue()) {
+#ifdef HAS_MESHREFINEMENT_PLUGIN
             m_carvingPerformer.push_back(new RefineCarvingPerformer(topo, this));
+#else
+            msg_warning() << "Option carvingWithRefinement require MeshRefienement plugin. Please check https://www.sofa-framework.org/applications/marketplace/cutting-mesh-refinement/ for more information.";
+#endif
         }
     }
 

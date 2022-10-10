@@ -7,7 +7,7 @@
 #  Written by Erik Pernod <erik.pernod@infinytech3d.com>, September 2019     #
 ##############################################################################
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(InteractionTools VERSION 0.1)
 
 find_package(Sofa.Component.StateContainer REQUIRED)
@@ -31,8 +31,8 @@ set(HEADER_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.h
     ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.inl
     
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
+    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.h
 
@@ -48,11 +48,10 @@ set(SOURCE_FILES
     ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
     
+    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.cpp
-
 
     ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
 )
@@ -60,11 +59,16 @@ set(SOURCE_FILES
 find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
-    list(APPEND HEADER_FILES ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h)
-	list(APPEND HEADER_FILES ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h)
+    list(APPEND HEADER_FILES 
+        ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h            
+        ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+    )
 	
-    list(APPEND SOURCE_FILES ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp)
-	list(APPEND SOURCE_FILES ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp)
+    list(APPEND SOURCE_FILES 
+        ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp        
+        ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+	)
+    
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 

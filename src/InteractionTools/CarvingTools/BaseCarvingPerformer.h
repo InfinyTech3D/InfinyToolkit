@@ -43,7 +43,7 @@ class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer
 public:
 	BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
 
-    ~BaseCarvingPerformer();
+    virtual ~BaseCarvingPerformer();
 
     void clearContacts();
     
