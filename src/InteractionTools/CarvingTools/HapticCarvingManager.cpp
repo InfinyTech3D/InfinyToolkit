@@ -59,11 +59,11 @@ void HapticCarvingManager::init()
 
 void HapticCarvingManager::doCarve()
 {
-    if (!m_carvingReady)
+    if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
     // get the collision output
-    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = m_detectionNP->getDetectionOutputs();
+    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = l_detectionNP.get()->getDetectionOutputs();
     if (detectionOutputs.size() == 0)
         return;
 
@@ -73,17 +73,18 @@ void HapticCarvingManager::doCarve()
         m_forceFeedback->setLock(true);
 
     // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
-    const ContactVector* contacts = NULL;
+    const ContactVector* contacts = nullptr;
+    sofa::core::CollisionModel* toolCollisionModel = l_toolModel.get();
     for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
     {
         sofa::core::CollisionModel* collMod1 = it->first.first;
         sofa::core::CollisionModel* collMod2 = it->first.second;
         sofa::core::CollisionModel* targetModel = nullptr;
 
-        if (collMod1 == m_toolCollisionModel && collMod2->hasTag(sofa::core::objectmodel::Tag("CarvingSurface"))) {
+        if (collMod1 == toolCollisionModel && collMod2->hasTag(sofa::core::objectmodel::Tag("CarvingSurface"))) {
             targetModel = collMod2;
         }
-        else if (collMod2 == m_toolCollisionModel && collMod1->hasTag(sofa::core::objectmodel::Tag("CarvingSurface"))) {
+        else if (collMod2 == toolCollisionModel && collMod1->hasTag(sofa::core::objectmodel::Tag("CarvingSurface"))) {
             targetModel = collMod1;
         }
         else {
@@ -113,7 +114,7 @@ void HapticCarvingManager::doCarve()
 
             if (c.value < d_carvingDistance.getValue())
             {
-                int triangleIdx = (c.elem.first.getCollisionModel() == m_toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
+                int triangleIdx = (c.elem.first.getCollisionModel() == toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
                 elemsToRemove.push_back(triangleIdx);
             }
         }
