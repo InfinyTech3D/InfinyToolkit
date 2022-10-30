@@ -15,7 +15,6 @@ find_package(Sofa.Component.MechanicalLoad REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.Component.Constraint.Projective REQUIRED)
-find_package(SofaCarving REQUIRED)
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
