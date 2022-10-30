@@ -7,8 +7,8 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
-#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
 namespace sofa::component::controller

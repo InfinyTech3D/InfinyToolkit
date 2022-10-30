@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 
 namespace sofa
 {
@@ -18,12 +18,12 @@ namespace component
 //Here are just several convenient functions to help user to know what contains the plugin
 
 extern "C" {
-    SOFA_INTERACTIONTOOLS_API void initExternalModule();
-    SOFA_INTERACTIONTOOLS_API const char* getModuleName();
-    SOFA_INTERACTIONTOOLS_API const char* getModuleVersion();
-    SOFA_INTERACTIONTOOLS_API const char* getModuleLicense();
-    SOFA_INTERACTIONTOOLS_API const char* getModuleDescription();
-    SOFA_INTERACTIONTOOLS_API const char* getModuleComponentList();
+    SOFA_INFINYTOOLKIT_API void initExternalModule();
+    SOFA_INFINYTOOLKIT_API const char* getModuleName();
+    SOFA_INFINYTOOLKIT_API const char* getModuleVersion();
+    SOFA_INFINYTOOLKIT_API const char* getModuleLicense();
+    SOFA_INFINYTOOLKIT_API const char* getModuleDescription();
+    SOFA_INFINYTOOLKIT_API const char* getModuleComponentList();
 }
 
 void initExternalModule()
@@ -37,7 +37,7 @@ void initExternalModule()
 
 const char* getModuleName()
 {
-    return "InteractionTools";
+    return "InfinyToolkit";
 }
 
 const char* getModuleVersion()

@@ -10,7 +10,7 @@
 #define SOFA_COMPONENT_FORCEFIELD_MIDDLEFORCEFIELD_CPP
 
 #include <sofa/core/ObjectFactory.h>
-#include <InteractionTools/MiddleForceField.inl>
+#include <InfinyToolkit/MiddleForceField.inl>
 
 namespace sofa
 {
@@ -27,7 +27,7 @@ int MiddleForceFieldClass = core::RegisterObject("Middle interpolated force appl
         .add< MiddleForceField<Vec3Types> >()
 
         ;
-template class SOFA_INTERACTIONTOOLS_API MiddleForceField<Vec3Types>;
+template class SOFA_INFINYTOOLKIT_API MiddleForceField<Vec3Types>;
 
 } // namespace forcefield
 

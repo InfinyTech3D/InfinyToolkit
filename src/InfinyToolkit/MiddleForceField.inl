@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/MiddleForceField.h>
+#include <InfinyToolkit/MiddleForceField.h>
 #include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>

@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/type/Vec.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
@@ -33,7 +33,7 @@ using namespace sofa::defaulttype;
 *      if an odd number of triangle is intersected by the ray, needle is inside mesh otherwise outside.
 * If needle is inside a mesh, @sa d_sliceName contain the name of this mesh. If none, d_sliceName return "None".
 */
-class SOFA_INTERACTIONTOOLS_API NeedleTracker : public sofa::core::behavior::BaseController
+class SOFA_INFINYTOOLKIT_API NeedleTracker : public sofa::core::behavior::BaseController
 {
 public:
     typedef defaulttype::Vec3Types DataTypes;

@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/PliersPositionsMapper.h>
+#include <InfinyToolkit/PliersPositionsMapper.h>
 
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>

@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 
 #include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
 #include <sofa/component/constraint/projective/AttachConstraint.h>
@@ -29,7 +29,7 @@ typedef sofa::component::constraint::projective::AttachConstraint< sofa::default
 /** 
 *
 */
-class SOFA_INTERACTIONTOOLS_API PliersToolManager: public core::objectmodel::BaseObject
+class SOFA_INFINYTOOLKIT_API PliersToolManager: public core::objectmodel::BaseObject
 {
 public:
     SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);

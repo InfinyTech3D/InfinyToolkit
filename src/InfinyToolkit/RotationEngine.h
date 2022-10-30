@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/core/DataEngine.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/objectmodel/BaseObject.h>
@@ -35,7 +35,7 @@ namespace engine
     using sofa::type::Vector3;
     using sofa::core::DataEngine;
 
-class SOFA_INTERACTIONTOOLS_API RotationEngine : public DataEngine
+class SOFA_INFINYTOOLKIT_API RotationEngine : public DataEngine
 {
 public:
 	SOFA_CLASS(RotationEngine, DataEngine);

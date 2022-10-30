@@ -8,10 +8,10 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/component/haptics/ForceFeedback.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
 namespace sofa
 {
@@ -24,7 +24,7 @@ namespace haptics
 
 
 /// @brief Null force feedback for haptic feedback device
-class SOFA_INTERACTIONTOOLS_API BruteForceFeedback : public sofa::component::haptics::ForceFeedback
+class SOFA_INFINYTOOLKIT_API BruteForceFeedback : public sofa::component::haptics::ForceFeedback
 {
 public:
     SOFA_CLASS(BruteForceFeedback,sofa::component::haptics::ForceFeedback);

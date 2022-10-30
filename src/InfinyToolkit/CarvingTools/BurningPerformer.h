@@ -8,13 +8,13 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
 namespace sofa::component::controller
 {
 using namespace sofa::core::topology;
 
-class SOFA_INTERACTIONTOOLS_API BurningPerformer : public BaseCarvingPerformer
+class SOFA_INFINYTOOLKIT_API BurningPerformer : public BaseCarvingPerformer
 {
 public:
 	using TexCoord = sofa::type::Vec<2, float>;
