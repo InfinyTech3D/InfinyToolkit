@@ -41,7 +41,7 @@ public:
     void computeForce(SReal x, SReal y, SReal z, SReal u, SReal v, SReal w, SReal q, SReal& fx, SReal& fy, SReal& fz) override;
     void computeWrench(const sofa::defaulttype::SolidTypes<SReal>::Transform &world_H_tool, const sofa::defaulttype::SolidTypes<SReal>::SpatialVector &V_tool_world, sofa::defaulttype::SolidTypes<SReal>::SpatialVector &W_tool_world ) override;
 
-    void setCurrentForce(sofa::type::Vector3 _force) { currentForce = _force; }
+    void setCurrentForce(sofa::type::Vec3 _force) { currentForce = _force; }
 
     Data< double > forceCoef; ///< multiply haptic force by this coef.
 
@@ -50,7 +50,7 @@ protected:
 protected:
     sofa::infinytoolkit::AdvancedCarvingManager::SPtr m_ACarving;
 
-    sofa::type::Vector3 currentForce;
+    sofa::type::Vec3 currentForce;
 };
 
 } // namespace sofa::infinytoolkit

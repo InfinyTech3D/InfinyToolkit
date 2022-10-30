@@ -50,14 +50,14 @@ HapticEmulatorTask::HapticEmulatorTask(HapticEmulator* ptr, CpuTask::Status* pSt
 
 HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 {
-    Vector3 currentForce;
-    Vector3 pos_in_world;
+    Vec3 currentForce;
+    Vec3 pos_in_world;
     bool contact = false;
     long long duration;
     
     if (m_driver->m_forceFeedback)
     {
-        //Vector3 pos(driver->m_omniData.transform[12+0]*0.1,driver->m_omniData.transform[12+1]*0.1,driver->m_omniData.transform[12+2]*0.1);        
+        //Vec3 pos(driver->m_omniData.transform[12+0]*0.1,driver->m_omniData.transform[12+1]*0.1,driver->m_omniData.transform[12+2]*0.1);        
         m_driver->lockPosition.lock();
         pos_in_world = m_driver->d_positionBase.getValue();// +driver->d_orientationTool.getValue().rotate(pos*driver->d_scale.getValue());
         m_driver->lockPosition.unlock();
@@ -88,7 +88,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
         if (norm > maxInputForceFeedback) {
             msg_warning(m_driver) << "###################################################";
             msg_warning(m_driver) << "BAD forceFeedback: " << currentForce << " | " << pos_in_world << " -> " << norm << " -> duration: " << duration;
-            currentForce = Vector3(0, 0, 0);
+            currentForce = Vec3(0, 0, 0);
         }        
     }
 
@@ -165,7 +165,7 @@ bool HapticEmulator::findNode(sofa::simulation::Node::SPtr node)
 
     // check its children
     sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
-    for (int i = 0; i < childNodes.size(); ++i)
+    for (Index i = 0; i < childNodes.size(); ++i)
     {
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);
         if (node->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
@@ -190,7 +190,7 @@ void HapticEmulator::bwdInit()
     sofa::simulation::Node::SPtr rootNode = static_cast<simulation::Node*>(this->getContext()->getRootContext());
     sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
 
-    for (int i = 0; i < childNodes.size(); ++i)
+    for (Index i = 0; i < childNodes.size(); ++i)
     {
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);
 
@@ -262,7 +262,7 @@ void HapticEmulator::updatePosition()
 
     lockPosition.unlock();
 
-    //Vector3 currentForce;
+    //Vec3 currentForce;
     //m_forceFeedback->computeForce(posDevice[0], posDevice[1], posDevice[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
     /*
     //copy angle
@@ -274,7 +274,7 @@ void HapticEmulator::updatePosition()
     angle[5] = -(M_PI/2)-m_simuData.angle2[2];
 
     //copy the position of the tool
-    Vector3 position;
+    Vec3 position;
     position[0] = m_simuData.transform[12+0] * 0.1;
     position[1] = m_simuData.transform[12+1] * 0.1;
     position[2] = m_simuData.transform[12+2] * 0.1;

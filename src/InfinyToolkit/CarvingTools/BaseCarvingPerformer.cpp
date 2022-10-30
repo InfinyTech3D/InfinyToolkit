@@ -72,12 +72,12 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
         for (contactInfo * cInfo : m_triangleContacts)
         {
-            std::vector<Vector3> pos;
+            std::vector<Vec3> pos;
             sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
             sofa::core::topology::Topology::Triangle tri = m_topologyCon->getTriangle(cInfo->elemId);
 
             for (unsigned int j = 0; j < 3; j++) {
-                pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+                pos.push_back(Vec3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
             }
 
             sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
@@ -97,7 +97,7 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
         for (contactInfo * cInfo : m_pointContacts)
         {
-            std::vector<Vector3> pos;
+            std::vector<Vec3> pos;
             sofa::type::RGBAColor color4(1.0f, 0.0, 0.0f, 1.0);
             if (cInfo->dist < _carvingDistance)
                 color4 = sofa::type::RGBAColor(0.0f, 1.0, 0.0f, 1.0);
@@ -109,8 +109,8 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
         }
 
         contactInfo* cInfo = m_pointContacts[0];
-        vparams->drawTool()->drawSphere(cInfo->pointA, _refineDistance, sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
-        vparams->drawTool()->drawSphere(cInfo->pointA, _carvingDistance, sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
+        vparams->drawTool()->drawSphere(cInfo->pointA, float(_refineDistance), sofa::type::RGBAColor(0.0f, 0.0f, 1.0f, 0.8f));
+        vparams->drawTool()->drawSphere(cInfo->pointA, float(_carvingDistance), sofa::type::RGBAColor(0.0f, 1.0f, 0.0f, 0.8f));
     }
 }
 

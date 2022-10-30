@@ -331,37 +331,37 @@ void RefineCarvingPerformer::draw(const core::visual::VisualParams* vparams)
     //if (m_topologyCon && !m_tetra2Filter.empty())
     //{
     //    sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
-    //    std::vector<Vector3> pos;
+    //    std::vector<Vec3> pos;
     //    
     //    for (auto tetraId : m_tetra2Filter)
     //    {
     //        const sofa::core::topology::Topology::Tetrahedron& tri = m_topologyCon->getTetrahedron(tetraId);
     //        for (unsigned int j = 0; j < 4; j++) {
-    //            pos.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //            pos.push_back(Vec3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
     //        }
     //    }
 
     //    vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.5f, 1.0f, 1.0f), 0.5f);
 
 
-    //    std::vector<Vector3> pos2;
+    //    std::vector<Vec3> pos2;
     //    for (auto triId : m_triIds)
     //    {
     //        const sofa::core::topology::Topology::Triangle& tri = m_topologyCon->getTriangle(triId);
     //        for (unsigned int j = 0; j < 3; j++) {
-    //            pos2.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //            pos2.push_back(Vec3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
     //        }
     //    }
     //    vparams->drawTool()->drawTriangles(pos2, sofa::type::RGBAColor(1.0f, 0.5f, 1.0f, 1.0f));
 
 
-    //    std::vector<Vector3> pos3;
+    //    std::vector<Vec3> pos3;
 
     //    //for (unsigned int i = 0; i < m_tetra2Filter2.size(); ++i)
     //    //{
     //    //    const sofa::core::topology::Topology::Tetrahedron& tri = m_topologyCon->getTetrahedron(m_tetra2Filter2[i]);
     //    //    for (unsigned int j = 0; j < 4; j++) {
-    //    //        pos3.push_back(Vector3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
+    //    //        pos3.push_back(Vec3(mstate->getPX(tri[j]), mstate->getPY(tri[j]), mstate->getPZ(tri[j])));
     //    //    }
     //    //}
 

@@ -76,8 +76,6 @@ public:
     typedef SolidTypes<double>::Transform Transform;
 
     typedef type::Vec3 Vec3;
-    typedef type::Vec4f Vec4f;
-    typedef type::Vector3 Vector3;
     typedef type::Quatf Quat;
 
     Data< std::string > d_deviceName; ///< Name of device Configuration
@@ -148,7 +146,7 @@ private:
 public:
     sofa::simulation::TaskScheduler* _taskScheduler;
     sofa::simulation::CpuTask::Status _simStepStatus;
-    sofa::type::Vector3 m_toolForceFeedBack;
+    sofa::type::Vec3 m_toolForceFeedBack;
 
     std::mutex lockPosition;
 
