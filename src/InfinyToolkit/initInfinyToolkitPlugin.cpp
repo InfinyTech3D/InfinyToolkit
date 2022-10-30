@@ -24,10 +24,7 @@
 
 #include <InfinyToolkit/config.h>
 
-namespace sofa
-{
-
-namespace component
+namespace sofa::infinytoolkit
 {
 
 //Here are just several convenient functions to help user to know what contains the plugin
@@ -76,9 +73,7 @@ const char* getModuleComponentList()
     return "W3CDriver";
 }
 
-}
-
-}
+} // namespace sofa::infinytoolkit
 
 SOFA_LINK_CLASS(PliersToolManager)
 SOFA_LINK_CLASS(PliersPositionsMapper)

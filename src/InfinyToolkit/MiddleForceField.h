@@ -26,15 +26,8 @@
 #include <InfinyToolkit/config.h>
 #include <sofa/core/behavior/ForceField.h>
 
-namespace sofa
+namespace sofa::infinytoolkit
 {
-
-namespace component
-{
-
-namespace forcefield
-{
-
 
 /** Apply forces changing to given degres of freedom. Some keyTimes are given
 * and the force to be applied is linearly interpolated between keyTimes. */
@@ -87,8 +80,4 @@ private :
 extern template class SOFA_INFINYTOOLKIT_API MiddleForceField<sofa::defaulttype::Vec3Types>;
 #endif //  !defined(SOFA_COMPONENT_FORCEFIELD_MiddleForceField_CPP)
 
-} // namespace forcefield
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

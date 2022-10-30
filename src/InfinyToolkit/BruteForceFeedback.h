@@ -28,15 +28,8 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
-namespace sofa
+namespace sofa::infinytoolkit
 {
-
-namespace component
-{
-
-namespace haptics
-{
-
 
 /// @brief Null force feedback for haptic feedback device
 class SOFA_INFINYTOOLKIT_API BruteForceFeedback : public sofa::component::haptics::ForceFeedback
@@ -55,13 +48,9 @@ public:
 protected:
     BruteForceFeedback();
 protected:
-    sofa::component::collision::AdvancedCarvingManager::SPtr m_ACarving;
+    sofa::infinytoolkit::AdvancedCarvingManager::SPtr m_ACarving;
 
     sofa::type::Vector3 currentForce;
 };
 
-} // namespace haptics
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

@@ -28,13 +28,7 @@
 #include <sofa/type/Vec.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace collision
+namespace sofa::infinytoolkit
 {
     
 using namespace sofa::defaulttype;
@@ -111,8 +105,4 @@ protected:
     bool isInit;
 };
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

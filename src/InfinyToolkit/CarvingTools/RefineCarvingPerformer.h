@@ -27,7 +27,7 @@
 
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
 
 class SOFA_INFINYTOOLKIT_API RefineCarvingPerformer : public BaseCarvingPerformer
@@ -64,5 +64,5 @@ protected:
 	Vec3 carvingPosition;
 };
 					
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit
 	

@@ -42,11 +42,10 @@
 #include <thread>
 #include <mutex>
 
-namespace sofa::component::collision
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::type;
-using namespace sofa::component::controller;
 using namespace sofa::core::topology;
 
 /**
@@ -63,7 +62,7 @@ public:
     using ToolCollisionModel = sofa::core::CollisionModel;
     using SurfaceCollisionModel = sofa::core::CollisionModel;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
-    using BaseCarvingPerformer = sofa::component::controller::BaseCarvingPerformer;
+    using BaseCarvingPerformer = sofa::infinytoolkit::BaseCarvingPerformer;
     using TetrahedronSetTopologyContainer = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
     
     using TexCoord = sofa::type::Vec<2, float>;
@@ -133,4 +132,4 @@ private:
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
 };
 
-} // namespace sofa::component::collision
+} // namespace sofa::infinytoolkit

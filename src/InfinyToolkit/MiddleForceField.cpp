@@ -27,13 +27,7 @@
 #include <sofa/core/ObjectFactory.h>
 #include <InfinyToolkit/MiddleForceField.inl>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace forcefield
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::defaulttype;
@@ -44,8 +38,4 @@ int MiddleForceFieldClass = core::RegisterObject("Middle interpolated force appl
         ;
 template class SOFA_INFINYTOOLKIT_API MiddleForceField<Vec3Types>;
 
-} // namespace forcefield
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

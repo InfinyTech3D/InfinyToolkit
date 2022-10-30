@@ -30,13 +30,7 @@
 
 #include <sofa/core/topology/TopologySubsetData.inl>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace forcefield
+namespace sofa::infinytoolkit
 {
 
 template<class DataTypes>
@@ -121,8 +115,4 @@ SReal MiddleForceField<DataTypes>::getPotentialEnergy(const core::MechanicalPara
 }
 
 
-} // namespace forcefield
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

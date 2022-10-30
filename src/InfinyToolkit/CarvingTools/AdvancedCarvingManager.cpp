@@ -48,7 +48,7 @@
 #include <sofa/core/topology/TopologyData.inl>
 
 
-namespace sofa::component::collision
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::core::topology;
@@ -357,4 +357,4 @@ void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
 }
 
 
-} // namespace sofa::component::collision
+} // namespace sofa::infinytoolkit

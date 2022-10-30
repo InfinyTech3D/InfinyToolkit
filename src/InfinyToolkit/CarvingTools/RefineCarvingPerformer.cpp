@@ -26,7 +26,7 @@
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
     using namespace sofa::core::topology;
 
@@ -378,4 +378,4 @@ void RefineCarvingPerformer::draw(const core::visual::VisualParams* vparams)
     //}
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit

@@ -27,7 +27,7 @@
 #include <SofaCarving/CarvingManager.h>
 #include <sofa/component/haptics/ForceFeedback.h>
 
-namespace sofa::component::collision
+namespace sofa::infinytoolkit
 {
 
 /**
@@ -67,4 +67,4 @@ protected:
     
 };
 
-} // namespace sofa::component::collision
+} // namespace sofa::infinytoolkit

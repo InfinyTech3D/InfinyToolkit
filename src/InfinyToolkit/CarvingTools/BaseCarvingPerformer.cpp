@@ -28,7 +28,7 @@
 #include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
 
 BaseCarvingPerformer::BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
@@ -115,4 +115,4 @@ void BaseCarvingPerformer::draw(const core::visual::VisualParams* vparams)
     }
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit

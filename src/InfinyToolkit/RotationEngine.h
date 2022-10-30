@@ -35,15 +35,7 @@
 
 #include <fstream>
 
-namespace sofa
-{
-
-//using namespace component::collision;
-
-namespace component
-{
-	
-namespace engine
+namespace sofa::infinytoolkit
 {
     using core::behavior::BaseMechanicalState;
     using sofa::defaulttype::Vec3Types;
@@ -86,8 +78,4 @@ protected:
     sofa::simulation::Node::SPtr m_toolNode;
 };
 					
-} // namespace engine
-	
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

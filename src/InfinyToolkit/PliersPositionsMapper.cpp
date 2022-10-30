@@ -31,13 +31,7 @@
 #include <sofa/type/Vec.h>
 
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace engine
+namespace sofa::infinytoolkit
 {
 
 SOFA_DECL_CLASS(PliersPositionsMapper)
@@ -260,8 +254,4 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 
 
 
-} // namespace misc
-
-} // namespace component
-
-} // namespace sofa
+} // sofa::infinytoolkit
