@@ -20,9 +20,9 @@ class contactInfo
 {
 public:
     unsigned int elemId; // in global mesh
-    Vector3 pointA;
-    Vector3 pointB;
-    Vector3 normal;
+    Vec3 pointA;
+    Vec3 pointB;
+    Vec3 normal;
     double dist;
 };
 

@@ -85,14 +85,14 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
     if (!m_tetraId2remove.empty())
     {
-        std::vector<Vector3> pos;
+        std::vector<Vec3> pos;
         sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
 
         for (auto tetraId : m_tetraId2remove)
         {
             const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
             for (unsigned int k = 0; k < 4; ++k)
-                pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
+                pos.push_back(Vec3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
 
             vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(1.0f, 0.0, 0.0f, 1.0), 0.7f);
         }
@@ -100,14 +100,14 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
     if (!m_tetraId2refine.empty())
     {
-        std::vector<Vector3> pos;
+        std::vector<Vec3> pos;
         sofa::core::behavior::BaseMechanicalState* mstate = m_topologyCon->getContext()->getMechanicalState();
 
         for (auto tetraId : m_tetraId2refine)
         {
             const sofa::core::topology::Topology::Tetrahedron& tetra = m_topologyCon->getTetrahedron(tetraId);
             for (unsigned int k = 0; k < 4; ++k)
-                pos.push_back(Vector3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
+                pos.push_back(Vec3(mstate->getPX(tetra[k]), mstate->getPY(tetra[k]), mstate->getPZ(tetra[k])));
 
             vparams->drawTool()->drawScaledTetrahedra(pos, sofa::type::RGBAColor(0.0f, 0.0, 1.0f, 1.0), 0.7f);
         }

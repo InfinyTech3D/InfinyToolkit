@@ -71,7 +71,7 @@ public:
     void setPlierAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
     void setPlierOrigin(Vec3 _zero) { zero = _zero; }
 
-    sofa::type::Vector3 m_min, m_max;
+    sofa::type::Vec3 m_min, m_max;
 
 
     void draw(const core::visual::VisualParams* vparams) override;

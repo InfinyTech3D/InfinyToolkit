@@ -29,7 +29,7 @@ BruteForceFeedback::BruteForceFeedback()
 void BruteForceFeedback::init()
 {
     this->ForceFeedback::init();
-    currentForce = sofa::type::Vector3(0, 0, 0);
+    currentForce = sofa::type::Vec3(0, 0, 0);
 
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
     m_ACarving = context->get<sofa::infinytoolkit::AdvancedCarvingManager>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);

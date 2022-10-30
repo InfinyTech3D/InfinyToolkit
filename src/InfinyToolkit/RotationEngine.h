@@ -24,7 +24,7 @@ namespace sofa::infinytoolkit
 {
     using core::behavior::BaseMechanicalState;
     using sofa::defaulttype::Vec3Types;
-    using sofa::type::Vector3;
+    using sofa::type::Vec3;
     using sofa::core::DataEngine;
 
 class SOFA_INFINYTOOLKIT_API RotationEngine : public DataEngine
@@ -54,7 +54,7 @@ public:
 	void handleEvent(sofa::core::objectmodel::Event* event);
 
 public:
-    Data< Vector3 > m_rotation;
+    Data< Vec3 > m_rotation;
 
 protected:
     void process();

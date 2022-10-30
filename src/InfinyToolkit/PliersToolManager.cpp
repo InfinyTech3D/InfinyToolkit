@@ -126,7 +126,7 @@ bool PliersToolManager::computeBoundingBox()
     }
 
 
-    for (int i = 0; i < m_mord1->getSize(); i++)
+    for (Index i = 0; i < m_mord1->getSize(); i++)
     {
         SReal x = m_mord1->getPX(i);
         SReal y = m_mord1->getPY(i);
@@ -147,7 +147,7 @@ bool PliersToolManager::computeBoundingBox()
             m_max[2] = z;
     }
 
-    for (int i = 0; i < m_mord2->getSize(); i++)
+    for (Index i = 0; i < m_mord2->getSize(); i++)
     {
         SReal x = m_mord2->getPX(i);
         SReal y = m_mord2->getPY(i);
@@ -188,7 +188,7 @@ void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
 
     // Add to m_idBroadPhase all model vertices inside the BB
     m_idBroadPhase.clear();
-    for (int i = 0; i < m_model->getSize(); i++)
+    for (Index i = 0; i < m_model->getSize(); i++)
     {
         SReal x = m_model->getPX(i);
         SReal y = m_model->getPY(i);
