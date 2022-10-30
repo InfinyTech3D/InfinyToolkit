@@ -26,7 +26,6 @@ BaseCarvingPerformer::BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr
 
 BaseCarvingPerformer::~BaseCarvingPerformer()
 {
-    std::cout << "BaseCarvingPerformer::~BaseCarvingPerformer()" << std::endl;
     clearContacts();
 }
 

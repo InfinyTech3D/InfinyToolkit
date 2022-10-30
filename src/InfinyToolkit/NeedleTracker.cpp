@@ -67,7 +67,7 @@ void NeedleTracker::init()
     }
     else 
     {
-        std::cout << "Needle found." << std::endl;
+        msg_info() << "Needle found.";
         m_needle = buffer[0];
     }
 }
@@ -116,8 +116,8 @@ std::string NeedleTracker::getPositionInSlices(const Coord& tipPosition)
     // first look at the BB
     for (int i = 0; i < m_slices.size(); ++i) 
     {
-        bool insideBB = testSliceBBIntersection(i, tipPosition);        
-        //std::cout << i << " -> " << insideBB << std::endl;
+        bool insideBB = testSliceBBIntersection(i, tipPosition);
+
         // check close intersection
         if (insideBB)
         {
@@ -144,7 +144,6 @@ bool NeedleTracker::testSliceBBIntersection(int sliceID, const Coord& tipPositio
 {
     const Coord& min = m_min[sliceID];
     const Coord& max = m_max[sliceID];
-    //std::cout << min << " - position: " << tipPosition << " - " << max << std::endl;
     for (int i = 0; i < 3; ++i)
     {
         if (tipPosition[i] < min[i])
@@ -210,7 +209,6 @@ bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPo
 
         if (intersect)
         {
-            //std::cout << "sliceID : " << sliceID << " | triID: " << i << " pos: " << out << std::endl;
             m_triPointInter.push_back(p0);
             m_triPointInter.push_back(p1);
             m_triPointInter.push_back(p2);
@@ -270,7 +268,6 @@ void NeedleTracker::handleEvent(sofa::core::objectmodel::Event* event)
         {
             Coord tipPos = Coord(m_needle->getPX(0), m_needle->getPY(0), m_needle->getPZ(0));
             std::string res = getPositionInSlices(tipPos);
-            //std::cout << res << std::endl;
         }
     }
 }

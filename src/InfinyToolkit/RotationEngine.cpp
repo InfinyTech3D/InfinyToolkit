@@ -41,12 +41,7 @@ void RotationEngine::bwdInit()
     m_toolNode = nullptr;
 
     getContext()->get<MechanicalObject3>(&m_mstates, core::objectmodel::Tag("head"), core::objectmodel::BaseContext::SearchRoot);
-    std::cout << "mstates: " << m_mstates.size() << std::endl;
-    
-    for (int i = 0; i < m_mstates.size(); i++)
-    {
-        std::cout << i << " -> " << m_mstates[i]->name << std::endl;
-    }
+    msg_info() << "mstates: " << m_mstates.size();
     
     sofa::simulation::Node::SPtr rootNode = static_cast<simulation::Node*>(this->getContext()->getRootContext());
     sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
@@ -100,30 +95,23 @@ void RotationEngine::reinit()
 
 void RotationEngine::doUpdate()
 {
-    std::cout << "RotationEngine::doUpdate()" << std::endl;
     for (int i = 0; i < m_mstates.size(); i++)
     {
         MechanicalObject3* state = m_mstates[i];
         sofa::type::Vector3 rot = state->getRotation();
-        std::cout << "rot: " << rot << std::endl;
 
         state->setRotation(rot[0] + 1, rot[1], rot[2]);
         state->reinit();
         rot = state->getRotation();
-        std::cout << "rot apres: " << rot << std::endl;
     }
 }
 
 
 void RotationEngine::process()
 {
-    std::cout << "RotationEngine::process()" << std::endl;
     for (int i = 0; i < m_mstates.size(); i++)
     {
-        MechanicalObject3* state = m_mstates[i];
-        //sofa::type::Vector3 rot = state->getRotation();
-        //std::cout << "rot: " << rot << std::endl;
-        
+        MechanicalObject3* state = m_mstates[i];       
         state->setRotation(0, 0, 0.5);
         state->reinit();
     }

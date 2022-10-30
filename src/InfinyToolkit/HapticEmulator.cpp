@@ -81,8 +81,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
     m_driver->m_toolForceFeedBack = currentForce * m_driver->d_forceScale.getValue();
     m_driver->m_isInContact = contact;    
     m_driver->m_toolPosition = m_driver->d_positionBase.getValue() + currentForce * m_driver->d_forceScale.getValue();
-//    std::cout << "# m_toolPosition: " << m_driver->m_toolPosition << " | " << m_driver->d_positionBase.getValue() << std::endl;
-    //msg_info(m_driver) << "computeForce end: ";
+
     m_driver->lockPosition.unlock();      
 
     if (m_driver->m_terminate == false)
@@ -135,7 +134,6 @@ void HapticEmulator::clearDevice()
     m_terminate = true;
     while (_simStepStatus.isBusy())
     {
-        std::cout << "Waiting to finish" << std::endl;
         CTime::sleep(1);
     }
     _taskScheduler->stop();
@@ -208,7 +206,6 @@ void HapticEmulator::initDevice(int cptInitPass)
 {
     //HDSchedulerHandle hStateHandle = HD_INVALID_HANDLE;
     //m_hHD = 1;
-    std::cout << "HapticEmulator::initDevice" << std::endl;
     unsigned int mNbThread = 2;
 
     _taskScheduler = sofa::simulation::TaskScheduler::getInstance();
@@ -245,7 +242,6 @@ void HapticEmulator::updatePosition()
     posDevice[0] = m_toolPosition[0];
     posDevice[1] = m_toolPosition[1];
     posDevice[2] = m_toolPosition[2];
-    //std::cout << "HapticEmulator::updatePosition m_toolPosition: " << m_toolPosition << " | " << d_positionBase.getValue() << std::endl;
 
 //    d_positionBase.setValue(m_toolPosition);
    // Sleep(100);
