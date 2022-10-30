@@ -7,21 +7,16 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include "NeedleTracker.h"
+#include <InfinyToolkit/NeedleTracker.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/helper/proximity.h>
 #include <limits>
 
-namespace sofa 
+namespace sofa::infinytoolkit
 {
 
-namespace component
-{
-
-namespace collision
-{
 int NeedleTrackerClass = core::RegisterObject("Class to track the current position of the needle tip.")
     .add< NeedleTracker >()
     ;
@@ -165,7 +160,7 @@ bool NeedleTracker::testSliceBBIntersection(int sliceID, const Coord& tipPositio
 using sofa::core::topology::BaseMeshTopology;
 bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPosition)
 {
-    // Todo lancé de rayon ici
+    // Todo lancï¿½ de rayon ici
     if (sliceID >= m_slices.size()) {
         msg_error() << "SlideId " << sliceID << " out fo bounds.";
         return false;
@@ -374,9 +369,4 @@ void NeedleTracker::draw(const core::visual::VisualParams* vparams)
 }
 
 
-} // namespace collision
-
-} // namespace component
-
-} // namespace sofa
-
+} // namespace sofa::infinytoolkit

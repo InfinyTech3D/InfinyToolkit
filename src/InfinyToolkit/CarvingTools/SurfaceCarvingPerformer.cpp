@@ -12,7 +12,7 @@
 
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
 
 SurfaceCarvingPerformer::SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
@@ -463,4 +463,4 @@ void SurfaceCarvingPerformer::doMoveCarve2()
 
 
 
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit

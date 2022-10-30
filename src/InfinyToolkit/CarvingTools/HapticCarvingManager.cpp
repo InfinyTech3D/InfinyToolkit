@@ -23,7 +23,7 @@
 #include <sofa/helper/AdvancedTimer.h>
 #include <sofa/helper/ScopedAdvancedTimer.h>
 
-namespace sofa::component::collision
+namespace sofa::infinytoolkit
 {
 
 int HapticCarvingManagerClass = core::RegisterObject("Manager handling carving operations between an haptic tool and an object.")
@@ -130,4 +130,4 @@ void HapticCarvingManager::doCarve()
         m_forceFeedback->setLock(false);
 }
 
-} // namespace sofa::component::collision
+} // namespace sofa::infinytoolkit

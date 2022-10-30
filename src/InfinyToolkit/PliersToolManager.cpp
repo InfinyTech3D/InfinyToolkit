@@ -20,13 +20,7 @@
 #include <sofa/component/collision/geometry/SphereModel.h>
 
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace misc
+namespace sofa::infinytoolkit
 {
 
 SOFA_DECL_CLASS(PliersToolManager)
@@ -902,8 +896,4 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
 
 
 
-} // namespace misc
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

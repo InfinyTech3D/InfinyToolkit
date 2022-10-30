@@ -13,13 +13,7 @@
 #include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
 #include <sofa/component/constraint/projective/AttachConstraint.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace misc
+namespace sofa::infinytoolkit
 {
 
 typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
@@ -129,8 +123,4 @@ protected:
 };
 
 
-} // namespace misc
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

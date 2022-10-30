@@ -26,16 +26,15 @@ public:
     double dist;
 };
 
-namespace sofa::component::collision
+namespace sofa::infinytoolkit
 {
 class AdvancedCarvingManager;
 }
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
     using namespace sofa::component::topology;
     using namespace sofa::core::topology;
-    using namespace sofa::component::collision;
 
 
 class SOFA_INFINYTOOLKIT_API BaseCarvingPerformer
@@ -70,5 +69,5 @@ protected:
     AdvancedCarvingManager* m_carvingMgr = nullptr;
 };
 					
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit
 	

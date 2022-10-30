@@ -12,7 +12,7 @@
 
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
 
 BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
@@ -63,4 +63,4 @@ void BurningPerformer::draw(const core::visual::VisualParams* vparams)
  
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit

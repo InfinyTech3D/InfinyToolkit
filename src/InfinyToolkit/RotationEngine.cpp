@@ -14,13 +14,7 @@
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/simulation/Node.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace engine
+namespace sofa::infinytoolkit
 {
 
     
@@ -184,8 +178,4 @@ void RotationEngine::handleEvent(sofa::core::objectmodel::Event* event)
     }
 }
 
-} // namespace engine
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit

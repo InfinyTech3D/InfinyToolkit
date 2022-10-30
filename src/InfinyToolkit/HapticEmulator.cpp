@@ -21,14 +21,9 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/system/thread/CTime.h>
 
-namespace sofa
+namespace sofa::infinytoolkit
 {
 
-namespace component
-{
-
-namespace controller
-{
 using namespace sofa::type;
 using namespace sofa::helper::system::thread;
 
@@ -464,8 +459,4 @@ int HapticEmulatorClass = core::RegisterObject("Driver allowing interfacing with
 .add< HapticEmulator >()
 ;
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // sofa::infinytoolkit

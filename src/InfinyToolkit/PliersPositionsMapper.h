@@ -17,7 +17,7 @@ namespace sofa::component::topology::container::dynamic
     class TetrahedronSetTopologyContainer;
 }
 
-namespace sofa::component::engine
+namespace sofa::infinytoolkit
 {
 
 using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
@@ -64,4 +64,4 @@ protected:
 };
 
 
-} // namespace sofa::component::engine
+} // namespace sofa::infinytoolkit

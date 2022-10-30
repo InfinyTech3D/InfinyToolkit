@@ -10,7 +10,7 @@
 
 #include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
-namespace sofa::component::controller
+namespace sofa::infinytoolkit
 {
 using namespace sofa::core::topology;
 
@@ -39,5 +39,5 @@ private:
 	std::set<BaseMeshTopology::TetrahedronID> m_tetraId2remove;
 };
 					
-} // namespace sofa::component::controller
+} // namespace sofa::infinytoolkit
 	

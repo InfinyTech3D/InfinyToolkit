@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace sofa::component::haptics
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::type;
@@ -32,7 +32,7 @@ void BruteForceFeedback::init()
     currentForce = sofa::type::Vector3(0, 0, 0);
 
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_ACarving = context->get<sofa::component::collision::AdvancedCarvingManager>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    m_ACarving = context->get<sofa::infinytoolkit::AdvancedCarvingManager>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
 
     if (m_ACarving == NULL)
     {
@@ -186,4 +186,4 @@ void BruteForceFeedback::computeWrench(const sofa::defaulttype::SolidTypes<SReal
 static int nullForceFeedbackClass = sofa::core::RegisterObject("Null force feedback for haptic feedback device")
         .add< BruteForceFeedback >();
 
-} // namespace sofa::component::haptics
+} // namespace sofa::infinytoolkit

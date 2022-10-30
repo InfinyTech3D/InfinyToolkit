@@ -24,13 +24,7 @@
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
 
-namespace sofa 
-{
-
-namespace component 
-{
-
-namespace controller 
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::defaulttype;
@@ -57,7 +51,7 @@ private:
 /**
 * Geomagic driver
 */
-class SOFA_INFINYTOOLKIT_API HapticEmulator : public Controller
+class SOFA_INFINYTOOLKIT_API HapticEmulator : public sofa::component::controller::Controller
 {
 
 public:
@@ -148,8 +142,4 @@ public:
     Vec3 m_toolPosition;
 };
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::infinytoolkit
