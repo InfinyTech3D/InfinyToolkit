@@ -8,13 +8,13 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
 namespace sofa::component::controller
 {
 using namespace sofa::core::topology;
 
-class SOFA_INTERACTIONTOOLS_API SurfaceCarvingPerformer : public BaseCarvingPerformer
+class SOFA_INFINYTOOLKIT_API SurfaceCarvingPerformer : public BaseCarvingPerformer
 {
 public:
 	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);

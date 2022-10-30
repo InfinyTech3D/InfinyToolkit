@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/PliersToolManager.h>
+#include <InfinyToolkit/PliersToolManager.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 

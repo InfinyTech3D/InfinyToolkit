@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/core/behavior/ForceField.h>
 
 namespace sofa
@@ -69,7 +69,7 @@ private :
 
 
 #if !defined(SOFA_COMPONENT_FORCEFIELD_MiddleForceField_CPP)
-extern template class SOFA_INTERACTIONTOOLS_API MiddleForceField<sofa::defaulttype::Vec3Types>;
+extern template class SOFA_INFINYTOOLKIT_API MiddleForceField<sofa::defaulttype::Vec3Types>;
 #endif //  !defined(SOFA_COMPONENT_FORCEFIELD_MiddleForceField_CPP)
 
 } // namespace forcefield

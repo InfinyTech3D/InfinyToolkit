@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
@@ -38,7 +38,7 @@ namespace sofa::component::controller
     using namespace sofa::component::collision;
 
 
-class SOFA_INTERACTIONTOOLS_API BaseCarvingPerformer
+class SOFA_INFINYTOOLKIT_API BaseCarvingPerformer
 {
 public:
 	BaseCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);

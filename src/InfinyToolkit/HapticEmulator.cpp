@@ -8,7 +8,7 @@
  ****************************************************************************/
 
 
-#include <InteractionTools/HapticEmulator.h>
+#include <InfinyToolkit/HapticEmulator.h>
 #include <sofa/core/ObjectFactory.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>

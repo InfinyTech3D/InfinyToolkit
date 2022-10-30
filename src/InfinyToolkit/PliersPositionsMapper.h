@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 #include <sofa/core/DataEngine.h>
 
 
@@ -24,7 +24,7 @@ using sofa::component::topology::container::dynamic::TetrahedronSetTopologyConta
 /** 
 *
 */
-class SOFA_INTERACTIONTOOLS_API PliersPositionsMapper: public sofa::core::DataEngine
+class SOFA_INFINYTOOLKIT_API PliersPositionsMapper: public sofa::core::DataEngine
 {
 public:
     SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);

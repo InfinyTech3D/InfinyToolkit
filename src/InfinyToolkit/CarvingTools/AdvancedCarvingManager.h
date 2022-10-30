@@ -8,8 +8,8 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InfinyToolkit/config.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 #include <sofa/type/Vec.h>
 
 #include <sofa/core/behavior/MechanicalState.h>
@@ -40,7 +40,7 @@ using namespace sofa::core::topology;
 * The surface to be carved are also mapped on collision models @sa surfaceCollisionModels
 * Detecting the collision is done using the scene Intersection and NarrowPhaseDetection pipeline.
 */
-class SOFA_INTERACTIONTOOLS_API AdvancedCarvingManager : public core::behavior::BaseController
+class SOFA_INFINYTOOLKIT_API AdvancedCarvingManager : public core::behavior::BaseController
 {
 public:
     SOFA_CLASS(AdvancedCarvingManager,sofa::core::behavior::BaseController);

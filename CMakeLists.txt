@@ -8,7 +8,7 @@
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.12)
-project(InteractionTools VERSION 0.1)
+project(InfinyToolkit VERSION 0.1)
 
 find_package(Sofa.Component.StateContainer REQUIRED)
 find_package(Sofa.Component.MechanicalLoad REQUIRED)
@@ -17,68 +17,68 @@ find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.Component.Constraint.Projective REQUIRED)
 find_package(SofaCarving REQUIRED)
 
-set(USE_INTERACTIONTOOLS_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
+set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
-set(INTERACTIONTOOLS_SRC_DIR src/InteractionTools)
+set(INFINYTOOLKIT_SRC_DIR src/InfinyToolkit)
 
 set(HEADER_FILES
-    ${INTERACTIONTOOLS_SRC_DIR}/config.h.in
-    ${INTERACTIONTOOLS_SRC_DIR}/RotationEngine.h
-    ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.h
-    ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.h
-    ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.h    
-    ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.h
-    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.h
-    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.inl
+    ${INFINYTOOLKIT_SRC_DIR}/config.h.in
+    ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.h
+    ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.h
+    ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.h    
+    ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
+    ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.h
+    ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.inl
     
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
 
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
 )
 
 set(SOURCE_FILES
-    ${INTERACTIONTOOLS_SRC_DIR}/RotationEngine.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/PliersToolManager.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/PliersPositionsMapper.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/HapticEmulator.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/NeedleTracker.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/MiddleForceField.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/initInteractionToolsPlugin.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
     
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
 
-    ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
 )
 
 find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
-        ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.h            
-        ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h            
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
     )
 	
     list(APPEND SOURCE_FILES 
-        ${INTERACTIONTOOLS_SRC_DIR}/BruteForceFeedback.cpp        
-        ${INTERACTIONTOOLS_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp        
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
 	)
     
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 
-set(README_FILES PluginInteractionTools.txt)
+set(README_FILES PluginInfinyToolkit.txt)
 
 # Create the plugin library.
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES})
 
 # Set define dllimport/dllexport mechanism on Windows.
-target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INTERACTIONTOOLS")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 
 # Link the plugin library to its dependencies (other libraries).
 target_link_libraries(${PROJECT_NAME} Sofa.Component.StateContainer Sofa.Component.MechanicalLoad Sofa.Component.Controller Sofa.Component.Haptics SofaCarving Sofa.Component.Constraint.Projective)

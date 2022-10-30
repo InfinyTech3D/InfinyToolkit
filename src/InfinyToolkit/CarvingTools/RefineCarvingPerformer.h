@@ -8,14 +8,14 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
 #include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
 
 namespace sofa::component::controller
 {
 
-class SOFA_INTERACTIONTOOLS_API RefineCarvingPerformer : public BaseCarvingPerformer
+class SOFA_INFINYTOOLKIT_API RefineCarvingPerformer : public BaseCarvingPerformer
 {
 public:
 	RefineCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);

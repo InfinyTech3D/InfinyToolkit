@@ -10,8 +10,8 @@
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/visual/VisualParams.h>
 
-#include <InteractionTools/CarvingTools/BaseCarvingPerformer.h>
-#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
 namespace sofa::component::controller
 {

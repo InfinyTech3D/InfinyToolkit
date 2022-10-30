@@ -7,8 +7,8 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/CarvingTools/BurningPerformer.h>
-#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <InfinyToolkit/CarvingTools/BurningPerformer.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
 #include <sofa/component/statecontainer/MechanicalObject.h>
 

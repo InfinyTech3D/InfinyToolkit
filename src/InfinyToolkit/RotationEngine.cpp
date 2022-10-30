@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/RotationEngine.h>
+#include <InfinyToolkit/RotationEngine.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/collision/DetectionOutput.h>
 #include <sofa/simulation/AnimateEndEvent.h>

@@ -7,7 +7,7 @@
  * Written by Erik Pernod <erik.pernod@infinytech3d.com>, October 2019       *
  ****************************************************************************/
 
-#include <InteractionTools/CarvingTools/AdvancedCarvingManager.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/collision/DetectionOutput.h>
 #include <sofa/core/objectmodel/KeypressedEvent.h>
@@ -21,11 +21,11 @@
 #include <sofa/core/topology/TopologicalMapping.h>
 #include <sofa/helper/AdvancedTimer.h>
 
-#include <InteractionTools/CarvingTools/SurfaceCarvingPerformer.h>
-#include <InteractionTools/CarvingTools/BurningPerformer.h>
+#include <InfinyToolkit/CarvingTools/SurfaceCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/BurningPerformer.h>
 
 #ifdef HAS_MESHREFINEMENT_PLUGIN
-#include <InteractionTools/CarvingTools/RefineCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
 #endif
 
 #include <sofa/core/behavior/BaseMechanicalState.h>

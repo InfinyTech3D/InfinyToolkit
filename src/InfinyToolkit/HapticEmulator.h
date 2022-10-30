@@ -8,7 +8,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InteractionTools/config.h>
+#include <InfinyToolkit/config.h>
 
 #include <sofa/helper/LCPcalc.h>
 #include <sofa/defaulttype/SolidTypes.h>
@@ -40,7 +40,7 @@ using core::objectmodel::Data;
 
 class HapticEmulator;
 
-class SOFA_INTERACTIONTOOLS_API HapticEmulatorTask : public CpuTask
+class SOFA_INFINYTOOLKIT_API HapticEmulatorTask : public CpuTask
 {
 public:
     HapticEmulatorTask(HapticEmulator* ptr, CpuTask::Status* pStatus);
@@ -57,7 +57,7 @@ private:
 /**
 * Geomagic driver
 */
-class SOFA_INTERACTIONTOOLS_API HapticEmulator : public Controller
+class SOFA_INFINYTOOLKIT_API HapticEmulator : public Controller
 {
 
 public:
