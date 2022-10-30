@@ -121,7 +121,6 @@ bool RefineCarvingPerformer::runPerformer()
 
         if (res)
         {
-            std::cout << "RefineCarvingPerformer::refineTetrahedra()" << std::endl;
 #if 0
             return res;
 #else
@@ -178,7 +177,6 @@ void RefineCarvingPerformer::simpleCarving()
 
 void RefineCarvingPerformer::surfaceCarving()
 {
-    std::cout << "RefineCarvingPerformer::surfaceCarving()" << std::endl;
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
@@ -206,7 +204,7 @@ void RefineCarvingPerformer::surfaceCarving()
             continue;
 
         SReal factor = (carvingDistance - dist)* invCarv; // ]0, carvingDistance]
-        std::cout << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist << std::endl;
+        msg_info("RefineCarvingPerformer") << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist;
         vertex = vertex + dir * factor;
     }
 }
@@ -215,7 +213,6 @@ void RefineCarvingPerformer::surfaceCarving()
 void RefineCarvingPerformer::surfaceCarving2()
 {
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
-    std::cout << "m_triIdsToFilter: " << m_triIdsToFilter.size() << std::endl;
 
     if (m_triIdsToFilter.empty())
         return;
@@ -286,7 +283,6 @@ void RefineCarvingPerformer::surfaceCarving2()
 
             SReal factor = (carvingDistance - dist) * invCarv; // ]0, carvingDistance]
             vertex = vertex + dir * factor;
-            std::cout << "factor: " << factor << std::endl;
 
             auto it = newPoints.find(pId);
             if (it == newPoints.end()) // new point
@@ -316,19 +312,15 @@ void RefineCarvingPerformer::surfaceCarving2()
     {
         bool valid = tetraGeo->checkTetrahedronValidity(value);
         if (!valid) {
-            std::cout << "Not valid: " << value << std::endl;
             tetra2Remove.insert(value);
         }
     }
 
     if (!tetra2Remove.empty())
     {
-        std::cout << "remove tetra: " << tetra2Remove << std::endl;
         m_tetraAlgo->removeTetrahedra(tetra2Remove);
     }
 
-    std::cout << "RefineCarvingPerformer::surfaceCarving2() : " << m_triangleContacts.size() << std::endl;
-    
 }
 
 
