@@ -30,13 +30,6 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.inl
-    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
-
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
 )
 
 set(SOURCE_FILES
@@ -47,13 +40,6 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.cpp
     ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
-    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
-
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
 )
 
 find_package(MeshRefinement QUIET)
@@ -72,6 +58,29 @@ if (MeshRefinement_FOUND)
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 
+find_package(SofaCarving QUIET)
+if (SofaCarving_FOUND)
+    message("SofaCarving plugin found - Adding it to ${PROJECT_NAME}")
+    list(APPEND HEADER_FILES 
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
+
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+    )
+	
+    list(APPEND SOURCE_FILES 
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+	)
+endif()
+
+
 set(README_FILES PluginInfinyToolkit.txt)
 
 # Create the plugin library.
@@ -81,10 +90,14 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} Sofa.Component.StateContainer Sofa.Component.MechanicalLoad Sofa.Component.Controller Sofa.Component.Haptics SofaCarving Sofa.Component.Constraint.Projective)
+target_link_libraries(${PROJECT_NAME} Sofa.Component.StateContainer Sofa.Component.MechanicalLoad Sofa.Component.Controller Sofa.Component.Haptics Sofa.Component.Constraint.Projective)
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
+endif()
+
+if (SofaCarving_FOUND)
+    target_link_libraries(${PROJECT_NAME} SofaCarving)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
