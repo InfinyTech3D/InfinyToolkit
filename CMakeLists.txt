@@ -12,10 +12,12 @@ project(InfinyToolkit VERSION 0.1)
 
 find_package(Sofa.Component.StateContainer REQUIRED)
 find_package(Sofa.Component.MechanicalLoad REQUIRED)
+find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
+find_package(Sofa.Component.SolidMechanics.Spring REQUIRED)
+find_package(Sofa.Component.Constraint.Projective REQUIRED)
+find_package(Sofa.Component.Collision.Geometry REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
-find_package(Sofa.Component.Constraint.Projective REQUIRED)
-find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -42,21 +44,7 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
 )
 
-find_package(MeshRefinement QUIET)
-if (MeshRefinement_FOUND)
-    message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
-    list(APPEND HEADER_FILES 
-        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h            
-        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
-    )
-	
-    list(APPEND SOURCE_FILES 
-        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp        
-        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
-	)
-    
-    add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
-endif()
+
 
 #find_package(SofaCarving QUIET)
 if (SofaCarving_FOUND)
@@ -68,6 +56,7 @@ if (SofaCarving_FOUND)
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
 
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
     )
 	
     list(APPEND SOURCE_FILES 
@@ -77,7 +66,23 @@ if (SofaCarving_FOUND)
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
 
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 	)
+    
+    # Add component for carving using refinement mesh
+    find_package(MeshRefinement QUIET)
+    if (MeshRefinement_FOUND)
+        message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
+        list(APPEND HEADER_FILES 
+            ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+        )
+        
+        list(APPEND SOURCE_FILES 
+            ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+        )
+        
+        add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
+    endif()
 endif()
 
 
@@ -93,11 +98,14 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 target_link_libraries(${PROJECT_NAME} 
     Sofa.Component.StateContainer 
     Sofa.Component.MechanicalLoad 
+    Sofa.Component.Topology.Container.Dynamic
+    Sofa.Component.SolidMechanics.Spring
+    Sofa.Component.Constraint.Projective
+    Sofa.Component.Collision.Geometry
     Sofa.Component.Controller 
     Sofa.Component.Haptics 
-    Sofa.Component.Constraint.Projective
-    Sofa.Component.Topology.Container.Dynamic
 )
+
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
