@@ -42,7 +42,7 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
 )
 
-#find_package(MeshRefinement QUIET)
+find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
@@ -58,7 +58,7 @@ if (MeshRefinement_FOUND)
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 
-find_package(SofaCarving QUIET)
+#find_package(SofaCarving QUIET)
 if (SofaCarving_FOUND)
     message("SofaCarving plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
