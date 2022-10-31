@@ -15,6 +15,7 @@ find_package(Sofa.Component.MechanicalLoad REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.Component.Constraint.Projective REQUIRED)
+find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -41,7 +42,7 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
 )
 
-find_package(MeshRefinement QUIET)
+#find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
@@ -89,7 +90,14 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} Sofa.Component.StateContainer Sofa.Component.MechanicalLoad Sofa.Component.Controller Sofa.Component.Haptics Sofa.Component.Constraint.Projective)
+target_link_libraries(${PROJECT_NAME} 
+    Sofa.Component.StateContainer 
+    Sofa.Component.MechanicalLoad 
+    Sofa.Component.Controller 
+    Sofa.Component.Haptics 
+    Sofa.Component.Constraint.Projective
+    Sofa.Component.Topology.Container.Dynamic
+)
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
