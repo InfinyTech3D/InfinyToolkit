@@ -12,10 +12,12 @@ project(InfinyToolkit VERSION 0.1)
 
 find_package(Sofa.Component.StateContainer REQUIRED)
 find_package(Sofa.Component.MechanicalLoad REQUIRED)
+find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
+find_package(Sofa.Component.SolidMechanics.Spring REQUIRED)
+find_package(Sofa.Component.Constraint.Projective REQUIRED)
+find_package(Sofa.Component.Collision.Geometry REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
-find_package(Sofa.Component.Constraint.Projective REQUIRED)
-find_package(SofaCarving REQUIRED)
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -30,13 +32,6 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.inl
-    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
-
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
 )
 
 set(SOURCE_FILES
@@ -47,30 +42,49 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.cpp
     ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
-    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
-
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
 )
 
-find_package(MeshRefinement QUIET)
-if (MeshRefinement_FOUND)
-    message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
+
+
+find_package(SofaCarving QUIET)
+if (SofaCarving_FOUND)
+    message("SofaCarving plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
-        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h            
-        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
+
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
     )
 	
     list(APPEND SOURCE_FILES 
-        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp        
-        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 	)
     
-    add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
+    # Add component for carving using refinement mesh
+    find_package(MeshRefinement QUIET)
+    if (MeshRefinement_FOUND)
+        message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
+        list(APPEND HEADER_FILES 
+            ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+        )
+        
+        list(APPEND SOURCE_FILES 
+            ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+        )
+        
+        add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
+    endif()
 endif()
+
 
 set(README_FILES PluginInfinyToolkit.txt)
 
@@ -81,10 +95,24 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} Sofa.Component.StateContainer Sofa.Component.MechanicalLoad Sofa.Component.Controller Sofa.Component.Haptics SofaCarving Sofa.Component.Constraint.Projective)
+target_link_libraries(${PROJECT_NAME} 
+    Sofa.Component.StateContainer 
+    Sofa.Component.MechanicalLoad 
+    Sofa.Component.Topology.Container.Dynamic
+    Sofa.Component.SolidMechanics.Spring
+    Sofa.Component.Constraint.Projective
+    Sofa.Component.Collision.Geometry
+    Sofa.Component.Controller 
+    Sofa.Component.Haptics 
+)
+
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
+endif()
+
+if (SofaCarving_FOUND)
+    target_link_libraries(${PROJECT_NAME} SofaCarving)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")

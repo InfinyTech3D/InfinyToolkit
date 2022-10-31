@@ -1,16 +1,26 @@
 # CMake package configuration file for InteractionTools
 
+@PACKAGE_GUARD@
 @PACKAGE_INIT@
 
-find_package(Sofa.Component.MechanicalLoad REQUIRED)
-find_package(Sofa.Component.StateContainer REQUIRED)
-find_package(Sofa.Component.Controller REQUIRED)
-find_package(Sofa.Component.Haptics REQUIRED)
-find_package(Sofa.Component.Constraint.Projective REQUIRED)
-find_package(SofaCarving REQUIRED)
+set(INFINYTOOLKIT_HAVE_MESHREFINEMENT @INFINYTOOLKIT_HAVE_MESHREFINEMENT@)
+set(INFINYTOOLKIT_HAVE_SOFACARVING @INFINYTOOLKIT_HAVE_SOFACARVING@)
+
+find_package(Sofa.Component.MechanicalLoad QUIET REQUIRED)
+find_package(Sofa.Component.StateContainer QUIET REQUIRED)
+find_package(Sofa.Component.Controller QUIET REQUIRED)
+find_package(Sofa.Component.Haptics QUIET REQUIRED)
+find_package(Sofa.Component.Constraint.Projective QUIET REQUIRED)
+
+if(INFINYTOOLKIT_HAVE_MESHREFINEMENT )
+    find_package(MeshRefinement QUIET REQUIRED)
+endif()
+if(INFINYTOOLKIT_HAVE_SOFACARVING)
+    find_package(SofaCarving QUIET REQUIRED)
+endif()
 
 if(NOT TARGET @PROJECT_NAME@)
-	include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 endif()
 
 check_required_components(@PROJECT_NAME@)
