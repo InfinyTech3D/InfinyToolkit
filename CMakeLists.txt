@@ -46,7 +46,7 @@ set(SOURCE_FILES
 
 
 
-#find_package(SofaCarving QUIET)
+find_package(SofaCarving QUIET)
 if (SofaCarving_FOUND)
     message("SofaCarving plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
