@@ -27,7 +27,7 @@
 #include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-
+#include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/topology/TopologySubsetData.inl>
 
 namespace sofa::infinytoolkit
@@ -37,6 +37,7 @@ template<class DataTypes>
 MiddleForceField<DataTypes>::MiddleForceField()
     : d_force(initData(&d_force, (Real)1.0, "force", "applied force to all points"))
     , d_pace(initData(&d_pace, (Real)1.0, "pace", "applied force to all points"))
+    , p_showForce(initData(&p_showForce, bool(false), "showForce", "applied force to all points"))
 { 
 
 }
@@ -45,6 +46,8 @@ MiddleForceField<DataTypes>::MiddleForceField()
 template<class DataTypes>
 void MiddleForceField<DataTypes>::init()
 {
+    this->Inherit::init();
+
     core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
     m_bary = Coord(0.0, 0.0, 0.0);
 
@@ -63,6 +66,7 @@ void MiddleForceField<DataTypes>::init()
     }
 
     m_bary /= nbPoints;
+
 }
 
 template<class DataTypes>
@@ -110,9 +114,26 @@ template<class DataTypes>
 SReal MiddleForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord& x) const
 {
     SReal e = 0;
-
     return e;
 }
 
+
+template<class DataTypes>
+void MiddleForceField<DataTypes>::draw(const core::visual::VisualParams* vparams)
+{
+    if (!vparams->displayFlags().getShowForceFields() || !p_showForce.getValue()) {
+        return;
+    }
+    const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
+    core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
+    size_t nbPoints = state->getSize();
+    std::vector<sofa::type::Vector3> vertices;
+    for (size_t i = 0; i < nbPoints; ++i)
+    {
+        vertices.push_back(sofa::type::Vector3(state->getPX(i), state->getPY(i), state->getPZ(i)));
+        vertices.push_back(sofa::type::Vector3(m_bary));
+    }
+    vparams->drawTool()->drawLines(vertices, 1, sofa::type::RGBAColor(0, 1, 0, 1));
+}
 
 } // namespace sofa::infinytoolkit
