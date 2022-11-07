@@ -52,22 +52,30 @@ public:
     /// the key frames when the forces are defined by the user
     Data< Real > d_pace;
 
+    Data<bool> p_showForce;
+
 protected:
     MiddleForceField();
 
 public:
     void init() override;
 
+    void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
+
+    void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx) override;
+
     // ForceField methods
     /// Add the forces
-    void addForce (const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
+  //  void addForce (const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
 
     /// Compute the force derivative
-    void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& /* d_df */, const DataVecDeriv& /* d_dx */) override;
+//    void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& /* d_df */, const DataVecDeriv& /* d_dx */) override;
 
     void addKToMatrix(linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
 
     SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;
+
+    void draw(const core::visual::VisualParams* vparams) override;
 
 private :
     Coord m_bary;
