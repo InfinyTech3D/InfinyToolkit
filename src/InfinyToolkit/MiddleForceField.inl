@@ -38,6 +38,7 @@ MiddleForceField<DataTypes>::MiddleForceField()
     : d_positions(initData(&d_positions, "position", "List of coordinates points"))
     , d_force(initData(&d_force, 1.0_sreal, "force", "Applied force to all points to simulate maximum compression."))
     , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
+    , d_refreshBaryRate(initData(&d_refreshBaryRate, (unsigned int)(0), "refreshBaryRate", "To recompute barycenter every X pace. 0 by default == no refresh"))
     , p_showForce(initData(&p_showForce, bool(false), "showForce", "Parameter to display the force direction"))
 { 
 
@@ -95,7 +96,7 @@ void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
     const Real pacePercent = fmod(cT, pace) / (pace * 0.5);
     const Real factorForce = (pacePercent >= 1.0) ? 2 - pacePercent : pacePercent;
     
-    dmsg_info() << "cT: " << cT << " -> pacePercent: " << pacePercent << " -> " << factorForce;
+    msg_info() << "cT: " << cT << " -> pacePercent: " << pacePercent << " -> " << factorForce;
 
     const Real force = d_force.getValue() * factorForce;
     for (size_t i = 0; i < _p1.size(); ++i)
@@ -103,6 +104,20 @@ void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
         Coord dir = m_bary - _p1[i];
         _f1[i] += force * dir;
     }
+
+
+    // check if update barycenters
+    unsigned int refreshRate = d_refreshBaryRate.getValue();
+    if (refreshRate == 0)
+        return;
+
+    const int paceCpt = floor(cT / pace);
+    if (paceCpt - m_lastBaryRefresh == refreshRate) // need to recompute
+    {
+        m_lastBaryRefresh = paceCpt;
+        computeBarycenter();
+    }
+    
 }
 
 template<class DataTypes>

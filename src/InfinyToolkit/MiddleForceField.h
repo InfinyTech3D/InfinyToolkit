@@ -69,10 +69,14 @@ public:
     Data<VecCoord> d_positions;
 
     /// Applied force to all points to simulate maximum compression.
-    Data< Real > d_force;
+    Data<Real> d_force;
 
     /// Time to perform a full Pace (deflate + inflate). Same scale as the simulation time.
-    Data< Real > d_pace;
+    Data<Real> d_pace;
+
+    /// To recompute barycenter every X pace. 0 by default == no refresh
+    Data<unsigned int> d_refreshBaryRate;
+
 
     /// Parameter to display the force direction
     Data<bool> p_showForce;
@@ -81,6 +85,8 @@ private :
     /// Computed barycenter of the given positions @sa d_positions
     Coord m_bary;
 
+    /// counter to the last pace the barycenter has been refreshed. To be used with @sa d_refreshBaryRate
+    unsigned int m_lastBaryRefresh = 0;
 }; // definition of the MiddleForceField class
 
 
