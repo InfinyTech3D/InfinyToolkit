@@ -35,9 +35,10 @@ namespace sofa::infinytoolkit
 
 template<class DataTypes>
 MiddleForceField<DataTypes>::MiddleForceField()
-    : d_force(initData(&d_force, (Real)1.0, "force", "applied force to all points"))
-    , d_pace(initData(&d_pace, (Real)1.0, "pace", "applied force to all points"))
-    , p_showForce(initData(&p_showForce, bool(false), "showForce", "applied force to all points"))
+    : d_positions(initData(&d_positions, "position", "List of coordinates points"))
+    , d_force(initData(&d_force, 1.0_sreal, "force", "Applied force to all points to simulate maximum compression."))
+    , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
+    , p_showForce(initData(&p_showForce, bool(false), "showForce", "Parameter to display the force direction"))
 { 
 
 }
@@ -48,58 +49,68 @@ void MiddleForceField<DataTypes>::init()
 {
     this->Inherit::init();
 
-    core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
-    m_bary = Coord(0.0, 0.0, 0.0);
-
-    if (state == nullptr || state->getSize() == 0)
+    size_t nbPoints = d_positions.getValue().size();
+    if (nbPoints == 0)
     {
-        msg_warning() << "Wrong BaseMechanicalState pointer or buffer size";
+        msg_error() << "No position set or empty vector given into field: 'position'. Won't be able to compute pace.";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         return;
     }
 
-    size_t nbPoints = state->getSize();
+    computeBarycenter();
+
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+}
+
+
+template<class DataTypes>
+void MiddleForceField<DataTypes>::computeBarycenter()
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
+    
+    m_bary = Coord(0.0, 0.0, 0.0);
+    size_t nbPoints = _x.size();
     for (size_t i = 0; i < nbPoints; ++i)
     {
-        m_bary[0] += state->getPX(i);
-        m_bary[1] += state->getPY(i);
-        m_bary[2] += state->getPZ(i);
+        m_bary += _x[i];        
     }
 
     m_bary /= nbPoints;
-
 }
+
 
 template<class DataTypes>
 void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mparams*/, DataVecDeriv& f1, const DataVecCoord& p1, const DataVecDeriv&)
 {
+    if (sofa::core::objectmodel::BaseObject::d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return;
+
     sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f1;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _p1 = p1;
 
     Real cT = this->getContext()->getTime();
     
     const Real& pace = d_pace.getValue();
-    Real pacePercent = fmod (cT, pace) / pace;
+    // we apply a force proportional to the pace rate. 0 Force at start of pace, 0 at end, F at half pace
+    const Real pacePercent = fmod(cT, pace) / (pace * 0.5);
+    const Real factorForce = (pacePercent >= 1.0) ? 2 - pacePercent : pacePercent;
     
-    Real factor = 0;
-    if (pacePercent < 0.5)
-        factor = pacePercent * 2;
-    else
-        factor = 2 - (pacePercent * 2);
+    dmsg_info() << "cT: " << cT << " -> pacePercent: " << pacePercent << " -> " << factorForce;
 
-    Real factorForce = d_force.getValue()*factor;
-
+    const Real force = d_force.getValue() * factorForce;
     for (size_t i = 0; i < _p1.size(); ++i)
     {
         Coord dir = m_bary - _p1[i];
-        _f1[i] += factorForce * dir;
+        _f1[i] += force * dir;
     }
 }
 
 template<class DataTypes>
-void MiddleForceField<DataTypes>::addDForce(const core::MechanicalParams* mparams, DataVecDeriv& /* d_df */, const DataVecDeriv& /* d_dx */)
+void MiddleForceField<DataTypes>::addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx )
 {
-    //TODO: remove this line (avoid warning message) ...
-    //mparams->setKFactorUsed(true);
+    //TODO: implement this if really needed...
+    SOFA_UNUSED(d_df);
+    SOFA_UNUSED(d_dx);
 }
 
 template<class DataTypes>
@@ -125,13 +136,14 @@ void MiddleForceField<DataTypes>::draw(const core::visual::VisualParams* vparams
         return;
     }
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
-    core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
-    size_t nbPoints = state->getSize();
+    
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
+    size_t nbPoints = _x.size();
     std::vector<sofa::type::Vector3> vertices;
     for (size_t i = 0; i < nbPoints; ++i)
     {
-        vertices.push_back(sofa::type::Vector3(state->getPX(i), state->getPY(i), state->getPZ(i)));
-        vertices.push_back(sofa::type::Vector3(m_bary));
+        vertices.emplace_back(_x[i]);
+        vertices.emplace_back(m_bary);
     }
     vparams->drawTool()->drawLines(vertices, 1, sofa::type::RGBAColor(0, 1, 0, 1));
 }

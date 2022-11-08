@@ -46,38 +46,39 @@ public:
     using DataVecCoord = core::objectmodel::Data<VecCoord>;
     using DataVecDeriv = core::objectmodel::Data<VecDeriv>;
     
-    /// applied force for all the points
-    Data< Real > d_force;
-
-    /// the key frames when the forces are defined by the user
-    Data< Real > d_pace;
-
-    Data<bool> p_showForce;
-
-protected:
     MiddleForceField();
 
-public:
     void init() override;
 
+    // ForceField methods
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
-
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx) override;
 
-    // ForceField methods
-    /// Add the forces
-  //  void addForce (const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
-
-    /// Compute the force derivative
-//    void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& /* d_df */, const DataVecDeriv& /* d_dx */) override;
-
-    void addKToMatrix(linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
+    void addKToMatrix(linearalgebra::BaseMatrix* matrix, SReal kFact, unsigned int& offset) override;
 
     SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;
 
     void draw(const core::visual::VisualParams* vparams) override;
 
+protected:
+    /// Will compute the barycenter of the given set of coordinates.
+    void computeBarycenter();
+
+public:
+    /// List of coordinates points
+    Data<VecCoord> d_positions;
+
+    /// Applied force to all points to simulate maximum compression.
+    Data< Real > d_force;
+
+    /// Time to perform a full Pace (deflate + inflate). Same scale as the simulation time.
+    Data< Real > d_pace;
+
+    /// Parameter to display the force direction
+    Data<bool> p_showForce;
+
 private :
+    /// Computed barycenter of the given positions @sa d_positions
     Coord m_bary;
 
 }; // definition of the MiddleForceField class
