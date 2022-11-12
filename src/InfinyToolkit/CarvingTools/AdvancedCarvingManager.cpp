@@ -90,11 +90,15 @@ AdvancedCarvingManager::~AdvancedCarvingManager()
 
 void AdvancedCarvingManager::bwdInit()
 {
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Loading);
+
     // Search for collision model corresponding to the tool.
-    if (d_toolModelPath.getValue().empty())
-        m_toolCollisionModel = getContext()->get<ToolCollisionModel>(core::objectmodel::Tag("CarvingTool"), core::objectmodel::BaseContext::SearchRoot);
-    else
-        m_toolCollisionModel = getContext()->get<ToolCollisionModel>(d_toolModelPath.getValue());
+    if (!l_toolModel.get())
+    {
+        auto toolCollisionModel = getContext()->get<core::CollisionModel>(core::objectmodel::Tag("CarvingTool"), core::objectmodel::BaseContext::SearchRoot);
+        if (toolCollisionModel != nullptr)
+            l_toolModel.set(toolCollisionModel);
+    }
 
     // Search for the surface collision model.
     if (d_surfaceModelPath.getValue().empty())
@@ -116,14 +120,30 @@ void AdvancedCarvingManager::bwdInit()
     }
 
 
-    m_detectionNP = getContext()->get<core::collision::NarrowPhaseDetection>();
-    m_carvingReady = true;
+    // If no NarrowPhaseDetection is set using the link try to find the component
+    if (l_detectionNP.get() == nullptr)
+    {
+        l_detectionNP.set(getContext()->get<core::collision::NarrowPhaseDetection>());
+    }
 
-    if (m_toolCollisionModel == nullptr) { msg_error() << "m_toolCollisionModel not found"; m_carvingReady = false; }
-    if (m_surfaceCollisionModels.empty()) { msg_error() << "m_surfaceCollisionModels not found"; m_carvingReady = false; }
-    if (m_detectionNP == nullptr) { msg_error() << "NarrowPhaseDetection not found"; m_carvingReady = false; }
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+
+    if (l_toolModel.get() == nullptr) {
+        msg_error() << "m_toolCollisionModel not found"; 
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+    }
+
+    if (m_surfaceCollisionModels.empty()) { 
+        msg_error() << "m_surfaceCollisionModels not found"; 
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+    }
+
+    if (l_detectionNP.get() == nullptr) {
+        msg_error() << "NarrowPhaseDetection not found"; 
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+    }
     
-    if (!m_carvingReady) {
+    if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid) {
         msg_error() << "AdvancedCarvingManager: initialisation failed.";
         return;
     }
@@ -177,7 +197,7 @@ void AdvancedCarvingManager::bwdInit()
         carvingPerformer->initPerformer();
     }
 
-    msg_warning() << "bwdInit!";
+    msg_info() << "bwdInit!";
 }
 
 
@@ -192,7 +212,7 @@ void AdvancedCarvingManager::clearContacts()
 
 void AdvancedCarvingManager::filterCollision()
 {
-    if (!m_carvingReady)
+    if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
     if (!d_active.getValue())
@@ -202,7 +222,7 @@ void AdvancedCarvingManager::filterCollision()
     clearContacts();
 
     // get the collision output
-    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = m_detectionNP->getDetectionOutputs();
+    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = l_detectionNP.get()->getDetectionOutputs();
     if (detectionOutputs.size() == 0) // exit if no collision
     {
         lockConstraints.unlock();
@@ -214,6 +234,7 @@ void AdvancedCarvingManager::filterCollision()
 
     // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
     const ContactVector* contacts = nullptr;
+    auto toolCollisionModel = l_toolModel.get();
     for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
     {
         sofa::core::CollisionModel* collMod1 = it->first.first;
@@ -221,11 +242,11 @@ void AdvancedCarvingManager::filterCollision()
         sofa::core::CollisionModel* targetModel = nullptr;
 
         // get the good collision contact
-        if (collMod1 == m_toolCollisionModel && collMod2->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
+        if (collMod1 == toolCollisionModel && collMod2->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
         {
             targetModel = collMod2;
         }
-        else if (collMod2 == m_toolCollisionModel && collMod1->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
+        else if (collMod2 == toolCollisionModel && collMod1->hasTag(sofa::core::objectmodel::Tag("CarvingSurface")))
         {
             targetModel = collMod1;
         }
@@ -275,7 +296,7 @@ void AdvancedCarvingManager::filterCollision()
             for (size_t j = 0; j < ncontacts; ++j)
             {
                 const ContactVector::value_type& c = (*contacts)[j];
-                int elemIdx = (c.elem.first.getCollisionModel() == m_toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
+                int elemIdx = (c.elem.first.getCollisionModel() == toolCollisionModel ? c.elem.second.getIndex() : c.elem.first.getIndex());
 
                 // update the triangle id if a mapping is present
                 contactInfo* info = new contactInfo();
@@ -319,7 +340,7 @@ void AdvancedCarvingManager::filterCollision()
 
 void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
-    if (!m_carvingReady)
+    if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
     if (simulation::AnimateEndEvent::checkEventType(event))
@@ -344,7 +365,7 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
 
 void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)
 {
-    if (!m_carvingReady)
+    if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
     if (!d_drawContacts.getValue())
