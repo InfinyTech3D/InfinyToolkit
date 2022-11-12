@@ -39,6 +39,7 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SimpleCarvingPerformer.h
 
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
@@ -58,6 +59,7 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SimpleCarvingPerformer.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
