@@ -110,23 +110,19 @@ public:
 
     Data < bool > d_drawContacts;
 
-private:
+protected:
     /// Mutex to lock constraints for haptic use
     std::mutex lockConstraints;
 
-    /// Pointer to the tool collision model
-    ToolCollisionModel* m_toolCollisionModel = nullptr;
+    // link to the forceFeedBack component, if not set will search through graph and take first one encountered
+    SingleLink<AdvancedCarvingManager, core::CollisionModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_toolModel;
 
     // Pointer to the target object collision model
     std::vector<SurfaceCollisionModel*> m_surfaceCollisionModels;
-    
-    
-    // Pointer to the scene detection Method component (Narrow phase only)
-    core::collision::NarrowPhaseDetection* m_detectionNP = nullptr;
-    
-    // Bool to store the information if component has well be init and can be used.
-    bool m_carvingReady = false;
-    
+        
+    // link to the scene detection Method component (Narrow phase only)
+    SingleLink<AdvancedCarvingManager, core::collision::NarrowPhaseDetection, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_detectionNP;
+       
     bool m_texCoordsHandling = false;
 
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
