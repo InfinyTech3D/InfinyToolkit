@@ -43,7 +43,7 @@
     
     <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
         positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" drawDevice="0"/>
-	<AdvancedCarvingManager active="@GeomagicDevice.button1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.1" 
+	<AdvancedCarvingManager active="@GeomagicDevice.button1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.2" 
     carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0"/>
 	
 
