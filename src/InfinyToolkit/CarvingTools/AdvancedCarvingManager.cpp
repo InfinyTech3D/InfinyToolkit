@@ -38,6 +38,7 @@
 
 #include <InfinyToolkit/CarvingTools/SurfaceCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/BurningPerformer.h>
+#include <InfinyToolkit/CarvingTools/SimpleCarvingPerformer.h>
 
 #ifdef HAS_MESHREFINEMENT_PLUGIN
 #include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
@@ -178,17 +179,26 @@ void AdvancedCarvingManager::bwdInit()
             }
         }
 
-        if (!alreadyRegistered && d_carvingWithBurning.getValue()) {
+        if (alreadyRegistered) // if several collision model on the same node.
+            continue;
+
+
+        if (d_carvingWithBurning.getValue()) {
             m_carvingPerformer.push_back(new BurningPerformer(topo, this));
         }
 
-        if (!alreadyRegistered && d_carvingWithRefinement.getValue()) {
+        if (d_carvingWithRefinement.getValue()) {
 #ifdef HAS_MESHREFINEMENT_PLUGIN
             m_carvingPerformer.push_back(new RefineCarvingPerformer(topo, this));
 #else
             msg_warning() << "Option carvingWithRefinement require MeshRefienement plugin. Please check https://www.sofa-framework.org/applications/marketplace/cutting-mesh-refinement/ for more information.";
 #endif
         }
+        else
+        {
+            m_carvingPerformer.push_back(new SimpleCarvingPerformer(topo, this));
+        }
+
     }
 
 

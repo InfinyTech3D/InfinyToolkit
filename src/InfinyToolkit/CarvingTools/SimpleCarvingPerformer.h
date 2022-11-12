@@ -21,61 +21,32 @@
  * Authors: see Authors.txt                                                  *
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
+#pragma once
 
-#include <InfinyToolkit/CarvingTools/BurningPerformer.h>
-#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
-
-#include <sofa/component/statecontainer/MechanicalObject.h>
+#include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
+#include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
 
 namespace sofa::infinytoolkit
 {
+using namespace sofa::core::topology;
+using namespace sofa::component::topology::container::dynamic;
 
-BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
-    : BaseCarvingPerformer(topo, _carvingMgr)
+class SOFA_INFINYTOOLKIT_API SimpleCarvingPerformer : public BaseCarvingPerformer
 {
+public:
+	SimpleCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
 
-}
+	virtual ~SimpleCarvingPerformer() = default;
 
+	bool initPerformer() override;
 
-bool BurningPerformer::initPerformer()
-{
-    m_carvingMgr->m_vtexcoords.createTopologyHandler(m_topologyCon.get());
-    
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
-    texcoords.resize(m_topologyCon->getNbPoints());
+	bool runPerformer() override;
 
-    return true;
-}
+private:
+	TetrahedronSetTopologyModifier::SPtr m_topoModif = nullptr;
 
-
-bool BurningPerformer::runPerformer()
-{
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
-
-    const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
-    const SReal invRefDistance = 1 / _refineDistance;
-
-    for (contactInfo * cInfo : m_pointContacts)
-    {
-        SReal dist = (cInfo->pointB - cInfo->pointA).norm();
-        if (dist > _refineDistance)
-            continue;
-
-        float coef = float((_refineDistance - dist) * invRefDistance);
-        float& val = texcoords[cInfo->elemId][0];
-        if (coef > val)
-        {
-            val = coef;
-            texcoords[cInfo->elemId][1] = coef;
-        }
-    }
-
-    return true;
-}
-
-void BurningPerformer::draw(const core::visual::VisualParams* vparams)
-{
-    BaseCarvingPerformer::draw(vparams);
-}
-
+	std::vector<Index> m_tetra2Remove;
+};
+					
 } // namespace sofa::infinytoolkit
+	

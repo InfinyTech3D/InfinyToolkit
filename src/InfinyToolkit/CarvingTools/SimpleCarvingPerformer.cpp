@@ -22,7 +22,7 @@
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
 
-#include <InfinyToolkit/CarvingTools/BurningPerformer.h>
+#include <InfinyToolkit/CarvingTools/SimpleCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
 #include <sofa/component/statecontainer/MechanicalObject.h>
@@ -30,52 +30,67 @@
 namespace sofa::infinytoolkit
 {
 
-BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
+SimpleCarvingPerformer::SimpleCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
 {
 
 }
 
 
-bool BurningPerformer::initPerformer()
+bool SimpleCarvingPerformer::initPerformer()
 {
-    m_carvingMgr->m_vtexcoords.createTopologyHandler(m_topologyCon.get());
-    
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
-    texcoords.resize(m_topologyCon->getNbPoints());
+    m_topoModif = m_topologyCon->getContext()->get<TetrahedronSetTopologyModifier>();
 
+    if (m_topoModif == nullptr) {
+        msg_error("SimpleCarvingPerformer") << "InitPerformer failed, no TetrahedronSetTopologyModifier found in Node: " << m_topologyCon->getContext()->getName();
+        return false;
+    }
+    
     return true;
 }
 
 
-bool BurningPerformer::runPerformer()
+bool SimpleCarvingPerformer::runPerformer()
 {
-    helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
+    m_tetra2Remove.clear();
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
 
-    const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
-    const SReal invRefDistance = 1 / _refineDistance;
-
-    for (contactInfo * cInfo : m_pointContacts)
+    std::set<Index> tetraIds;
+    // check points first
+    for (const contactInfo* cInfo : m_pointContacts)
     {
-        SReal dist = (cInfo->pointB - cInfo->pointA).norm();
-        if (dist > _refineDistance)
-            continue;
-
-        float coef = float((_refineDistance - dist) * invRefDistance);
-        float& val = texcoords[cInfo->elemId][0];
-        if (coef > val)
+        if (cInfo->dist<= _carvingDistance)
         {
-            val = coef;
-            texcoords[cInfo->elemId][1] = coef;
+            const TetrahedronSetTopologyContainer::TetrahedraAroundVertex& tetraAV = m_topologyCon->getTetrahedraAroundVertex(cInfo->elemId);
+            for (Index tetraId : tetraAV)
+            {
+                tetraIds.insert(tetraId);
+            }
         }
     }
 
-    return true;
-}
+    // check triangles
+    for (const contactInfo* cInfo : m_triangleContacts)
+    {
+        if (cInfo->dist <= _carvingDistance)
+        {
+            const TetrahedronSetTopologyContainer::TetrahedraAroundTriangle& tetraAT = m_topologyCon->getTetrahedraAroundTriangle(cInfo->elemId);
+            for (Index tetraId : tetraAT)
+            {
+                tetraIds.insert(tetraId);
+            }
+        }
+    }
 
-void BurningPerformer::draw(const core::visual::VisualParams* vparams)
-{
-    BaseCarvingPerformer::draw(vparams);
+    // convert to vector
+    for (auto tetraId : tetraIds) {
+        m_tetra2Remove.push_back(tetraId);
+    }
+
+    if (!m_tetra2Remove.empty())
+        m_topoModif->removeTetrahedra(m_tetra2Remove);
+ 
+    return true;
 }
 
 } // namespace sofa::infinytoolkit
