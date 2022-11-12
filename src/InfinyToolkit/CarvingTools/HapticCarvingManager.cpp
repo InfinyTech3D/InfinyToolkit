@@ -46,7 +46,7 @@ int HapticCarvingManagerClass = core::RegisterObject("Manager handling carving o
 ;
 
 HapticCarvingManager::HapticCarvingManager()
-    : CarvingManager()
+    : AdvancedCarvingManager()
     , m_forceFeedback(nullptr)
 {
     this->f_listening.setValue(true);
@@ -61,7 +61,7 @@ HapticCarvingManager::~HapticCarvingManager()
 
 void HapticCarvingManager::init()
 {
-    CarvingManager::init();
+    AdvancedCarvingManager::init();
 
     // check if forcefeedback
     m_forceFeedback = getContext()->get<sofa::component::haptics::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
