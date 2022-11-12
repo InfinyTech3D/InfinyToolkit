@@ -24,7 +24,7 @@
 #pragma once
 
 #include <InfinyToolkit/config.h>
-#include <SofaCarving/CarvingManager.h>
+#include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 #include <sofa/component/haptics/ForceFeedback.h>
 
 namespace sofa::infinytoolkit
@@ -36,10 +36,10 @@ namespace sofa::infinytoolkit
 * The surface to be carved are also mapped on collision models @sa surfaceCollisionModels
 * Detecting the collision is done using the scene Intersection and NarrowPhaseDetection pipeline.
 */
-class SOFA_INFINYTOOLKIT_API HapticCarvingManager : public sofa::component::collision::CarvingManager
+class SOFA_INFINYTOOLKIT_API HapticCarvingManager : public AdvancedCarvingManager
 {
 public:
-	SOFA_CLASS(HapticCarvingManager, sofa::component::collision::CarvingManager);
+	SOFA_CLASS(HapticCarvingManager, AdvancedCarvingManager);
 
 	typedef defaulttype::Vec3Types DataTypes;
     typedef DataTypes::Coord Coord;
