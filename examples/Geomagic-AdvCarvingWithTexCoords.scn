@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <Node name="root" dt="0.05" gravity="0 -9 0" >
-    <VisualStyle displayFlags="hideVisualModels hideBehaviorModels showCollisionModels hideMappings hideForceFields" />
+    <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels hideMappings hideForceFields" />
 
     <Node name="RequiredPlugins">
         <RequiredPlugin name="Geomagic"/> <!-- Needed to use components [GeomagicDriver] -->
@@ -44,8 +44,8 @@
     
     <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
         positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" drawDevice="0"/>
-	<AdvancedCarvingManager active="@GeomagicDevice.button1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.1" 
-        carvingWithBurning="0" carvingWithRefinement="0" drawContacts="0"/>
+	<AdvancedCarvingManager name="ACarving" active="@GeomagicDevice.button1" refineDistance="1.5" refineCriteria="0.5" carvingDistance="0.1" 
+        carvingWithBurning="1" carvingWithRefinement="0" drawContacts="0"/>
 	
 
     <Node name="ToolController">
@@ -87,7 +87,7 @@
             <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
-                <OglModel name="Visual" texturename="textures/colorMap.png" />
+                <OglModel name="Visual" texcoords="@../../../ACarving.texcoords" texturename="textures/colorMap.png" />
                 <IdentityMapping input="@../../Volume" output="@Visual" />
             </Node>
         </Node>
