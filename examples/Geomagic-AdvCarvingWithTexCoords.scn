@@ -40,9 +40,9 @@
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
     <DefaultContactManager name="response" response="FrictionContactConstraint" />
-    <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1" />
+    <MinProximityIntersection name="Proximity" alarmDistance="0.8" contactDistance="0.2" />
     
-    <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
+    <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="0" 
         positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" drawDevice="0"/>
 	<AdvancedCarvingManager name="ACarving" active="@GeomagicDevice.button1" refineDistance="1.5" refineCriteria="0.5" carvingDistance="0.1" 
         carvingWithBurning="1" carvingWithRefinement="0" drawContacts="0"/>
@@ -106,13 +106,19 @@
         <LinearSolverConstraintCorrection/>
         
         <Node name="CollisionModel" >
-            <MeshOBJLoader filename="./mesh/drill_collision.obj"  name="loader"/>            
+            <MeshOBJLoader filename="./mesh/Cautery-Hook_collision.obj"  name="loader"/>            
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="-180" rz="-90" dz="3.5" dx="0.0" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState" ry="-90" dz="0.1" dy="0.6" />
             <LineCollisionModel name="instrumentLine" contactStiffness="10" />
             <PointCollisionModel name="instrumentPoint" contactStiffness="10" tags="CarvingTool" /> 
             <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState" />
-        </Node>        
+        </Node>
+        
+        <Node name="VisuTool" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/Cautery-Hook.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1" ry="-90" dz="0.1" dy="0.6"/>
+            <RigidMapping name="MM->VM mapping" input="@instrumentState" output="@InstrumentVisualModel" />
+        </Node>
     </Node>
 	
 </Node>
