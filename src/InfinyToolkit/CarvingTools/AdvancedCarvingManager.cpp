@@ -39,6 +39,7 @@
 #include <InfinyToolkit/CarvingTools/SurfaceCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/BurningPerformer.h>
 #include <InfinyToolkit/CarvingTools/SimpleCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/CuttingPerformer.h>
 
 #ifdef HAS_MESHREFINEMENT_PLUGIN
 #include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
@@ -65,6 +66,7 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     , d_active( initData(&d_active, false, "active", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
     , d_carvingWithBurning(initData(&d_carvingWithBurning, true, "carvingWithBurning", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
     , d_carvingWithRefinement(initData(&d_carvingWithRefinement, false, "carvingWithRefinement", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
+    , d_cutting(initData(&d_cutting, false, "cuttingMode", "cutting process"))
     , d_carvingDistance( initData(&d_carvingDistance, 0.0, "carvingDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineDistance(initData(&d_refineDistance, 0.0, "refineDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineCriteria( initData(&d_refineCriteria, 0.5, "refineCriteria", "Collision distance at which cavring will start. Equal to contactDistance by default."))
@@ -193,6 +195,10 @@ void AdvancedCarvingManager::bwdInit()
 #else
             msg_warning() << "Option carvingWithRefinement require MeshRefienement plugin. Please check https://www.sofa-framework.org/applications/marketplace/cutting-mesh-refinement/ for more information.";
 #endif
+        }
+        else if (d_cutting.getValue())
+        {
+            m_carvingPerformer.push_back(new CuttingPerformer(topo, this));
         }
         else
         {
@@ -338,11 +344,11 @@ void AdvancedCarvingManager::filterCollision()
         carvingPerformer->filterContacts();
     }
     
-    // process the collision
-    for (auto carvingPerformer : m_carvingPerformer)
-    {
-        carvingPerformer->runPerformer();
-    }
+    //// process the collision
+    //for (auto carvingPerformer : m_carvingPerformer)
+    //{
+    //    carvingPerformer->runPerformer();
+    //}
 }
 
 
@@ -367,7 +373,11 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
         if (ev->getKey() == 'C')
         {
             msg_warning() << "Burn, baby burn!";
-            d_active.setValue(true);
+            //d_active.setValue(true);
+            for (auto carvingPerformer : m_carvingPerformer)
+            {
+                carvingPerformer->runPerformer();
+            }
         }
     }
 }

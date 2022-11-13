@@ -96,6 +96,7 @@ public:
     Data < bool > d_active;
     Data < bool > d_carvingWithBurning;
     Data < bool > d_carvingWithRefinement;
+    Data < bool > d_cutting;
     
     
     /// Collision distance at which cavring will start. Equal to contactDistance by default.
