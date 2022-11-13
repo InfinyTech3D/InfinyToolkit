@@ -239,9 +239,6 @@ void AdvancedCarvingManager::filterCollision()
         return;
     }
 
-    const SReal& refDistance = d_refineDistance.getValue();
-    SReal invRefDistance = 1 / refDistance;
-
     // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
     const ContactVector* contacts = nullptr;
     auto toolCollisionModel = l_toolModel.get();
@@ -266,10 +263,12 @@ void AdvancedCarvingManager::filterCollision()
 
         // Get the number of contacts        
         contacts = dynamic_cast<const ContactVector*>(it->second);
-        size_t ncontacts = contacts->size();
-        if (contacts == nullptr || contacts->size() == 0)
+        if (contacts == nullptr)
             continue;
 
+        size_t ncontacts = contacts->size();
+        if (contacts->size() == 0)
+            continue;
 
         int mode = -1; // 0 = triangleModel, 1 = pointModel
         if (targetModel->getTypeName().find("TriangleCollisionModel") != std::string::npos)
