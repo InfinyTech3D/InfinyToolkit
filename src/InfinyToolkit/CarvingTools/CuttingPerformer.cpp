@@ -52,11 +52,7 @@ bool CuttingPerformer::initPerformer()
         m_tetraCuttingMgr->init(m_topologyCon->getContext());
         m_tetraCuttingMgr->activateLogs(m_topologyCon->f_printLog.getValue());
 
-        //if (d_surfaceCut.getValue())
-        //{
-        //    const std::string& textName = d_textureName.getValue();
-        //    if (!textName.empty())
-        //        m_tetraCuttingMgr->setCutTextureName(textName);
+                m_tetraCuttingMgr->setCutTextureName("textures/liver_internal.png");
         //}
     }
 
@@ -84,7 +80,7 @@ void CuttingPerformer::filterContacts()
     }
 
     if (cutPositions.empty())
-        return false;
+        return;
 
     bary /= cutPositions.size();
     cutDir /= cutPositions.size();
@@ -104,8 +100,8 @@ void CuttingPerformer::filterContacts()
         }
     }
 
-    m_planPositions[2] = m_planPositions[1] + cutDir * _carvingDistance;
-    m_planPositions[3] = m_planPositions[0] + cutDir * _carvingDistance;
+    m_planPositions[2] = m_planPositions[1] + cutDir * _carvingDistance * 1.5;
+    m_planPositions[3] = m_planPositions[0] + cutDir * _carvingDistance* 1.5;
     Vec3 m_planNormal = (m_planPositions[1] - m_planPositions[0]).cross(cutDir);
 
     // Test all tetra
@@ -114,10 +110,10 @@ void CuttingPerformer::filterContacts()
 
 bool CuttingPerformer::runPerformer()
 {
-    
+    m_tetraCuttingMgr->processCut(1);
 
-    m_tetraCuttingMgr->processCut(0);
-
+    m_triangleContacts.clear();
+    m_pointContacts.clear();
     return true;
 }
 
