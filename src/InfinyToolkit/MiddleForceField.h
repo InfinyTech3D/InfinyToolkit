@@ -26,6 +26,8 @@
 #include <InfinyToolkit/config.h>
 #include <sofa/core/behavior/ForceField.h>
 
+#include <chrono>
+
 namespace sofa::infinytoolkit
 {
 
@@ -81,12 +83,22 @@ public:
     /// Parameter to display the force direction
     Data<bool> p_showForce;
 
+    // Synchronize with real time (instead of simulation time)
+    Data<bool> d_syncRealTime;
+
+    // Frequency at which a full deflate+inflate is done
+    Data<Real> d_frequency;
+    
 private :
     /// Computed barycenter of the given positions @sa d_positions
     Coord m_bary;
 
     /// counter to the last pace the barycenter has been refreshed. To be used with @sa d_refreshBaryRate
     unsigned int m_lastBaryRefresh = 0;
+
+    // keep trace of the latest time we measured
+    std::chrono::time_point<std::chrono::system_clock> m_startTime;
+
 }; // definition of the MiddleForceField class
 
 

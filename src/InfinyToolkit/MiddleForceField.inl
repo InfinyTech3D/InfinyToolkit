@@ -40,6 +40,9 @@ MiddleForceField<DataTypes>::MiddleForceField()
     , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
     , d_refreshBaryRate(initData(&d_refreshBaryRate, (unsigned int)(0), "refreshBaryRate", "To recompute barycenter every X pace. 0 by default == no refresh"))
     , p_showForce(initData(&p_showForce, bool(false), "showForce", "Parameter to display the force direction"))
+    , d_syncRealTime(initData(&d_syncRealTime, false, "syncRealTime", "Synchronize with the real time instead of simulation time."))
+    , d_frequency(initData(&d_frequency, 1.0_sreal, "frequency", "Frequency at which the full deflate+inflate is done, in Hz, i.e x/sec. Used if pace is not set."))
+    , m_startTime()
 { 
 
 }
@@ -58,8 +61,21 @@ void MiddleForceField<DataTypes>::init()
         return;
     }
 
+    if (!d_pace.isSet() && !d_frequency.isSet())
+    {
+        msg_error() << "Neither Pace nor frequency are set. Won't be able to compute pace.";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        return;
+    }
+
+    if (d_pace.isSet() && d_frequency.isSet())
+    {
+        msg_warning() << "Pace and frequency are both set. Will take into account the frequency value.";
+    }
+
     computeBarycenter();
 
+    m_startTime = std::chrono::system_clock::now();
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 }
 
@@ -89,14 +105,29 @@ void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
     sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f1;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _p1 = p1;
 
-    Real cT = this->getContext()->getTime();
-    
-    const Real& pace = d_pace.getValue();
+    Real pacePercent = 1.0_sreal;
+    Real time = 1.0_sreal;
+
+    const Real pace = (!d_frequency.isSet()) ? d_pace.getValue() : Real(1.0 / d_frequency.getValue());
+
+    if (d_syncRealTime.getValue())
+    {
+        using namespace std::chrono;
+
+        std::chrono::duration<Real> duration = system_clock::now() - m_startTime;
+        time = duration.count();
+    }
+    else
+    {
+        time = this->getContext()->getTime();
+    }
+
     // we apply a force proportional to the pace rate. 0 Force at start of pace, 0 at end, F at half pace
-    const Real pacePercent = fmod(cT, pace) / (pace * 0.5);
-    const Real factorForce = (pacePercent >= 1.0) ? 2 - pacePercent : pacePercent;
-    
-    msg_info() << "cT: " << cT << " -> pacePercent: " << pacePercent << " -> " << factorForce;
+    pacePercent = std::fmod(time, pace) / (pace * 0.5);
+
+    Real factorForce = (pacePercent >= 1.0) ? 2 - pacePercent : pacePercent;
+
+    msg_info() << "Time: " << time << " -> pacePercent: " << pacePercent << " -> " << factorForce;
 
     const Real force = d_force.getValue() * factorForce;
     for (size_t i = 0; i < _p1.size(); ++i)
@@ -111,7 +142,7 @@ void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
     if (refreshRate == 0)
         return;
 
-    const int paceCpt = floor(cT / pace);
+    const int paceCpt = floor(time / pace);
     if (paceCpt - m_lastBaryRefresh == refreshRate) // need to recompute
     {
         m_lastBaryRefresh = paceCpt;
