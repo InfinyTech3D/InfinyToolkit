@@ -37,6 +37,7 @@ template<class DataTypes>
 MiddleForceField<DataTypes>::MiddleForceField()
     : d_positions(initData(&d_positions, "position", "List of coordinates points"))
     , d_force(initData(&d_force, 1.0_sreal, "force", "Applied force to all points to simulate maximum compression."))
+    , d_uniformForce(initData(&d_uniformForce, bool(false), "uniformForce", "If true, will apply the same force at each vertex otherwise will apply force proportional to the distance to the barycenter"))
     , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
     , d_refreshBaryRate(initData(&d_refreshBaryRate, (unsigned int)(0), "refreshBaryRate", "To recompute barycenter every X pace. 0 by default == no refresh"))
     , p_showForce(initData(&p_showForce, bool(false), "showForce", "Parameter to display the force direction"))
@@ -130,10 +131,20 @@ void MiddleForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
     msg_info() << "Time: " << time << " -> pacePercent: " << pacePercent << " -> " << factorForce;
 
     const Real force = d_force.getValue() * factorForce;
+    const bool uniformF = d_uniformForce.getValue();
     for (size_t i = 0; i < _p1.size(); ++i)
     {
         Coord dir = m_bary - _p1[i];
-        _f1[i] += force * dir;
+        if (uniformF)
+        {
+            type::Vec3 dir3 = dir;
+            dir3.normalize();
+            _f1[i] += force * dir3;
+        }
+        else
+        {
+            _f1[i] += force * dir;
+        }
     }
 
 

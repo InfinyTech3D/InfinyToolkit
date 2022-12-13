@@ -73,6 +73,9 @@ public:
     /// Applied force to all points to simulate maximum compression.
     Data<Real> d_force;
 
+    /// If true, will apply the same force at each vertex otherwise will apply force proportional to the distance to the barycenter
+    Data<bool> d_uniformForce;
+
     /// Time to perform a full Pace (deflate + inflate). Same scale as the simulation time.
     Data<Real> d_pace;
 
