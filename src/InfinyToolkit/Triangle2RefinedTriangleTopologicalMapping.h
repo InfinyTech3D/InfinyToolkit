@@ -23,6 +23,12 @@
 #include <InfinyToolkit/config.h>
 #include <sofa/core/topology/TopologicalMapping.h>
 
+namespace sofa::component::topology::container::dynamic
+{
+    class TriangleSetTopologyModifier;
+} // namespace sofa::component::topology::container::dynamic
+
+
 namespace sofa::component::topology::mapping
 {
 /**
@@ -67,7 +73,7 @@ public:
 
 private:
     /// Pointer to the output topology modifier
-    //container::dynamic::EdgeSetTopologyModifier* m_outTopoModifier;
+    container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier;
 };
 
 } //namespace sofa::component::topology::mapping
