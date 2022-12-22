@@ -144,17 +144,70 @@ void Triangle2RefinedTriangleTopologicalMapping::updateTopologicalMappingTopDown
         {
         case core::topology::TRIANGLESREMOVED:
         {
-            const sofa::type::vector<Topology::TriangleID>& tri2Remove = (static_cast<const TrianglesRemoved*>(*itBegin))->getArray();
+            sofa::type::vector<Topology::TriangleID> in_tri2Remove = (static_cast<const TrianglesRemoved*>(*itBegin))->getArray();
+            std::sort(in_tri2Remove.begin(), in_tri2Remove.end(), std::greater<unsigned int>());
+            std::cout << "in_tri2Remove: " << in_tri2Remove << std::endl;
 
-            sofa::type::vector< Index > triIDs2Remove;
-            for (auto triCID : tri2Remove)
+            Topology::TriangleID out_lastTriID = toModel->getNbTriangles() - 1;
+            Topology::TriangleID in_lastTriID = fromModel->getNbTriangles() - 1;            
+
+            sofa::type::vector< Index > out_tri2Remove;
+            for (Topology::TriangleID triCID : in_tri2Remove)
             {
                 const sofa::type::vector<Index>& tris = In2OutMap[triCID];
-                for (auto id : tris)
-                    triIDs2Remove.push_back(id);
+                for (auto id : tris) {
+                    out_tri2Remove.push_back(id);
+                }
+            }
+            std::sort(out_tri2Remove.begin(), out_tri2Remove.end(), std::greater<unsigned int>());
+            std::cout << "triIDs2Remove: " << out_tri2Remove << std::endl;
+            
+            // update refined triangles ID due to swap and pop back
+            for (Topology::TriangleID out_removeId : out_tri2Remove)
+            {
+                // need to replace last Id by the current removed one.
+                // Get the input id corresponding to the last tri Id of output
+                auto itOutLast = Glob2LocMap.find(out_lastTriID);
+                if (itOutLast == Glob2LocMap.end())
+                {
+                    msg_error() << "Output triangle id not found: " << out_lastTriID << " in map. Need to understand why this is possible.";
+                    continue;
+                }
+                Topology::TriangleID in_idOutLast = itOutLast->second;
+
+                // Get the list of output id linked to this input id
+                if (In2OutMap.find(in_idOutLast) == In2OutMap.end())
+                {
+                    msg_error() << "Input triangle id not found: " << in_idOutLast << " in map. Need to understand why this is possible.";
+                    continue;
+                }
+                sofa::type::vector<Index>& outIds = In2OutMap[in_idOutLast];
+
+                // Replace the last output id for the current removed one
+                for (unsigned int i = 0; i < outIds.size(); i++)
+                {
+                    if (outIds[i] == out_lastTriID) {
+                        outIds[i] = out_removeId;
+                        break;
+                    }
+                }
+
+                // Update out to in map
+                Glob2LocMap[out_removeId] = in_idOutLast;
+                Glob2LocMap.erase(out_lastTriID);
+
+                out_lastTriID--;
             }
 
-            m_outTopoModifier->removeTriangles(triIDs2Remove, true, false);
+            // update corase triangles ID due to swap and pop back
+            for (Topology::TriangleID in_removeId : in_tri2Remove)
+            {
+                In2OutMap[in_removeId] = In2OutMap[in_lastTriID];
+                In2OutMap.erase(in_lastTriID);
+                in_lastTriID--;
+            }
+
+            m_outTopoModifier->removeTriangles(out_tri2Remove, true, false);
             break;
         }
         default:

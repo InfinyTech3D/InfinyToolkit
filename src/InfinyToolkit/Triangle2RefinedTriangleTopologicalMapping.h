@@ -38,7 +38,8 @@ namespace sofa::component::topology::mapping
 * OUTPUT TOPOLOGY = TriangleSetTopology, as the refined version of the INPUT TOPOLOGY
 *
 * Triangle2RefinedTriangleTopologicalMapping class is templated by the pair (INPUT TOPOLOGY, OUTPUT TOPOLOGY)
-*
+* In2OutMap[cId] -> [rId0, rId5, ... , rId8]   input triangle id of coarse mesh -> vector of corresponding refiened triangle id
+* Glob2LocMap[rId] -> [cId]  input is id of refined triangle, output is the belonging coarse triangle
 */
 class SOFA_INFINYTOOLKIT_API Triangle2RefinedTriangleTopologicalMapping : public sofa::core::topology::TopologicalMapping
 {
