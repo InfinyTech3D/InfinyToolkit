@@ -99,18 +99,41 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
     // TODO optimise this double loop
     for (unsigned int idRTri = 0; idRTri < nbTriRefined; ++idRTri)
     {
-        const Coord bary = refinedGeo->computeTriangleCenter(idRTri);
+        const Coord baryR = refinedGeo->computeTriangleCenter(idRTri);
+
+        Topology::TriangleID idC = InvalidID;
+        SReal distance = std::numeric_limits<SReal>::max();
+        
         for (unsigned int idCTri = 0; idCTri < nbTriCoarse; ++idCTri)
         {
             Topology::TriangleID idnull;
-            bool inside = coarseGeo->isPointInsideTriangle(idCTri, false, bary, idnull);
-            if (inside)
+            bool inside = coarseGeo->isPointInsideTriangle(idCTri, false, baryR, idnull);
+            
+            // If the triangulation is curve, several candidates are possible (ray vs triangle intersection)
+            // Will take the closest one
+            if (inside) 
             {
-                In2OutMap[idCTri].push_back(idRTri);
-                Glob2LocMap[idRTri] = idCTri;
-                break;
+                const Coord baryC = coarseGeo->computeTriangleCenter(idCTri);
+                SReal dist = (baryR - baryC).norm();
+
+                if (dist < distance)
+                {
+                    distance = dist;
+                    idC = idCTri;
+                }
             }
         }
+
+        if (idC != InvalidID)
+        {
+            In2OutMap[idC].push_back(idRTri);
+            Glob2LocMap[idRTri] = idC;
+        }
+        else
+        {
+            msg_error() << "No coarse triangle found for triangle: " << idRTri;
+        }
+        
     }
     
     this->d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
@@ -178,7 +201,7 @@ void Triangle2RefinedTriangleTopologicalMapping::updateTopologicalMappingTopDown
                 // Get the list of output id linked to this input id
                 if (In2OutMap.find(in_idOutLast) == In2OutMap.end())
                 {
-                    msg_error() << "Input triangle id not found: " << in_idOutLast << " in map. Need to understand why this is possible.";
+                    msg_error() << "Input triangle id not found: " << in_idOutLast << " in map of size: " << In2OutMap.size();
                     continue;
                 }
                 sofa::type::vector<Index>& outIds = In2OutMap[in_idOutLast];
