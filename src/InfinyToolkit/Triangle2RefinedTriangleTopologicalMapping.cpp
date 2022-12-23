@@ -49,7 +49,7 @@ const int Triangle2RefinedTriangleTopologicalMappingClass = core::RegisterObject
 
 Triangle2RefinedTriangleTopologicalMapping::Triangle2RefinedTriangleTopologicalMapping()
     : sofa::core::topology::TopologicalMapping()
-    , m_outTopoModifier(nullptr)
+    , p_drawMapping(initData(&p_drawMapping, true, "drawMapping", "if true, will draw line between mapped triangles"))
 {
     m_inputType = TopologyElementType::TRIANGLE;
     m_outputType = TopologyElementType::TRIANGLE;
@@ -96,6 +96,18 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
     sofa::Size nbTriCoarse = fromModel->getNbTriangles();
     sofa::Size nbTriRefined = toModel->getNbTriangles();
     
+    bool drawMap = p_drawMapping.getValue();
+    if (drawMap)
+    {
+        m_barycenters.resize(nbTriCoarse);
+        for (unsigned int idCTri = 0; idCTri < nbTriCoarse; ++idCTri)
+        {
+            m_barycenters[idCTri].cIndex = idCTri;
+            m_barycenters[idCTri].cBaryCenter = coarseGeo->computeTriangleCenter(idCTri);
+            m_barycenters[idCTri].rBaryCenters.clear();
+        }
+    }
+
     // TODO optimise this double loop
     for (unsigned int idRTri = 0; idRTri < nbTriRefined; ++idRTri)
     {
@@ -128,6 +140,8 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
         {
             In2OutMap[idC].push_back(idRTri);
             Glob2LocMap[idRTri] = idC;
+            if (drawMap)
+                m_barycenters[idC].rBaryCenters.push_back(baryR);
         }
         else
         {
@@ -243,6 +257,28 @@ void Triangle2RefinedTriangleTopologicalMapping::updateTopologicalMappingTopDown
     }
 
     sofa::helper::AdvancedTimer::stepEnd("Update Triangle2RefinedTriangleTopologicalMapping");
+}
+
+void Triangle2RefinedTriangleTopologicalMapping::draw(const core::visual::VisualParams* vparams)
+{
+    if (!p_drawMapping.getValue())
+        return;
+
+    const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
+
+    sofa::type::vector<sofa::type::Vec3> vertices;
+    for (unsigned int id = 0; id < m_barycenters.size(); ++id)
+    {
+        const debugData& data = m_barycenters[id];
+        type::vector <type::Vec3> rBary = data.rBaryCenters;
+        for (unsigned int j = 0; j < rBary.size(); ++j)
+        {
+            vertices.push_back(data.cBaryCenter);
+            vertices.push_back(rBary[j]);
+        }
+    }
+
+    vparams->drawTool()->drawLines(vertices, 1.0f, sofa::type::RGBAColor::green());
 }
 
 } //namespace sofa::component::topology::mapping

@@ -61,6 +61,7 @@ public:
     */
     void init() override;
 
+    void draw(const core::visual::VisualParams* vparams) override;
 
     /** \brief Translates the TopologyChange objects from the source to the target.
     *
@@ -72,9 +73,20 @@ public:
 
     Index getFromIndex(Index ind) override;
 
+    struct debugData
+    {
+        int cIndex;
+        type::Vec3 cBaryCenter;
+        type::vector <type::Vec3> rBaryCenters;
+    };
+
+    Data<bool> p_drawMapping;
+
 private:
     /// Pointer to the output topology modifier
-    container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier;
+    container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier = nullptr;
+
+    type::vector <debugData> m_barycenters;
 };
 
 } //namespace sofa::component::topology::mapping
