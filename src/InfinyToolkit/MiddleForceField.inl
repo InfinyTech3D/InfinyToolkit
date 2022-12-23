@@ -29,6 +29,7 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/topology/TopologySubsetData.inl>
+#include <sofa/core/MechanicalParams.h>
 
 namespace sofa::infinytoolkit
 {
@@ -168,6 +169,11 @@ void MiddleForceField<DataTypes>::addDForce(const core::MechanicalParams* mparam
     //TODO: implement this if really needed...
     SOFA_UNUSED(d_df);
     SOFA_UNUSED(d_dx);
+
+    // remove warning about kFactor not being used in Debug mode
+#ifndef NDEBUG
+    mparams->setKFactorUsed(true);
+#endif
 }
 
 template<class DataTypes>
