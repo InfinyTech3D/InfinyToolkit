@@ -84,7 +84,7 @@ void CuttingPerformer::filterContacts()
     }
 
     if (cutPositions.empty())
-        return false;
+        return;
 
     bary /= cutPositions.size();
     cutDir /= cutPositions.size();
@@ -114,10 +114,10 @@ void CuttingPerformer::filterContacts()
 
 bool CuttingPerformer::runPerformer()
 {
-    
+    m_tetraCuttingMgr->processCut(1);
 
-    m_tetraCuttingMgr->processCut(0);
-
+    m_triangleContacts.clear();
+    m_pointContacts.clear();
     return true;
 }
 
