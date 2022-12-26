@@ -36,13 +36,12 @@ set(HEADER_FILES
 
     ## Carving tools sections
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h    
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SimpleCarvingPerformer.h
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/CuttingPerformer.h
-
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
 )
 
@@ -58,12 +57,11 @@ set(SOURCE_FILES
     ## Carving tools sections
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BaseCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SimpleCarvingPerformer.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/CuttingPerformer.cpp
-
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 )
 
@@ -73,10 +71,12 @@ if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/CuttingPerformer.h
     )
     
     list(APPEND SOURCE_FILES 
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/CuttingPerformer.cpp
     )
     
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
