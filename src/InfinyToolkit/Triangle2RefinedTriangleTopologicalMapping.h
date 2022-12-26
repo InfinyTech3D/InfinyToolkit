@@ -82,6 +82,9 @@ public:
 
     Data<bool> p_drawMapping;
 
+protected:
+    void logMaps() const;
+
 private:
     /// Pointer to the output topology modifier
     container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier = nullptr;
