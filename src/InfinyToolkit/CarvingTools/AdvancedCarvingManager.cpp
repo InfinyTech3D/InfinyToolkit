@@ -39,10 +39,10 @@
 #include <InfinyToolkit/CarvingTools/SurfaceCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/BurningPerformer.h>
 #include <InfinyToolkit/CarvingTools/SimpleCarvingPerformer.h>
-#include <InfinyToolkit/CarvingTools/CuttingPerformer.h>
 
 #ifdef HAS_MESHREFINEMENT_PLUGIN
 #include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
+#include <InfinyToolkit/CarvingTools/CuttingPerformer.h>
 #endif
 
 #include <sofa/core/behavior/BaseMechanicalState.h>
@@ -66,7 +66,7 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     , d_active( initData(&d_active, false, "active", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
     , d_carvingWithBurning(initData(&d_carvingWithBurning, true, "carvingWithBurning", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
     , d_carvingWithRefinement(initData(&d_carvingWithRefinement, false, "carvingWithRefinement", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
-    , d_cutting(initData(&d_cutting, false, "cuttingMode", "cutting process"))
+    , d_cuttingMode(initData(&d_cuttingMode, false, "cuttingMode", "Activate the option tetrahedral cutting."))
     , d_carvingDistance( initData(&d_carvingDistance, 0.0, "carvingDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineDistance(initData(&d_refineDistance, 0.0, "refineDistance", "Collision distance at which cavring will start. Equal to contactDistance by default."))    
     , d_refineCriteria( initData(&d_refineCriteria, 0.5, "refineCriteria", "Collision distance at which cavring will start. Equal to contactDistance by default."))
@@ -189,16 +189,21 @@ void AdvancedCarvingManager::bwdInit()
             m_carvingPerformer.push_back(new BurningPerformer(topo, this));
         }
 
-        if (d_carvingWithRefinement.getValue()) {
+        if (d_carvingWithRefinement.getValue()) 
+        {
 #ifdef HAS_MESHREFINEMENT_PLUGIN
             m_carvingPerformer.push_back(new RefineCarvingPerformer(topo, this));
 #else
             msg_warning() << "Option carvingWithRefinement require MeshRefienement plugin. Please check https://www.sofa-framework.org/applications/marketplace/cutting-mesh-refinement/ for more information.";
 #endif
         }
-        else if (d_cutting.getValue())
+        else if (d_cuttingMode.getValue())
         {
+#ifdef HAS_MESHREFINEMENT_PLUGIN
             m_carvingPerformer.push_back(new CuttingPerformer(topo, this));
+#else
+            msg_warning() << "Option cutting require MeshRefienement plugin. Please check https://www.sofa-framework.org/applications/marketplace/cutting-mesh-refinement/ for more information.";
+#endif
         }
         else
         {
