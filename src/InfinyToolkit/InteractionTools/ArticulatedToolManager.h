@@ -38,17 +38,17 @@ typedef sofa::component::constraint::projective::AttachConstraint< sofa::default
 /** 
 *
 */
-class SOFA_INFINYTOOLKIT_API PliersToolManager : public core::objectmodel::BaseObject
+class SOFA_INFINYTOOLKIT_API ArticulatedToolManager : public core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);
+    SOFA_CLASS(ArticulatedToolManager,core::objectmodel::BaseObject);
 
     using Vec3 = sofa::type::Vec3;
 
 protected:
-    PliersToolManager();
+    ArticulatedToolManager();
 
-    ~PliersToolManager() override = default;
+    ~ArticulatedToolManager() override = default;
 
 public:
     virtual void init() override;
