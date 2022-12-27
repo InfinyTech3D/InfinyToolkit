@@ -25,11 +25,11 @@ set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 set(INFINYTOOLKIT_SRC_DIR src/InfinyToolkit)
 
 set(HEADER_FILES
-    ${INFINYTOOLKIT_SRC_DIR}/config.h.in    
+    ${INFINYTOOLKIT_SRC_DIR}/config.h.in
     ${INFINYTOOLKIT_SRC_DIR}/CollisionDetectionDisplay.h
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.h
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.h
-    ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.h    
+    ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.h
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.inl
@@ -45,6 +45,9 @@ set(HEADER_FILES
     
     ## Interaction tools sections
     ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.h
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.h
@@ -72,6 +75,9 @@ set(SOURCE_FILES
     
     ## Interaction tools sections
     ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.cpp
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.cpp

@@ -113,67 +113,6 @@ int ArticulatedToolManager::testModels()
 
 bool ArticulatedToolManager::computeBoundingBox()
 {
-    if (m_mord1 == nullptr || m_mord2 == nullptr)
-    {
-        msg_info() << "error mechanical state not found";
-        const std::string& pathMord1 = m_pathMord1.getValue();
-        const std::string& pathMord2 = m_pathMord2.getValue();
-        this->getContext()->get(m_mord1, pathMord1);
-        this->getContext()->get(m_mord2, pathMord2);
-
-        if (m_mord1 == nullptr || m_mord2 == nullptr)
-            return false;
-    }
-
-    for (int i = 0; i < 3; ++i)
-    {
-        m_min[i] = 10000;
-        m_max[i] = -10000;
-    }
-
-
-    for (Index i = 0; i < m_mord1->getSize(); i++)
-    {
-        SReal x = m_mord1->getPX(i);
-        SReal y = m_mord1->getPY(i);
-        SReal z = m_mord1->getPZ(i);
-        
-        if (x < m_min[0])
-            m_min[0] = x;
-        if (y < m_min[1])
-            m_min[1] = y;
-        if (z < m_min[2])
-            m_min[2] = z;
-
-        if (x > m_max[0])
-            m_max[0] = x;
-        if (y > m_max[1])
-            m_max[1] = y;
-        if (z > m_max[2])
-            m_max[2] = z;
-    }
-
-    for (Index i = 0; i < m_mord2->getSize(); i++)
-    {
-        SReal x = m_mord2->getPX(i);
-        SReal y = m_mord2->getPY(i);
-        SReal z = m_mord2->getPZ(i);
-
-        if (x < m_min[0])
-            m_min[0] = x;
-        if (y < m_min[1])
-            m_min[1] = y;
-        if (z < m_min[2])
-            m_min[2] = z;
-
-        if (x > m_max[0])
-            m_max[0] = x;
-        if (y > m_max[1])
-            m_max[1] = y;
-        if (z > m_max[2])
-            m_max[2] = z;
-    }
-
     return true;
 }
 
@@ -193,12 +132,12 @@ void ArticulatedToolManager::computeVertexIdsInBroadPhase(float margin)
         SReal x = m_model->getPX(i);
         SReal y = m_model->getPY(i);
         SReal z = m_model->getPZ(i);
-        if (x > m_min[0] - margin && x < m_max[0] + margin
-            && y > m_min[1] - margin && y < m_max[1] + margin
-            && z > m_min[2] - margin && z < m_max[2] + margin)
-        {
-            m_idBroadPhase.push_back(i);
-        }
+        //if (x > m_min[0] - margin && x < m_max[0] + margin
+        //    && y > m_min[1] - margin && y < m_max[1] + margin
+        //    && z > m_min[2] - margin && z < m_max[2] + margin)
+        //{
+        //    m_idBroadPhase.push_back(i);
+        //}
     }
 }
 
@@ -458,300 +397,7 @@ int ArticulatedToolManager::createFF(float _stiffness)
 
 void ArticulatedToolManager::computePlierAxis()
 {
-    zero = Vec3(0, 0, 0);
-    xAxis = Vec3(1, 0, 0);
-    yAxis = Vec3(0, 1, 0);
-    zAxis = Vec3(0, 0, 1);
 
-    if (m_mord1 == nullptr)
-        return;
-
-    zero = Vec3(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
-    xAxis = Vec3(m_mord1->getPX(1), m_mord1->getPY(1), m_mord1->getPZ(1));
-    yAxis = Vec3(m_mord1->getPX(20), m_mord1->getPY(20), m_mord1->getPZ(20));
-    zAxis = Vec3(m_mord1->getPX(100), m_mord1->getPY(100), m_mord1->getPZ(100));
-
-    Vec3 xDir = (xAxis - zero); xDir.normalize();
-    Vec3 yDir = (yAxis - zero); yDir.normalize();
-    Vec3 zDir = (zAxis - zero); zDir.normalize();
-
-    matP = sofa::type::Mat3x3(xDir, yDir, zDir);
-
-}
-
-int ArticulatedToolManager::cutFromTetra(float minX, float maxX, bool cut)
-{
-    if (m_idBroadPhase.empty())
-        return 10000;
-
-    bool lastCut = true;
-
-    // Classify right/left points of the plier
-    sofa::type::vector<sofa::Index> idsLeft;
-    sofa::type::vector<sofa::Index> idsRight;
-    for (unsigned int i = 0; i < m_idBroadPhase.size(); i++)
-    {
-        Vec3 vert = Vec3(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
-        vert = matP*(vert - zero);
-
-		if (vert[2] < -20.0 || vert[2] > 20.0) // outside on the borders
-			continue;
-		
-		// backward test
-		if (vert[0] < minX)
-		{
-			//if (vert[2] > -5.0 || vert[2] < 5.0)
-			//	return -10000;
-			//else
-				continue;
-		}
-
-		// frontward test
-		if (vert[0] > maxX)
-		{
-			if (vert[2] > -5.0 || vert[2] < 5.0)
-				lastCut = false;
-
-			continue;
-		}
-
-        if (vert[2] >= -20.0 && vert[2] < 0.0)
-            idsLeft.push_back(m_idBroadPhase[i]);
-        else if (vert[2] >= 0.0 && vert[2] < 20.0)
-            idsRight.push_back(m_idBroadPhase[i]);
-    }
-
-    if (idsLeft.size() == 0 || idsRight.size() == 0)
-        return 20000;
-
-    msg_info() << "idsLeft: " << idsLeft.size();
-    msg_info() << "idsRight: " << idsRight.size();
-
-    // Detect all tetra on the cut path
-    TetrahedronSetTopologyContainer* tetraCon;
-    m_model->getContext()->get(tetraCon);
-    if (tetraCon == nullptr) {
-        msg_info() << "Error: NO tetraCon";
-        return -40;
-    }
-
-    // First get all tetra that are on the first side
-    sofa::type::vector<TetraID> tetraIds;
-    for (unsigned int i = 0; i < idsLeft.size(); ++i)
-    {
-        const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(idsLeft[i]);
-        for (unsigned int j = 0; j < tetraAV.size(); ++j)
-        {
-            TetraID tetraId = tetraAV[j];
-            bool found = false;
-            for (unsigned int k = 0; k<tetraIds.size(); ++k)
-                if (tetraIds[k] == tetraId)
-                {
-                    found = true;
-                    break;
-                }
-
-            if (!found)
-                tetraIds.push_back(tetraId);
-        }
-    }
-
-    msg_info() << "tetraIds: " << tetraIds.size();
-
-
-    // Then test for each tetra if one of the vertex is on the other side. If yes put on but path
-    tetraIdsOnCut.clear();
-    std::set< TetraID > items;
-    for (unsigned int i = 0; i < tetraIds.size(); ++i)
-    {
-        const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
-        for (unsigned int j = 0; j < 4; ++j)
-        {
-            sofa::Index idV = tetra[j];
-            bool found = false;
-            for (unsigned int k = 0; k < idsRight.size(); ++k)
-            {
-                if (idsRight[k] == idV)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                tetraIdsOnCut.push_back(tetraIds[i]);
-                items.insert(tetraIds[i]);
-                continue;
-            }
-        }
-    }
-
-    if (cut)
-    {
-        msg_info() << "tetraIdsOnCut: " << tetraIdsOnCut.size();
-        TetrahedronSetTopologyModifier* tetraModif;
-        m_model->getContext()->get(tetraModif);
-
-        if (tetraModif == nullptr) {
-            msg_info() << "Error: NO tetraModif";
-            return -45;
-        }
-
-
-        sofa::type::vector<unsigned int> vitems;
-        vitems.reserve(items.size());
-        vitems.insert(vitems.end(), items.rbegin(), items.rend());
-
-        for (unsigned int i = 0; i < vitems.size(); i++)
-        {
-            sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> its;
-            its.push_back(vitems[i]);
-            tetraModif->removeTetrahedra(its);
-        }
-
-        //vitems.resize(30);
-        
-    }
-    else
-    {
-        m_idBroadPhase.clear();
-        m_idBroadPhase.insert(m_idBroadPhase.end(), items.rbegin(), items.rend());
-    }
-
-	if (lastCut)
-		return 40000;
-
-    return int(items.size());
-}
-
-int ArticulatedToolManager::pathCutFromTetra(float minX, float maxX)
-{    
-    int res = cutFromTetra(minX, maxX, false);
-    if (res > 1000)
-        return 0;
-
-    sofa::type::vector<int> tetraIds = m_idBroadPhase;
-    m_idgrabed.clear();
-    TetrahedronSetTopologyContainer* tetraCon;
-    m_model->getContext()->get(tetraCon);
-    if (tetraCon == nullptr) {
-        msg_info() << "Error: NO tetraCon";
-        return -40;
-    }
-
-    for (unsigned int i = 0; i < tetraIds.size(); i++)
-    {
-        const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
-        for (int j = 0; j < 4; j++) 
-        {
-            bool found = false;
-            int idV = tetra[j];
-            for (unsigned int k = 0; k < m_idgrabed.size(); ++k)
-            {
-                if (m_idgrabed[k] == idV)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-        if (!found) 
-            m_idgrabed.push_back(idV);
-        
-        }
-    }
-
-    return int(m_idgrabed.size());
-}
-
-
-void ArticulatedToolManager::cutFromTriangles()
-{
-    // Classify right/left points of the plier
-    sofa::type::vector<sofa::Index> idsLeft;
-    sofa::type::vector<sofa::Index> idsRight;
-    for (unsigned int i = 0; i < m_idgrabed.size(); i++)
-    {
-        Vec3 vert = Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
-        vert = matP*(vert - zero);
-
-        if (vert[0] < 0.0 || vert[0] > 8.0)
-            continue;
-
-        if (vert[2] >= -2.0 && vert[2] < 1.0)
-            idsLeft.push_back(m_idgrabed[i]);
-        else if (vert[2] >= 1.0 && vert[2] < 3.0)
-            idsRight.push_back(m_idgrabed[i]);
-    }
-
-    msg_info() << "idsLeft: " << idsLeft.size();
-    msg_info() << "idsRight: " << idsRight.size();
-
-    // Detect all tetra on the cut path
-    std::vector<TriangleSetTopologyContainer*> triCons;
-    m_model->getContext()->get<TriangleSetTopologyContainer>(&triCons, sofa::core::objectmodel::BaseContext::SearchDown);
-
-    if (triCons.size() < 2) {
-        msg_info() << "Error: NO triCons";
-        return;
-    }
-
-    const sofa::type::vector<BaseMeshTopology::Triangle> & allTri = triCons[1]->getTriangleArray();
-    for (unsigned int i = 0; i < allTri.size(); ++i)
-    {
-        const BaseMeshTopology::Triangle& tri = allTri[i];
-        bool foundLeft = false;
-        bool foundRight = false;
-        for (int j = 0; j < 3; ++j)
-        {
-            sofa::Index idV = tri[j];
-            for (unsigned int k = 0; k < idsLeft.size(); ++k)
-            {
-                if (idsLeft[k] == idV)
-                {
-                    foundLeft = true;
-                    break;
-                }
-            }
-
-            if (foundLeft)
-                break;
-        }
-
-        if (!foundLeft)
-            continue;
-
-        msg_info() << "found: " << i;
-        for (int j = 0; j < 3; ++j)
-        {
-            sofa::Index idV = tri[j];
-            for (unsigned int k = 0; k < idsRight.size(); ++k)
-            {
-                if (idsRight[k] == idV)
-                {
-                    foundRight = true;
-                    break;
-                }
-            }
-
-            if (foundRight) {
-                triIdsOnCut.push_back(i);
-                break;
-            }
-        }
-    }
-
-    msg_info() << "triIdsOnCut: " << triIdsOnCut.size();
-    std::vector<TriangleSetTopologyModifier*> triModifs;
-    m_model->getContext()->get<TriangleSetTopologyModifier>(&triModifs, sofa::core::objectmodel::BaseContext::SearchDown);
-
-    if (triModifs.size() < 2 ) {
-        msg_info() << "Error: NO triModif";
-        return;
-    }
-    msg_info() << "FOUND: " << triModifs.size();
-    //tetraIdsOnCut.resize(30);
-    triModifs[1]->removeItems(triIdsOnCut);
 }
 
 
@@ -812,7 +458,7 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
             //for (int i=0; i<7; i++)
             //    cutFromTetra(i*2, i*2+2);
 
-            cutFromTetra(0, 14, false);
+            //cutFromTetra(0, 14, false);
 
             
             break;
@@ -828,7 +474,7 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
             /*for (int i=0; i<7; i++)
                 cutFromTetra(i*2, i*2+2);*/
 
-            cutFromTetra(0, 14, true);
+            //cutFromTetra(0, 14, true);
 
 
             break;
@@ -842,43 +488,43 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
 
-    sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
-    vparams->drawTool()->drawLine(m_min, m_max, sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
-    
-    vparams->drawTool()->drawLine(zero, xAxis, sofa::type::RGBAColor(1.0, 0.0, 0.0, 0.0));
-    vparams->drawTool()->drawLine(zero, yAxis, sofa::type::RGBAColor(0.0, 1.0, 0.0, 0.0));
-    vparams->drawTool()->drawLine(zero, zAxis, sofa::type::RGBAColor(0.0, 0.0, 1.0, 0.0));
+    //sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
+    //vparams->drawTool()->drawLine(m_min, m_max, sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
+    //
+    //vparams->drawTool()->drawLine(zero, xAxis, sofa::type::RGBAColor(1.0, 0.0, 0.0, 0.0));
+    //vparams->drawTool()->drawLine(zero, yAxis, sofa::type::RGBAColor(0.0, 1.0, 0.0, 0.0));
+    //vparams->drawTool()->drawLine(zero, zAxis, sofa::type::RGBAColor(0.0, 0.0, 1.0, 0.0));
 
-    if (m_model == nullptr)
-        return;
+    //if (m_model == nullptr)
+    //    return;
 
-    for (unsigned int i = 0; i < m_idgrabed.size(); i++)
-    {
-        SReal x = m_model->getPX(m_idgrabed[i]);
-        SReal y = m_model->getPY(m_idgrabed[i]);
-        SReal z = m_model->getPZ(m_idgrabed[i]);
-        vparams->drawTool()->drawPoint(Vec3(x, y, z), sofa::type::RGBAColor(255.0, 0.0, 0.0, 1.0));
-    }
+    //for (unsigned int i = 0; i < m_idgrabed.size(); i++)
+    //{
+    //    SReal x = m_model->getPX(m_idgrabed[i]);
+    //    SReal y = m_model->getPY(m_idgrabed[i]);
+    //    SReal z = m_model->getPZ(m_idgrabed[i]);
+    //    vparams->drawTool()->drawPoint(Vec3(x, y, z), sofa::type::RGBAColor(255.0, 0.0, 0.0, 1.0));
+    //}
 
 
-    TetrahedronSetTopologyContainer* tetraCon;
-    m_model->getContext()->get(tetraCon);
-    if (tetraCon == nullptr) {
-        msg_info() << "Error: NO tetraCon";
-        return;
-    }
+    //TetrahedronSetTopologyContainer* tetraCon;
+    //m_model->getContext()->get(tetraCon);
+    //if (tetraCon == nullptr) {
+    //    msg_info() << "Error: NO tetraCon";
+    //    return;
+    //}
 
-    for (unsigned int i = 0; i < tetraIdsOnCut.size(); i++)
-    {
-        const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
-        
-        Vec3 p0 = Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
-        Vec3 p1 = Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
-        Vec3 p2 = Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
-        Vec3 p3 = Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
+    //for (unsigned int i = 0; i < tetraIdsOnCut.size(); i++)
+    //{
+    //    const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
+    //    
+    //    Vec3 p0 = Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
+    //    Vec3 p1 = Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
+    //    Vec3 p2 = Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
+    //    Vec3 p3 = Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
 
-        vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
-    }
+    //    vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
+    //}
 }
 
 } // namespace sofa::infinytoolkit
