@@ -22,7 +22,7 @@
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
 
-#include <InfinyToolkit/PliersToolManager.h>
+#include <InfinyToolkit/InteractionTools/ArticulatedToolManager.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 
@@ -38,7 +38,7 @@
 namespace sofa::infinytoolkit
 {
 
-SOFA_DECL_CLASS(PliersToolManager)
+SOFA_DECL_CLASS(ArticulatedToolManager)
 
 using namespace defaulttype;
 using namespace sofa::core::topology;
@@ -52,11 +52,11 @@ using sofa::core::objectmodel::KeyreleasedEvent;
 using TetraID = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer::TetraID;
 
 
-int PliersToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
-        .add< PliersToolManager >();
+int ArticulatedToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
+        .add< ArticulatedToolManager >();
 
 
-PliersToolManager::PliersToolManager()
+ArticulatedToolManager::ArticulatedToolManager()
     : m_pathMord1(initData(&m_pathMord1, "pathMord1", "Path to mord1"))
     , m_pathMord2(initData(&m_pathMord2, "pathMord2", "Path to mord2"))
     , m_pathModel(initData(&m_pathModel, "pathModel", "Path to model"))
@@ -68,7 +68,7 @@ PliersToolManager::PliersToolManager()
 }
 
 
-void PliersToolManager::init()
+void ArticulatedToolManager::init()
 {
     const std::string& pathMord1 = m_pathMord1.getValue();
     const std::string& pathMord2 = m_pathMord2.getValue();
@@ -97,21 +97,21 @@ void PliersToolManager::init()
     computeBoundingBox();
 }
 
-int PliersToolManager::testModels()
+int ArticulatedToolManager::testModels()
 {
     if (m_mord1 == nullptr)
         return -20;
 
     if (m_mord2 == nullptr)
         return -21;
-
+     
     if (m_model == nullptr)
         return -22;
 
     return 52;
 }
 
-bool PliersToolManager::computeBoundingBox()
+bool ArticulatedToolManager::computeBoundingBox()
 {
     if (m_mord1 == nullptr || m_mord2 == nullptr)
     {
@@ -178,7 +178,7 @@ bool PliersToolManager::computeBoundingBox()
 }
 
 
-void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
+void ArticulatedToolManager::computeVertexIdsInBroadPhase(float margin)
 {
     // First compute boundingbox
     computeBoundingBox();    
@@ -202,7 +202,7 @@ void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
     }
 }
 
-bool PliersToolManager::unactiveTool()
+bool ArticulatedToolManager::unactiveTool()
 {
 	if (m_model == nullptr)
 		return false;
@@ -241,7 +241,7 @@ bool PliersToolManager::unactiveTool()
 	return true;
 }
 
-bool PliersToolManager::reactiveTool()
+bool ArticulatedToolManager::reactiveTool()
 {
 	// Restaure the default collision behavior
 	std::vector<SphereModel*> col_models;
@@ -264,7 +264,7 @@ bool PliersToolManager::reactiveTool()
 }
 
 
-const sofa::type::vector< int >& PliersToolManager::grabModel()
+const sofa::type::vector< int >& ArticulatedToolManager::grabModel()
 {
     // If no point in the broadphase, nothing to do
     if (m_idBroadPhase.size() == 0)
@@ -395,7 +395,7 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
     return m_idgrabed;
 }
 
-void PliersToolManager::releaseGrab()
+void ArticulatedToolManager::releaseGrab()
 {    
     if (!m_forcefieldUP || !m_forcefieldDOWN)
         return;
@@ -427,7 +427,7 @@ void PliersToolManager::releaseGrab()
 	}
 }
 
-int PliersToolManager::createFF(float _stiffness)
+int ArticulatedToolManager::createFF(float _stiffness)
 {
     m_stiffness = _stiffness;
 
@@ -456,7 +456,7 @@ int PliersToolManager::createFF(float _stiffness)
     return 0;
 }
 
-void PliersToolManager::computePlierAxis()
+void ArticulatedToolManager::computePlierAxis()
 {
     zero = Vec3(0, 0, 0);
     xAxis = Vec3(1, 0, 0);
@@ -479,7 +479,7 @@ void PliersToolManager::computePlierAxis()
 
 }
 
-int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
+int ArticulatedToolManager::cutFromTetra(float minX, float maxX, bool cut)
 {
     if (m_idBroadPhase.empty())
         return 10000;
@@ -624,7 +624,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     return int(items.size());
 }
 
-int PliersToolManager::pathCutFromTetra(float minX, float maxX)
+int ArticulatedToolManager::pathCutFromTetra(float minX, float maxX)
 {    
     int res = cutFromTetra(minX, maxX, false);
     if (res > 1000)
@@ -665,7 +665,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
 }
 
 
-void PliersToolManager::cutFromTriangles()
+void ArticulatedToolManager::cutFromTriangles()
 {
     // Classify right/left points of the plier
     sofa::type::vector<sofa::Index> idsLeft;
@@ -755,7 +755,7 @@ void PliersToolManager::cutFromTriangles()
 }
 
 
-void PliersToolManager::handleEvent(sofa::core::objectmodel::Event* event)
+void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
     if (KeypressedEvent::checkEventType(event))
     {
@@ -837,7 +837,7 @@ void PliersToolManager::handleEvent(sofa::core::objectmodel::Event* event)
     }
 }
 
-void PliersToolManager::draw(const core::visual::VisualParams* vparams)
+void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
 {
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
