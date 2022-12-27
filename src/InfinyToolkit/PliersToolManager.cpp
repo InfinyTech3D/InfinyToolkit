@@ -58,22 +58,11 @@ PliersToolManager::PliersToolManager()
     : m_pathMord1(initData(&m_pathMord1, "pathMord1", "Path to mord1"))
     , m_pathMord2(initData(&m_pathMord2, "pathMord2", "Path to mord2"))
     , m_pathModel(initData(&m_pathModel, "pathModel", "Path to model"))
-    , m_mord1(NULL)
-    , m_mord2(NULL)
-    , m_model(NULL)
-    , m_forcefieldUP(NULL)
-    , m_forcefieldDOWN(NULL)
 	, m_oldCollisionStiffness(5000)
     , m_stiffness(500)
 {
     this->f_listening.setValue(true);
     m_idgrabed.clear();
-}
-
-
-PliersToolManager::~PliersToolManager()
-{
-
 }
 
 
@@ -93,7 +82,7 @@ void PliersToolManager::init()
     this->getContext()->get(m_mord2, pathMord2);
     this->getContext()->get(m_model, pathModel);
 
-    if (m_mord1 == NULL || m_mord2 == NULL || m_model == NULL)
+    if (m_mord1 == nullptr || m_mord2 == nullptr || m_model == nullptr)
     {
         msg_error() << "error mechanical state not found";
         return;
@@ -108,13 +97,13 @@ void PliersToolManager::init()
 
 int PliersToolManager::testModels()
 {
-    if (m_mord1 == NULL)
+    if (m_mord1 == nullptr)
         return -20;
 
-    if (m_mord2 == NULL)
+    if (m_mord2 == nullptr)
         return -21;
 
-    if (m_model == NULL)
+    if (m_model == nullptr)
         return -22;
 
     return 52;
@@ -122,7 +111,7 @@ int PliersToolManager::testModels()
 
 bool PliersToolManager::computeBoundingBox()
 {
-    if (m_mord1 == NULL || m_mord2 == NULL)
+    if (m_mord1 == nullptr || m_mord2 == nullptr)
     {
         msg_info() << "error mechanical state not found";
         const std::string& pathMord1 = m_pathMord1.getValue();
@@ -130,7 +119,7 @@ bool PliersToolManager::computeBoundingBox()
         this->getContext()->get(m_mord1, pathMord1);
         this->getContext()->get(m_mord2, pathMord2);
 
-        if (m_mord1 == NULL || m_mord2 == NULL)
+        if (m_mord1 == nullptr || m_mord2 == nullptr)
             return false;
     }
 
@@ -146,7 +135,7 @@ bool PliersToolManager::computeBoundingBox()
         SReal x = m_mord1->getPX(i);
         SReal y = m_mord1->getPY(i);
         SReal z = m_mord1->getPZ(i);
-        //msg_info() << "drawLine: " << x << " " << y << " " << z;
+        
         if (x < m_min[0])
             m_min[0] = x;
         if (y < m_min[1])
@@ -186,19 +175,13 @@ bool PliersToolManager::computeBoundingBox()
     return true;
 }
 
-void PliersToolManager::reinit()
-{
-/*    if (!m_useDataInputs.getValue())
-        this->readDataFile();
-        */
-}
 
 void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
 {
     // First compute boundingbox
     computeBoundingBox();    
 
-    if (m_model == NULL)
+    if (m_model == nullptr)
         return;
 
     // Add to m_idBroadPhase all model vertices inside the BB
@@ -219,7 +202,7 @@ void PliersToolManager::computeVertexIdsInBroadPhase(float margin)
 
 bool PliersToolManager::unactiveTool()
 {
-	if (m_model == NULL)
+	if (m_model == nullptr)
 		return false;
 
 	std::vector<SphereModel*> col_models;
@@ -285,7 +268,7 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
     if (m_idBroadPhase.size() == 0)
         return m_idBroadPhase;
 
-    if (m_forcefieldUP == NULL || m_forcefieldDOWN == NULL)
+    if (m_forcefieldUP == nullptr || m_forcefieldDOWN == nullptr)
         createFF(500);
 
 
@@ -465,10 +448,10 @@ int PliersToolManager::createFF(float _stiffness)
     stiffspringforcefield_DOWN->setDamping(0);
     stiffspringforcefield_DOWN->init();
 
-    if (m_forcefieldUP == NULL)
+    if (m_forcefieldUP == nullptr)
         return -1001;
 
-    if (m_forcefieldDOWN == NULL)
+    if (m_forcefieldDOWN == nullptr)
         return -1002;
 
     return 0;
@@ -481,7 +464,7 @@ void PliersToolManager::computePlierAxis()
     yAxis = Vec3(0, 1, 0);
     zAxis = Vec3(0, 0, 1);
 
-    if (m_mord1 == NULL)
+    if (m_mord1 == nullptr)
         return;
 
     zero = Vec3(m_mord1->getPX(0), m_mord1->getPY(0), m_mord1->getPZ(0));
@@ -494,13 +477,6 @@ void PliersToolManager::computePlierAxis()
     Vec3 zDir = (zAxis - zero); zDir.normalize();
 
     matP = sofa::type::Mat3x3(xDir, yDir, zDir);
-
-    //Vec3 test1 = Vec3(m_mord1->getPX(3), m_mord1->getPY(3), m_mord1->getPZ(3));
-    //Vec3 test2 = Vec3(m_mord1->getPX(40), m_mord1->getPY(40), m_mord1->getPZ(40));
-    //Vec3 test3 = Vec3(m_mord1->getPX(45), m_mord1->getPY(45), m_mord1->getPZ(45));
-    //msg_info() << "test1 : " << test1 << " -> " << matP*(test1 - zero);
-    //msg_info() << "test2 : " << test2 << " -> " << matP*(test2 - zero);
-    //msg_info() << "test3 : " << test3 << " -> " << matP*(test3 - zero);
 
 }
 
@@ -555,7 +531,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     // Detect all tetra on the cut path
     TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
-    if (tetraCon == NULL) {
+    if (tetraCon == nullptr) {
         msg_info() << "Error: NO tetraCon";
         return -40;
     }
@@ -617,7 +593,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
         TetrahedronSetTopologyModifier* tetraModif;
         m_model->getContext()->get(tetraModif);
 
-        if (tetraModif == NULL) {
+        if (tetraModif == nullptr) {
             msg_info() << "Error: NO tetraModif";
             return -45;
         }
@@ -659,7 +635,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
     m_idgrabed.clear();
     TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
-    if (tetraCon == NULL) {
+    if (tetraCon == nullptr) {
         msg_info() << "Error: NO tetraCon";
         return -40;
     }
@@ -874,7 +850,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     vparams->drawTool()->drawLine(zero, yAxis, sofa::type::RGBAColor(0.0, 1.0, 0.0, 0.0));
     vparams->drawTool()->drawLine(zero, zAxis, sofa::type::RGBAColor(0.0, 0.0, 1.0, 0.0));
 
-    if (m_model == NULL)
+    if (m_model == nullptr)
         return;
 
     for (int i = 0; i < m_idgrabed.size(); i++)
@@ -888,7 +864,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
 
     TetrahedronSetTopologyContainer* tetraCon;
     m_model->getContext()->get(tetraCon);
-    if (tetraCon == NULL) {
+    if (tetraCon == nullptr) {
         msg_info() << "Error: NO tetraCon";
         return;
     }
@@ -904,11 +880,6 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
 
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }
-
-        
-   // msg_info() << "drawLine: " << m_min[0] << " " << m_min[1] << " " << m_min[2];
 }
-
-
 
 } // namespace sofa::infinytoolkit
