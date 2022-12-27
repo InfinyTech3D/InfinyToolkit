@@ -44,6 +44,9 @@ set(HEADER_FILES
     
     ## Interaction tools sections
     ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
 )
@@ -67,6 +70,9 @@ set(SOURCE_FILES
     
     ## Interaction tools sections
     ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 )
