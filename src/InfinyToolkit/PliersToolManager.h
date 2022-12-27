@@ -38,7 +38,7 @@ typedef sofa::component::constraint::projective::AttachConstraint< sofa::default
 /** 
 *
 */
-class SOFA_INFINYTOOLKIT_API PliersToolManager: public core::objectmodel::BaseObject
+class SOFA_INFINYTOOLKIT_API PliersToolManager : public core::objectmodel::BaseObject
 {
 public:
     SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);
@@ -48,11 +48,10 @@ public:
 protected:
     PliersToolManager();
 
-    virtual ~PliersToolManager();
+    ~PliersToolManager() override = default;
 
 public:
     virtual void init() override;
-    virtual void reinit() override;
     int testModels();
     
     const sofa::type::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
@@ -121,13 +120,13 @@ protected:
     Vec3 zAxis;
 
     // Pointer to the mechanicalObject
-    sofa::core::behavior::BaseMechanicalState* m_mord1;
-    sofa::core::behavior::BaseMechanicalState* m_mord2;
-    sofa::core::behavior::BaseMechanicalState* m_model;
+    sofa::core::behavior::BaseMechanicalState* m_mord1 = nullptr;
+    sofa::core::behavior::BaseMechanicalState* m_mord2 = nullptr;
+    sofa::core::behavior::BaseMechanicalState* m_model = nullptr;
 
     // Pointer to the stiffspring FF created.
-    StiffSpringFF::SPtr m_forcefieldUP;
-    StiffSpringFF::SPtr m_forcefieldDOWN;
+    StiffSpringFF::SPtr m_forcefieldUP = nullptr;
+    StiffSpringFF::SPtr m_forcefieldDOWN = nullptr;
 
     SReal m_oldCollisionStiffness;
     float m_stiffness;

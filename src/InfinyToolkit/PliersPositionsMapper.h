@@ -48,11 +48,10 @@ public:
 protected:
     PliersPositionsMapper();
 
-    virtual ~PliersPositionsMapper(); 
+    ~PliersPositionsMapper() override = default; 
 
 public:
     void init() override;
-    void reinit() override;
 	void doUpdate() override;
 
 
@@ -69,7 +68,7 @@ public:
     }
 
 protected:
-	TetrahedronSetTopologyContainer* m_topo;
+	TetrahedronSetTopologyContainer* m_topo = nullptr;
 
 	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
 	Data<sofa::type::vector<int> > m_tetraTube;
