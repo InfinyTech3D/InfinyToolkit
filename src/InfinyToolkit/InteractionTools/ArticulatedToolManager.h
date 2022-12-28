@@ -54,45 +54,41 @@ public:
 
 
     // global methods    
-    int createFF(float _stiffness);
-    bool computeBoundingBox();
+    void computeBoundingBox();
     void computeVertexIdsInBroadPhase(float margin = 0.0);
 
-	bool unactiveTool();
-	bool reactiveTool();
+	void unactiveTool();
+	void reactiveTool();
 
-    // API from grabing
-    const sofa::type::vector< int >& grabModel();
+    void performAction();
+    void stopAction();
 
-    void releaseGrab();
+    void closeTool();
+    void openTool();
 
 
     // Method from intern test
     virtual void handleEvent(sofa::core::objectmodel::Event* event) override;
-    void computePlierAxis();
     
     void draw(const core::visual::VisualParams* vparams) override;
 
 public:
+    // Path to the different JawModel
     SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel1;
     SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel2;
+    
+    Data<SReal> d_angleJaw1; //up
+    Data<SReal> d_angleJaw2; //down
+    Data<SReal> d_handleFactor;
 
-    // Path to the different mechanicalObject
-    Data<std::string> m_pathMord1;
-    Data<std::string> m_pathMord2;
-    Data<std::string> m_pathModel;
-	    
 protected:
     // Buffer of points ids 
     sofa::type::vector <int> m_idgrabed;
     sofa::type::vector <int> m_idBroadPhase;
 
     // Pointer to the mechanicalObject
-    BaseJawModel::SPtr m_jawModel1;
-    BaseJawModel::SPtr m_jawModel2;
-    sofa::core::behavior::BaseMechanicalState* m_mord1 = nullptr;
-    sofa::core::behavior::BaseMechanicalState* m_mord2 = nullptr;
-    sofa::core::behavior::BaseMechanicalState* m_model = nullptr;
+    BaseJawModel::SPtr m_jawModel1 = nullptr;
+    BaseJawModel::SPtr m_jawModel2 = nullptr;
 
     // Pointer to the stiffspring FF created.
     StiffSpringFF::SPtr m_forcefieldUP = nullptr;

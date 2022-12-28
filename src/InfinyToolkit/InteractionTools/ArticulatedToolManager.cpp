@@ -57,9 +57,8 @@ int ArticulatedToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
 
 
 ArticulatedToolManager::ArticulatedToolManager()
-    : m_pathMord1(initData(&m_pathMord1, "pathMord1", "Path to mord1"))
-    , m_pathMord2(initData(&m_pathMord2, "pathMord2", "Path to mord2"))
-    , m_pathModel(initData(&m_pathModel, "pathModel", "Path to model"))
+    : l_jawModel1(initLink("jawModel1", "link to the first jaw model component, if not set will search through graph and take first one encountered."))
+    , l_jawModel2(initLink("jawModel2", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
 	, m_oldCollisionStiffness(5000)
     , m_stiffness(500)
 {
@@ -70,50 +69,60 @@ ArticulatedToolManager::ArticulatedToolManager()
 
 void ArticulatedToolManager::init()
 {
-    const std::string& pathMord1 = m_pathMord1.getValue();
-    const std::string& pathMord2 = m_pathMord2.getValue();
-    const std::string& pathModel = m_pathModel.getValue();
-
-    if (pathMord1.empty() && pathMord2.empty())
+    if (l_jawModel1.get() == nullptr || l_jawModel2.get() == nullptr)
     {
-        msg_error() << "no input mords found !!";
-        return;
+        std::vector<BaseJawModel*> jawModels;
+        this->getContext()->get<BaseJawModel>(&jawModels, core::objectmodel::BaseContext::SearchRoot);
+    
+        if (jawModels.size() != 2)
+        {
+            msg_error() << "No jaw models given as inputs nor found inside the scene. Please provide them using the links jawModel1 and jawModel2.";
+            sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+            return;
+        }
+
+        m_jawModel1 = jawModels[0];
+        m_jawModel2 = jawModels[1];
     }
+    else
+    {
+        m_jawModel1 = l_jawModel1.get();
+        m_jawModel2 = l_jawModel2.get();
+    }
+    
 
-    this->getContext()->get(m_mord1, pathMord1);
-    this->getContext()->get(m_mord2, pathMord2);
-    this->getContext()->get(m_model, pathModel);
-
-    if (m_mord1 == nullptr || m_mord2 == nullptr || m_model == nullptr)
+    if (m_jawModel1 == nullptr || m_jawModel2 == nullptr)
     {
         msg_error() << "error mechanical state not found";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         return;
     }
 
-    msg_info() << "m_mord1: " << m_mord1->getName();
-    msg_info() << "m_mord2: " << m_mord2->getName();
-    msg_info() << "m_mord2: " << m_model->getName();
-
     computeBoundingBox();
+
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 }
+
 
 int ArticulatedToolManager::testModels()
 {
-    if (m_mord1 == nullptr)
+    if (m_jawModel1 == nullptr)
         return -20;
 
-    if (m_mord2 == nullptr)
+    if (m_jawModel2 == nullptr)
         return -21;
-     
-    if (m_model == nullptr)
-        return -22;
 
     return 52;
 }
 
-bool ArticulatedToolManager::computeBoundingBox()
+
+void ArticulatedToolManager::computeBoundingBox()
 {
-    return true;
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return;
+
+    m_jawModel1->computeBoundingBox();
+    m_jawModel2->computeBoundingBox();
 }
 
 
@@ -122,282 +131,89 @@ void ArticulatedToolManager::computeVertexIdsInBroadPhase(float margin)
     // First compute boundingbox
     computeBoundingBox();    
 
-    if (m_model == nullptr)
+    //if (m_model == nullptr)
+    //    return;
+
+    //// Add to m_idBroadPhase all model vertices inside the BB
+    //m_idBroadPhase.clear();
+    //for (Index i = 0; i < m_model->getSize(); i++)
+    //{
+    //    SReal x = m_model->getPX(i);
+    //    SReal y = m_model->getPY(i);
+    //    SReal z = m_model->getPZ(i);
+    //    //if (x > m_min[0] - margin && x < m_max[0] + margin
+    //    //    && y > m_min[1] - margin && y < m_max[1] + margin
+    //    //    && z > m_min[2] - margin && z < m_max[2] + margin)
+    //    //{
+    //    //    m_idBroadPhase.push_back(i);
+    //    //}
+    //}
+}
+
+
+void ArticulatedToolManager::unactiveTool()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
-    // Add to m_idBroadPhase all model vertices inside the BB
-    m_idBroadPhase.clear();
-    for (Index i = 0; i < m_model->getSize(); i++)
-    {
-        SReal x = m_model->getPX(i);
-        SReal y = m_model->getPY(i);
-        SReal z = m_model->getPZ(i);
-        //if (x > m_min[0] - margin && x < m_max[0] + margin
-        //    && y > m_min[1] - margin && y < m_max[1] + margin
-        //    && z > m_min[2] - margin && z < m_max[2] + margin)
-        //{
-        //    m_idBroadPhase.push_back(i);
-        //}
-    }
+    m_jawModel1->activeTool(false);
+    m_jawModel2->activeTool(false);
 }
 
-bool ArticulatedToolManager::unactiveTool()
+
+void ArticulatedToolManager::reactiveTool()
 {
-	if (m_model == nullptr)
-		return false;
-
-	std::vector<SphereModel*> col_models;
-	m_mord1->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		SReal contactS = col_model->getContactStiffness(0);
-		if (m_oldCollisionStiffness < contactS)
-			m_oldCollisionStiffness = contactS;
-		col_model->setContactStiffness(0.0);
-	}
-
-	col_models.clear();
-	m_mord2->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		col_model->setContactStiffness(0.0);
-	}
-
-	if (!m_forcefieldUP || !m_forcefieldDOWN)
-		return false;
-	m_idgrabed.clear();
-	m_idBroadPhase.clear();
-
-	// Clear springs created during the grab
-	StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-	stiffspringforcefield_UP->clear();
-
-	StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-	stiffspringforcefield_DOWN->clear();
-
-	return true;
-}
-
-bool ArticulatedToolManager::reactiveTool()
-{
-	// Restaure the default collision behavior
-	std::vector<SphereModel*> col_models;
-	m_mord1->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		col_model->setContactStiffness(m_oldCollisionStiffness);
-	}
-
-	col_models.clear();
-	m_mord2->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		col_model->setContactStiffness(m_oldCollisionStiffness);
-	}
-
-	return true;
-}
-
-
-const sofa::type::vector< int >& ArticulatedToolManager::grabModel()
-{
-    // If no point in the broadphase, nothing to do
-    if (m_idBroadPhase.size() == 0)
-        return m_idBroadPhase;
-
-    if (m_forcefieldUP == nullptr || m_forcefieldDOWN == nullptr)
-        createFF(500);
-
-
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-
-    // For each point in the broadphase search the neariest point of the plier
-    // If none under minDist = 2; point is rejected
-    size_t nbrVM1 = m_mord1->getSize();
-    size_t nbrVM2 = m_mord2->getSize();
-    for (unsigned int i = 0; i < m_idBroadPhase.size(); i++)
-    {
-        SReal Mx = m_model->getPX(m_idBroadPhase[i]);
-        SReal My = m_model->getPY(m_idBroadPhase[i]);
-        SReal Mz = m_model->getPZ(m_idBroadPhase[i]);
-
-        int idModel1 = -1;
-		int idModel2 = -1;
-        SReal minDist1 = 2;
-        SReal minDist2 = 2;
-        // compute bary on mordUP
-        for (unsigned int j = 0; j < nbrVM1; j++)
-        {
-            SReal x = m_mord1->getPX(j);
-            SReal y = m_mord1->getPY(j);
-            SReal z = m_mord1->getPZ(j);
-            SReal dist = (Mx - x)*(Mx - x) + (My - y)*(My - y) + (Mz - z)*(Mz - z);
-            dist = sqrt(dist);
-
-            if (dist < minDist1) {
-				minDist1 = dist;
-				idModel1 = j;
-            }
-        }
-
-        if (idModel1 != -1)
-        {
-
-            //stiffspringforcefield_UP->addSpring(m_idBroadPhase[i], idModel, m_stiffness, 0.0, minDist);
-            //attach->addConstraint(idsModel[i], idModel, 1.0);
-            //m_idgrabed.push_back(m_idBroadPhase[i]);
-        }
-
-        //idModel = -1;
-		//minDist = 2;
-
-        // compute bary on mordUP
-        for (unsigned int j = 0; j < nbrVM2; j++)
-        {
-            SReal x = m_mord2->getPX(j);
-            SReal y = m_mord2->getPY(j);
-            SReal z = m_mord2->getPZ(j);
-            SReal dist = (Mx - x)*(Mx - x) + (My - y)*(My - y) + (Mz - z)*(Mz - z);
-            dist = sqrt(dist);
-
-			if (dist < minDist2) {
-				minDist2 = dist;
-				idModel2 = j;
-			}			
-        }
-
-		if (idModel2 != -1)
-		{
-			//stiffspringforcefield_DOWN->addSpring(m_idBroadPhase[i], idModel, m_stiffness, 0.0, minDist);
-			//attach->addConstraint(idsModel[i], idModel, 1.0);
-			//m_idgrabed.push_back(m_idBroadPhase[i]);
-		}
-
-		int choice = 0;
-		if (idModel1 != -1 && idModel2 != -1)
-		{
-			if (minDist1 < minDist2)
-				choice = 1;
-			else
-				choice = 2;
-		}
-		else if (idModel1 != -1)
-			choice = 1;
-		else if (idModel2 != -1)
-			choice = 2;
-
-		if (choice == 1)
-		{
-			stiffspringforcefield_UP->addSpring(m_idBroadPhase[i], idModel1, m_stiffness, 0.0, minDist1);
-			m_idgrabed.push_back(m_idBroadPhase[i]);
-		}
-		else if (choice == 2)
-		{
-			stiffspringforcefield_DOWN->addSpring(m_idBroadPhase[i], idModel2, m_stiffness, 0.0, minDist2);
-			m_idgrabed.push_back(m_idBroadPhase[i]);
-		}
-
-
-    }
-
-	// Reduce collision spheres
-	if (m_idgrabed.size() > 0)
-	{
-		msg_info() << "Passe la ";
-		std::vector<SphereModel*> col_models;
-
-		m_mord1->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-		if (!col_models.empty())
-		{
-			msg_info() << "Passe la 2";
-			SphereModel* col_model = col_models[0];
-			m_oldCollisionStiffness = col_model->getContactStiffness(0);
-			col_model->setContactStiffness(1);
-		}
-
-		col_models.clear();
-		m_mord2->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-		if (!col_models.empty())
-		{
-			SphereModel* col_model = col_models[0];
-			col_model->setContactStiffness(1);
-		}
-
-	}
-
-    msg_info() << "Narrow Phase detection: " << m_idgrabed.size();
-    return m_idgrabed;
-}
-
-void ArticulatedToolManager::releaseGrab()
-{    
-    if (!m_forcefieldUP || !m_forcefieldDOWN)
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
-    m_idgrabed.clear();
-    m_idBroadPhase.clear();
 
-    // Clear springs created during the grab
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-    stiffspringforcefield_UP->clear();
-
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-    stiffspringforcefield_DOWN->clear();
-
-    // Restaure the default collision behavior
-	std::vector<SphereModel*> col_models;
-	m_mord1->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		col_model->setContactStiffness(m_oldCollisionStiffness); // TODO: check why this doesn't work
-	}
-
-	col_models.clear();
-	m_mord2->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	if (!col_models.empty())
-	{
-		SphereModel* col_model = col_models[0];
-		col_model->setContactStiffness(m_oldCollisionStiffness);
-	}
+    m_jawModel1->activeTool(true);
+    m_jawModel2->activeTool(true);
 }
 
-int ArticulatedToolManager::createFF(float _stiffness)
+void ArticulatedToolManager::performAction()
 {
-    m_stiffness = _stiffness;
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return;
 
-    m_forcefieldUP = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord1));
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-    stiffspringforcefield_UP->setName("pince_Forcefield_UP");
-    this->getContext()->addObject(stiffspringforcefield_UP);
-    stiffspringforcefield_UP->setStiffness(m_stiffness);
-    stiffspringforcefield_UP->setDamping(0);
-    stiffspringforcefield_UP->init();
-
-    m_forcefieldDOWN = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord2));
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-    stiffspringforcefield_DOWN->setName("pince_Forcefield_DOWN");
-    this->getContext()->addObject(stiffspringforcefield_DOWN);
-    stiffspringforcefield_DOWN->setStiffness(m_stiffness);
-    stiffspringforcefield_DOWN->setDamping(0);
-    stiffspringforcefield_DOWN->init();
-
-    if (m_forcefieldUP == nullptr)
-        return -1001;
-
-    if (m_forcefieldDOWN == nullptr)
-        return -1002;
-
-    return 0;
+    m_jawModel1->performAction();
+    m_jawModel2->performAction();
 }
 
-void ArticulatedToolManager::computePlierAxis()
-{
 
+void ArticulatedToolManager::stopAction()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return;
+
+}
+
+
+
+void ArticulatedToolManager::openTool()
+{
+    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
+    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
+    const SReal& factor = d_handleFactor.getValue();
+
+    jawAngle1 += factor;
+    jawAngle2 -= factor;
+
+    if (jawAngle1 < 0.1)
+        stopAction();
+}
+
+
+void ArticulatedToolManager::closeTool()
+{
+    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
+    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
+    const SReal& factor = d_handleFactor.getValue();
+
+    jawAngle1 -= factor;
+    jawAngle2 += factor;
+
+    if (jawAngle1 < 0.1)
+        performAction();
 }
 
 
@@ -413,70 +229,38 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         case 'T':
         case 't':
         {
-            releaseGrab();
+            //releaseGrab();
 
             computeVertexIdsInBroadPhase();
-            grabModel();
+            closeTool();
            
             break;
         }
         case 'G':
         case 'g':
         {
-            releaseGrab();
+            openTool();
             break;
         }
         case 'Y':
         case 'y':
         {
-            m_mord1->applyTranslation(0, -0.1, 0);
-            m_mord2->applyTranslation(0, 0.1, 0);
+            //m_mord1->applyTranslation(0, -0.1, 0);
+            //m_mord2->applyTranslation(0, 0.1, 0);
             break;
         }
         case 'H':
         case 'h':
         {
-            m_mord1->applyTranslation(0, 0.1, 0);
-            m_mord2->applyTranslation(0, -0.1, 0);
+            //m_mord1->applyTranslation(0, 0.1, 0);
+            //m_mord2->applyTranslation(0, -0.1, 0);
             break;
         }
         case 'J':
         case 'j':
         {
-            m_mord1->applyTranslation(0, 0.1, 0);
-            m_mord2->applyTranslation(0, 0.1, 0);
-            break;
-        }
-        case 'F':
-        case 'f':
-        {            
-            releaseGrab();
-
-            computeVertexIdsInBroadPhase();
-            computePlierAxis();
-            //cutFromTriangles();
-            //for (int i=0; i<7; i++)
-            //    cutFromTetra(i*2, i*2+2);
-
-            //cutFromTetra(0, 14, false);
-
-            
-            break;
-        }
-        case 'D':
-        case 'd':
-        {
-            releaseGrab();
-
-            computeVertexIdsInBroadPhase();
-            computePlierAxis();
-            //cutFromTriangles();
-            /*for (int i=0; i<7; i++)
-                cutFromTetra(i*2, i*2+2);*/
-
-            //cutFromTetra(0, 14, true);
-
-
+            //m_mord1->applyTranslation(0, 0.1, 0);
+            //m_mord2->applyTranslation(0, 0.1, 0);
             break;
         }
         }

@@ -55,7 +55,13 @@ public:
 	void setAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
 	void setOrigin(Vec3 _zero) { zero = _zero; }
 
+protected:
+	virtual void activateImpl() {}
+	virtual void deActivateImpl() {}
+
+public:
 	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> m_jawModel;
+
 
 protected:
 	// Buffer of points ids 

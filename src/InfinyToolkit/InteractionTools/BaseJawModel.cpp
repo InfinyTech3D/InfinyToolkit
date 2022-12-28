@@ -80,6 +80,10 @@ bool BaseJawModel::computeBoundingBox()
 void BaseJawModel::activeTool(bool value)
 {
     m_isActivated = value;
+    if (m_isActivated)
+        activateImpl();
+    else
+        deActivateImpl();
 }
 
 

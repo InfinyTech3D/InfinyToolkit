@@ -39,17 +39,29 @@ typedef sofa::component::constraint::projective::AttachConstraint< sofa::default
 class SOFA_INFINYTOOLKIT_API GrasperJawModel : public BaseJawModel
 {
 public:
-	GrasperJawModel() : BaseJawModel()
+	GrasperJawModel() 
+		: BaseJawModel()
 	{
 	}
 
 	virtual ~GrasperJawModel() = default;
 	
+	void performAction() override;
+	void activateImpl() override;
+	void deActivateImpl() override;
+
+protected:
+	int createFF(float _stiffness);
+
+	// API from grabing
+	const sofa::type::vector< int >& grabModel();
+
+	void releaseGrab();
 
 private:
 	float m_stiffness;
 	
-	StiffSpringFF::SPtr m_forcefiel = nullptr;
+	StiffSpringFF::SPtr m_forcefield = nullptr;
 };
 					
 } // namespace sofa::infinytoolkit
