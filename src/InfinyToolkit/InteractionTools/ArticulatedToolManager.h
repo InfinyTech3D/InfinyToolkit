@@ -39,6 +39,7 @@ public:
     SOFA_CLASS(ArticulatedToolManager,core::objectmodel::BaseObject);
 
     using Vec3 = sofa::type::Vec3;
+    using RigidCoord = sofa::defaulttype::RigidTypes::Coord;
 
 protected:
     ArticulatedToolManager();
@@ -80,6 +81,10 @@ public:
     Data<SReal> d_angleJaw1; //up
     Data<SReal> d_angleJaw2; //down
     Data<SReal> d_handleFactor;
+
+    Data <RigidCoord> d_inputPosition;
+
+    Data <type::vector<RigidCoord> > d_outputPositions;
 
 protected:
     // Buffer of points ids 

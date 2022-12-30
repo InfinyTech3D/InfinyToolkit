@@ -60,7 +60,7 @@ protected:
 	virtual void deActivateImpl() {}
 
 public:
-	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> m_jawModel;
+	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel;
 
 
 protected:

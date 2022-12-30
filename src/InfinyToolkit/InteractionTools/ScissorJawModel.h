@@ -56,6 +56,6 @@ private:
 
 	sofa::core::behavior::BaseMechanicalState* m_model = nullptr;
 };
-					
+
 } // namespace sofa::infinytoolkit
 	

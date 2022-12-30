@@ -28,6 +28,7 @@ namespace sofa::infinytoolkit
 {
 
 BaseJawModel::BaseJawModel()
+    : l_jawModel(initLink("jawModel", "link to the first jaw model component, if not set will search through graph and take first one encountered."))
 {
 
 }
@@ -38,7 +39,7 @@ bool BaseJawModel::computeBoundingBox()
     if (m_jaw == nullptr)
     {
         msg_info() << "error mechanical state not found";
-        const std::string& pathMord1 = m_jawModel.getPath();
+        const std::string& pathMord1 = l_jawModel.getPath();
         this->getContext()->get(m_jaw, pathMord1);
 
         if (m_jaw == nullptr)
