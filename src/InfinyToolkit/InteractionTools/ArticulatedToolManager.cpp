@@ -25,6 +25,7 @@
 #include <InfinyToolkit/InteractionTools/ArticulatedToolManager.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/helper/accessor.h>
 
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
@@ -59,7 +60,8 @@ int ArticulatedToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
 ArticulatedToolManager::ArticulatedToolManager()
     : l_jawModel1(initLink("jawModel1", "link to the first jaw model component, if not set will search through graph and take first one encountered."))
     , l_jawModel2(initLink("jawModel2", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
-	, m_oldCollisionStiffness(5000)
+    , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
+    , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
     , m_stiffness(500)
 {
     this->f_listening.setValue(true);
@@ -97,6 +99,14 @@ void ArticulatedToolManager::init()
         sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         return;
     }
+
+    const RigidCoord& position = d_inputPosition.getValue();
+
+    sofa::helper::WriteAccessor <Data< type::vector<RigidCoord> > > my_positions = d_outputPositions;
+    my_positions.resize(3);
+    my_positions[0] = position;
+    my_positions[1] = position;
+    my_positions[2] = position;
 
     computeBoundingBox();
 
