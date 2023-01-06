@@ -349,11 +349,11 @@ void AdvancedCarvingManager::filterCollision()
         carvingPerformer->filterContacts();
     }
     
-    // process the collision
-    for (auto carvingPerformer : m_carvingPerformer)
-    {
-        carvingPerformer->runPerformer();
-    }
+    //// process the collision
+    //for (auto carvingPerformer : m_carvingPerformer)
+    //{
+    //    carvingPerformer->runPerformer();
+    //}
 }
 
 

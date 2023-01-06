@@ -26,6 +26,8 @@
 #include <InfinyToolkit/config.h>
 #include <sofa/core/behavior/ForceField.h>
 
+#include <chrono>
+
 namespace sofa::infinytoolkit
 {
 
@@ -71,6 +73,9 @@ public:
     /// Applied force to all points to simulate maximum compression.
     Data<Real> d_force;
 
+    /// If true, will apply the same force at each vertex otherwise will apply force proportional to the distance to the barycenter
+    Data<bool> d_uniformForce;
+
     /// Time to perform a full Pace (deflate + inflate). Same scale as the simulation time.
     Data<Real> d_pace;
 
@@ -81,12 +86,22 @@ public:
     /// Parameter to display the force direction
     Data<bool> p_showForce;
 
+    // Synchronize with real time (instead of simulation time)
+    Data<bool> d_syncRealTime;
+
+    // Frequency at which a full deflate+inflate is done
+    Data<Real> d_frequency;
+    
 private :
     /// Computed barycenter of the given positions @sa d_positions
     Coord m_bary;
 
     /// counter to the last pace the barycenter has been refreshed. To be used with @sa d_refreshBaryRate
     unsigned int m_lastBaryRefresh = 0;
+
+    // keep trace of the latest time we measured
+    std::chrono::time_point<std::chrono::system_clock> m_startTime;
+
 }; // definition of the MiddleForceField class
 
 
