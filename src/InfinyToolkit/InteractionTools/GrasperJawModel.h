@@ -24,58 +24,45 @@
 #pragma once
 
 #include <InfinyToolkit/config.h>
-#include <sofa/core/DataEngine.h>
+#include <InfinyToolkit/InteractionTools/BaseJawModel.h>
 
-
-namespace sofa::component::topology::container::dynamic
-{
-    class TetrahedronSetTopologyContainer;
-}
+#include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
+#include <sofa/component/constraint/projective/AttachConstraint.h>
 
 namespace sofa::infinytoolkit
 {
 
-using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
-/** 
-*
-*/
-class SOFA_INFINYTOOLKIT_API PliersPositionsMapper: public sofa::core::DataEngine
+typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
+typedef sofa::component::constraint::projective::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
+
+
+class SOFA_INFINYTOOLKIT_API GrasperJawModel : public BaseJawModel
 {
 public:
-    SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
-    
+	GrasperJawModel() 
+		: BaseJawModel()
+	{
+	}
+
+	virtual ~GrasperJawModel() = default;
+	
+	void performAction() override;
+	void activateImpl() override;
+	void deActivateImpl() override;
 
 protected:
-    PliersPositionsMapper();
+	int createFF(float _stiffness);
 
-    ~PliersPositionsMapper() override = default; 
+	// API from grabing
+	const sofa::type::vector< int >& grabModel();
 
-public:
-    void init() override;
-	void doUpdate() override;
+	void releaseGrab();
 
-
-    void draw(const core::visual::VisualParams* vparams) override;
-
-	void handleTopologyChange();
-
-    /// Pre-construction check method called by ObjectFactory.
-    /// Check that DataTypes matches the MeshTopology.
-    template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        return BaseObject::canCreate(obj, context, arg);
-    }
-
-protected:
-	TetrahedronSetTopologyContainer* m_topo = nullptr;
-
-	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
-	Data<sofa::type::vector<int> > m_tetraTube;
-	Data<sofa::type::vector<int> > m_tetraFat;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_tubePositions;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_grasPositions;
+private:
+	float m_stiffness;
+	
+	StiffSpringFF::SPtr m_forcefield = nullptr;
 };
-
-
+					
 } // namespace sofa::infinytoolkit
+	

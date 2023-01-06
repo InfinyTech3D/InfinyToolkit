@@ -24,35 +24,30 @@
 #pragma once
 
 #include <InfinyToolkit/config.h>
-
-#include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
-#include <sofa/component/constraint/projective/AttachConstraint.h>
+#include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
+#include <InfinyToolkit/InteractionTools/ScissorJawModel.h>
 
 namespace sofa::infinytoolkit
 {
 
-typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
-typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
-typedef sofa::component::constraint::projective::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
-
 /** 
 *
 */
-class SOFA_INFINYTOOLKIT_API PliersToolManager: public core::objectmodel::BaseObject
+class SOFA_INFINYTOOLKIT_API ArticulatedToolManager : public core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(PliersToolManager,core::objectmodel::BaseObject);
+    SOFA_CLASS(ArticulatedToolManager,core::objectmodel::BaseObject);
 
     using Vec3 = sofa::type::Vec3;
+    using RigidCoord = sofa::defaulttype::RigidTypes::Coord;
 
 protected:
-    PliersToolManager();
+    ArticulatedToolManager();
 
-    virtual ~PliersToolManager();
+    ~ArticulatedToolManager() override = default;
 
 public:
     virtual void init() override;
-    virtual void reinit() override;
     int testModels();
     
     const sofa::type::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
@@ -60,54 +55,37 @@ public:
 
 
     // global methods    
-    int createFF(float _stiffness);
-    bool computeBoundingBox();
+    void computeBoundingBox();
     void computeVertexIdsInBroadPhase(float margin = 0.0);
 
-	bool unactiveTool();
-	bool reactiveTool();
+	void unactiveTool();
+	void reactiveTool();
 
-    // API from grabing
-    const sofa::type::vector< int >& grabModel();
+    void performAction();
+    void stopAction();
 
-    void releaseGrab();
+    void closeTool();
+    void openTool();
 
-    
-    // API for cutting
-    int cutFromTetra(float minX, float maxX, bool cut = true);
-    int pathCutFromTetra(float minX, float maxX);
-    void cutFromTriangles();
-    
 
     // Method from intern test
     virtual void handleEvent(sofa::core::objectmodel::Event* event) override;
-    void computePlierAxis();
-
-    void setPlierAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
-    void setPlierOrigin(Vec3 _zero) { zero = _zero; }
-
-    sofa::type::Vec3 m_min, m_max;
-
-
+    
     void draw(const core::visual::VisualParams* vparams) override;
 
-    /// Pre-construction check method called by ObjectFactory.
-    /// Check that DataTypes matches the MeshTopology.
-    template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        return BaseObject::canCreate(obj, context, arg);
-    }
-
-protected:
-    
-
 public:
-    // Path to the different mechanicalObject
-    Data<std::string> m_pathMord1;
-    Data<std::string> m_pathMord2;
-    Data<std::string> m_pathModel;
-	    
+    // Path to the different JawModel
+    SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel1;
+    SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel2;
+    
+    Data<SReal> d_angleJaw1; //up
+    Data<SReal> d_angleJaw2; //down
+    Data<SReal> d_handleFactor;
+
+    Data <RigidCoord> d_inputPosition;
+
+    Data <type::vector<RigidCoord> > d_outputPositions;
+
 protected:
     // Buffer of points ids 
     sofa::type::vector <int> m_idgrabed;
@@ -115,26 +93,14 @@ protected:
 
     SReal m_oldCollisionStiffness;
 
-    // Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
-    sofa::type::Mat3x3 matP;
-    Vec3 zero;
-    Vec3 xAxis;
-    Vec3 yAxis;
-    Vec3 zAxis;
-
     // Pointer to the mechanicalObject
-    sofa::core::behavior::BaseMechanicalState* m_mord1;
-    sofa::core::behavior::BaseMechanicalState* m_mord2;
-    sofa::core::behavior::BaseMechanicalState* m_model;
+    BaseJawModel::SPtr m_jawModel1 = nullptr;
+    BaseJawModel::SPtr m_jawModel2 = nullptr;
 
     // Pointer to the stiffspring FF created.
-    StiffSpringFF::SPtr m_forcefieldUP;
-    StiffSpringFF::SPtr m_forcefieldDOWN;
+    StiffSpringFF::SPtr m_forcefieldUP = nullptr;
+    StiffSpringFF::SPtr m_forcefieldDOWN = nullptr;
     float m_stiffness;
-
-    // Keep it for debug drawing
-    sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> tetraIdsOnCut;
-    sofa::type::vector<sofa::core::topology::Topology::TriangleID> triIdsOnCut;
 };
 
 

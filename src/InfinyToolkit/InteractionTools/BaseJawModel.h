@@ -23,59 +23,65 @@
  ****************************************************************************/
 #pragma once
 
+#include <sofa/type/Vec.h>
+#include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/behavior/BaseMechanicalState.h>
 #include <InfinyToolkit/config.h>
-#include <sofa/core/DataEngine.h>
-
-
-namespace sofa::component::topology::container::dynamic
-{
-    class TetrahedronSetTopologyContainer;
-}
 
 namespace sofa::infinytoolkit
 {
 
-using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
-/** 
-*
-*/
-class SOFA_INFINYTOOLKIT_API PliersPositionsMapper: public sofa::core::DataEngine
+class SOFA_INFINYTOOLKIT_API BaseJawModel : public core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
-    
+	SOFA_CLASS(BaseJawModel, core::objectmodel::BaseObject);
+
+	using Vec3 = sofa::type::Vec3;
+
+	BaseJawModel();
+
+	virtual ~BaseJawModel() = default;
+	
+	int getModelId() { return m_modelId; }
+
+	bool computeBoundingBox();
+	
+	void activeTool(bool value);
+	bool isToolActivated() { return m_isActivated; }
+
+	virtual void performAction();
+
+	void computeAxis();
+	void setAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
+	void setOrigin(Vec3 _zero) { zero = _zero; }
 
 protected:
-    PliersPositionsMapper();
-
-    ~PliersPositionsMapper() override = default; 
+	virtual void activateImpl() {}
+	virtual void deActivateImpl() {}
 
 public:
-    void init() override;
-	void doUpdate() override;
+	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel;
 
-
-    void draw(const core::visual::VisualParams* vparams) override;
-
-	void handleTopologyChange();
-
-    /// Pre-construction check method called by ObjectFactory.
-    /// Check that DataTypes matches the MeshTopology.
-    template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        return BaseObject::canCreate(obj, context, arg);
-    }
 
 protected:
-	TetrahedronSetTopologyContainer* m_topo = nullptr;
+	// Buffer of points ids 
+	sofa::type::vector <int> m_idgrabed;
+	sofa::type::vector <int> m_idBroadPhase;
 
-	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
-	Data<sofa::type::vector<int> > m_tetraTube;
-	Data<sofa::type::vector<int> > m_tetraFat;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_tubePositions;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_grasPositions;
+	int m_modelId = sofa::InvalidID;
+	bool m_isActivated = false;
+
+	// Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
+	sofa::type::Mat3x3 matP;
+	Vec3 zero;
+	Vec3 xAxis;
+	Vec3 yAxis;
+	Vec3 zAxis;
+
+	sofa::type::Vec3 m_min, m_max;
+
+	sofa::core::behavior::BaseMechanicalState* m_jaw;
 };
 
-
 } // namespace sofa::infinytoolkit
+	

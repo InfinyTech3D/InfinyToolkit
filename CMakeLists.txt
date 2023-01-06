@@ -27,7 +27,6 @@ set(INFINYTOOLKIT_SRC_DIR src/InfinyToolkit)
 set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/config.h.in
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.h
-    ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.h
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.h
     ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.h    
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
@@ -42,13 +41,18 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+    
+    ## Interaction tools sections
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.h
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
 )
 
 set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.cpp
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.cpp
     ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.cpp
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
@@ -63,6 +67,12 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+    
+    ## Interaction tools sections
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ArticulatedToolManager.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/BaseJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/GrasperJawModel.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/InteractionTools/ScissorJawModel.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 )
