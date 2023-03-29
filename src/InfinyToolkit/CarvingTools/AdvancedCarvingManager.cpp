@@ -64,6 +64,7 @@ AdvancedCarvingManager::AdvancedCarvingManager()
     : d_toolModelPath( initData(&d_toolModelPath, "toolModelPath", "Tool model path"))
     , d_surfaceModelPath( initData(&d_surfaceModelPath, "surfaceModelPath", "TriangleSetModel or SphereModel path"))
     , d_active( initData(&d_active, false, "active", "Activate this object.\nNote that this can be dynamically controlled by using a key") )
+    , d_process(initData(&d_process, false, "process", "Will perform the carving according to filter done in active mode"))
     , d_carvingWithBurning(initData(&d_carvingWithBurning, true, "carvingWithBurning", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
     , d_carvingWithRefinement(initData(&d_carvingWithRefinement, false, "carvingWithRefinement", "Activate this object.\nNote that this can be dynamically controlled by using a key"))
     , d_cuttingMode(initData(&d_cuttingMode, false, "cuttingMode", "Activate the option tetrahedral cutting."))
@@ -347,13 +348,7 @@ void AdvancedCarvingManager::filterCollision()
     for (auto carvingPerformer : m_carvingPerformer)
     {
         carvingPerformer->filterContacts();
-    }
-    
-    //// process the collision
-    //for (auto carvingPerformer : m_carvingPerformer)
-    //{
-    //    carvingPerformer->runPerformer();
-    //}
+    }    
 }
 
 
@@ -377,14 +372,20 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
     {
         if (ev->getKey() == 'C')
         {
-            msg_warning() << "Burn, baby burn!";
-            //d_active.setValue(true);
-            for (auto carvingPerformer : m_carvingPerformer)
-            {
-                carvingPerformer->runPerformer();
-            }
+            d_process.setValue(true);            
         }
     }
+
+    if (d_process.getValue())
+    {
+        for (auto carvingPerformer : m_carvingPerformer)
+        {
+            carvingPerformer->runPerformer();
+        }
+
+        d_process.setValue(false);
+    }
+
 }
 
 void AdvancedCarvingManager::draw(const core::visual::VisualParams* vparams)

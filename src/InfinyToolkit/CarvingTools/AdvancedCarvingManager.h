@@ -94,6 +94,7 @@ public:
     Data < std::string > d_surfaceModelPath;
 
     Data < bool > d_active;
+    Data < bool > d_process;
     Data < bool > d_carvingWithBurning;
     Data < bool > d_carvingWithRefinement;
     Data < bool > d_cuttingMode;
