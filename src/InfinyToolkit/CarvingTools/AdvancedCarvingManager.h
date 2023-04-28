@@ -124,7 +124,7 @@ protected:
         
     // link to the scene detection Method component (Narrow phase only)
     SingleLink<AdvancedCarvingManager, core::collision::NarrowPhaseDetection, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_detectionNP;
-       
+
     bool m_texCoordsHandling = false;
 
     sofa::type::vector< BaseCarvingPerformer*> m_carvingPerformer;
