@@ -113,8 +113,6 @@ protected:
     sofa::type::vector <int> m_idgrabed;
     sofa::type::vector <int> m_idBroadPhase;
 
-    SReal m_oldCollisionStiffness;
-
     // Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
     sofa::type::Mat3x3 matP;
     Vec3 zero;
@@ -130,6 +128,8 @@ protected:
     // Pointer to the stiffspring FF created.
     StiffSpringFF::SPtr m_forcefieldUP;
     StiffSpringFF::SPtr m_forcefieldDOWN;
+
+    SReal m_oldCollisionStiffness;
     float m_stiffness;
 
     // Keep it for debug drawing

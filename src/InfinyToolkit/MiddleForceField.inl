@@ -205,7 +205,7 @@ void MiddleForceField<DataTypes>::draw(const core::visual::VisualParams* vparams
     
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
     size_t nbPoints = _x.size();
-    std::vector<sofa::type::Vector3> vertices;
+    std::vector<sofa::type::Vec3> vertices;
     for (size_t i = 0; i < nbPoints; ++i)
     {
         vertices.emplace_back(_x[i]);

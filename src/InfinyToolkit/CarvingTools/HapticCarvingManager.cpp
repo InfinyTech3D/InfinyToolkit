@@ -65,10 +65,12 @@ void HapticCarvingManager::init()
 
     // check if forcefeedback
     m_forceFeedback = getContext()->get<sofa::component::haptics::ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-    if (m_forceFeedback)
+    if (m_forceFeedback) {
         msg_info() << "Forcefeedback found: " << m_forceFeedback->getName();
-    else
+    }
+    else {
         msg_info() << "NO Forcefeedback found: ";
+    }
 }
 
 

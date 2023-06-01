@@ -34,6 +34,7 @@
 
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/system/thread/CTime.h>
+#include <sofa/simulation/MainTaskSchedulerFactory.h>
 
 namespace sofa::infinytoolkit
 {
@@ -100,7 +101,8 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 
     if (m_driver->m_terminate == false)
     {
-        TaskScheduler::getInstance()->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
+        auto* _taskScheduler = sofa::simulation::MainTaskSchedulerFactory::createInRegistry();
+        _taskScheduler->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
         CTime::sleep(100);
     }
 
@@ -224,7 +226,7 @@ void HapticEmulator::initDevice(int cptInitPass)
     //m_hHD = 1;
     unsigned int mNbThread = 2;
 
-    _taskScheduler = sofa::simulation::TaskScheduler::getInstance();
+    _taskScheduler = sofa::simulation::MainTaskSchedulerFactory::createInRegistry();
     _taskScheduler->init(mNbThread);
     _taskScheduler->addTask(new HapticEmulatorTask(this, &_simStepStatus));
 
