@@ -91,7 +91,7 @@ void PliersPositionsMapper::doUpdate()
 	const sofa::type::vector<type::Vec3 >& _positions = d_positions.getValue();
 	type::vector<type::Vec3 >& tubePositions = *m_tubePositions.beginEdit();
 	tubePositions.resize(_tetraTube.size());
-	for (int i = 0; i < _tetraTube.size(); i++)
+    for (unsigned int i = 0; i < _tetraTube.size(); i++)
 	{
 		int idTetra = _tetraTube[i];
 		if (idTetra == -1) {
@@ -113,7 +113,7 @@ void PliersPositionsMapper::doUpdate()
 	const sofa::type::vector<int>& _tetraFat = m_tetraFat.getValue();
 	type::vector<type::Vec3 >& grasPositions = *m_grasPositions.beginEdit();
 	grasPositions.resize(_tetraFat.size());
-	for (int i = 0; i < _tetraFat.size()/3; i++)
+    for (unsigned int i = 0; i < _tetraFat.size()/3; i++)
 	{
 		type::Vec3i idTetras;
 
@@ -214,16 +214,18 @@ void PliersPositionsMapper::handleTopologyChange()
 
 void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 {
-   if (!vparams->displayFlags().getShowBehaviorModels())
+    if (!vparams->displayFlags().getShowBehaviorModels()){
         return;
+    }
    
-    if (m_topo == nullptr)
+    if (m_topo == nullptr) {
         return;
+    }
 
 	sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
 	const sofa::type::vector<type::Vec<3, SReal> >& _positions = d_positions.getValue();
 	const sofa::type::vector<int>& _tetraTube = m_tetraTube.getValue();
-    for (int i = 0; i < _tetraTube.size(); i++)
+    for (unsigned int i = 0; i < _tetraTube.size(); i++)
     {
         const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(_tetraTube[i]);
         
@@ -237,14 +239,14 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 	
 	const type::vector<type::Vec<3, SReal> >& tubePositions = m_tubePositions.getValue();
 
-	for (int i = 0; i < tubePositions.size()-1; i++)
+    for (unsigned int i = 0; i < tubePositions.size()-1; i++)
 	{
 		vparams->drawTool()->drawLine(tubePositions[i], tubePositions[i+1], sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
 	}
 
 	const type::vector<type::Vec<3, SReal> >& grasPositions = m_grasPositions.getValue();
 
-	for (int i = 0; i < grasPositions.size(); i++)
+    for (unsigned int i = 0; i < grasPositions.size(); i++)
 	{
 		vparams->drawTool()->drawPoint(grasPositions[i], sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
 	}

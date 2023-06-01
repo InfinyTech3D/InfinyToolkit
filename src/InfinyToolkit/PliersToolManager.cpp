@@ -49,6 +49,8 @@ using SphereModel = sofa::component::collision::geometry::SphereCollisionModel< 
 
 using sofa::core::objectmodel::KeypressedEvent;
 using sofa::core::objectmodel::KeyreleasedEvent;
+using TetraID = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer::TetraID;
+
 
 int PliersToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
         .add< PliersToolManager >();
@@ -296,19 +298,18 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
     // If none under minDist = 2; point is rejected
     size_t nbrVM1 = m_mord1->getSize();
     size_t nbrVM2 = m_mord2->getSize();
-    for (int i = 0; i < m_idBroadPhase.size(); i++)
+    for (unsigned int i = 0; i < m_idBroadPhase.size(); i++)
     {
         SReal Mx = m_model->getPX(m_idBroadPhase[i]);
         SReal My = m_model->getPY(m_idBroadPhase[i]);
         SReal Mz = m_model->getPZ(m_idBroadPhase[i]);
 
-        bool attached = false;
         int idModel1 = -1;
 		int idModel2 = -1;
         SReal minDist1 = 2;
         SReal minDist2 = 2;
         // compute bary on mordUP
-        for (int j = 0; j < nbrVM1; j++)
+        for (unsigned int j = 0; j < nbrVM1; j++)
         {
             SReal x = m_mord1->getPX(j);
             SReal y = m_mord1->getPY(j);
@@ -330,13 +331,11 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
             //m_idgrabed.push_back(m_idBroadPhase[i]);
         }
 
-        
-        attached = false;
-		//idModel = -1;
+        //idModel = -1;
 		//minDist = 2;
 
         // compute bary on mordUP
-        for (int j = 0; j < nbrVM2; j++)
+        for (unsigned int j = 0; j < nbrVM2; j++)
         {
             SReal x = m_mord2->getPX(j);
             SReal y = m_mord2->getPY(j);
@@ -509,12 +508,12 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     if (m_idBroadPhase.empty())
         return 10000;
 
-	bool lastCut = true;
+    bool lastCut = true;
 
     // Classify right/left points of the plier
-    sofa::type::vector<int> idsLeft;
-    sofa::type::vector<int> idsRight;
-    for (int i = 0; i < m_idBroadPhase.size(); i++)
+    sofa::type::vector<sofa::Index> idsLeft;
+    sofa::type::vector<sofa::Index> idsRight;
+    for (unsigned int i = 0; i < m_idBroadPhase.size(); i++)
     {
         Vec3 vert = Vec3(m_model->getPX(m_idBroadPhase[i]), m_model->getPY(m_idBroadPhase[i]), m_model->getPZ(m_idBroadPhase[i]));
         vert = matP*(vert - zero);
@@ -561,15 +560,15 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
     }
 
     // First get all tetra that are on the first side
-    sofa::type::vector<unsigned int> tetraIds;
-    for (int i = 0; i < idsLeft.size(); ++i)
+    sofa::type::vector<TetraID> tetraIds;
+    for (unsigned int i = 0; i < idsLeft.size(); ++i)
     {
         const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(idsLeft[i]);
-        for (int j = 0; j < tetraAV.size(); ++j)
+        for (unsigned int j = 0; j < tetraAV.size(); ++j)
         {
-            int tetraId = tetraAV[j];
+            TetraID tetraId = tetraAV[j];
             bool found = false;
-            for (int k = 0; k<tetraIds.size(); ++k)
+            for (unsigned int k = 0; k<tetraIds.size(); ++k)
                 if (tetraIds[k] == tetraId)
                 {
                     found = true;
@@ -586,13 +585,13 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
 
     // Then test for each tetra if one of the vertex is on the other side. If yes put on but path
     tetraIdsOnCut.clear();
-    std::set< unsigned int > items;
-    for (int i = 0; i < tetraIds.size(); ++i)
+    std::set< TetraID > items;
+    for (unsigned int i = 0; i < tetraIds.size(); ++i)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
         for (unsigned int j = 0; j < 4; ++j)
         {
-            int idV = tetra[j];
+            sofa::Index idV = tetra[j];
             bool found = false;
             for (unsigned int k = 0; k < idsRight.size(); ++k)
             {
@@ -627,7 +626,7 @@ int PliersToolManager::cutFromTetra(float minX, float maxX, bool cut)
         vitems.reserve(items.size());
         vitems.insert(vitems.end(), items.rbegin(), items.rend());
 
-        for (int i = 0; i < vitems.size(); i++)
+        for (unsigned int i = 0; i < vitems.size(); i++)
         {
             sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> its;
             its.push_back(vitems[i]);
@@ -664,7 +663,7 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
         return -40;
     }
 
-    for (int i = 0; i < tetraIds.size(); i++)
+    for (unsigned int i = 0; i < tetraIds.size(); i++)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
         for (int j = 0; j < 4; j++) 
@@ -693,9 +692,9 @@ int PliersToolManager::pathCutFromTetra(float minX, float maxX)
 void PliersToolManager::cutFromTriangles()
 {
     // Classify right/left points of the plier
-    sofa::type::vector<int> idsLeft;
-    sofa::type::vector<int> idsRight;
-    for (int i = 0; i < m_idgrabed.size(); i++)
+    sofa::type::vector<sofa::Index> idsLeft;
+    sofa::type::vector<sofa::Index> idsRight;
+    for (unsigned int i = 0; i < m_idgrabed.size(); i++)
     {
         Vec3 vert = Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
         vert = matP*(vert - zero);
@@ -722,15 +721,15 @@ void PliersToolManager::cutFromTriangles()
     }
 
     const sofa::type::vector<BaseMeshTopology::Triangle> & allTri = triCons[1]->getTriangleArray();
-    for (int i = 0; i < allTri.size(); ++i)
+    for (unsigned int i = 0; i < allTri.size(); ++i)
     {
         const BaseMeshTopology::Triangle& tri = allTri[i];
         bool foundLeft = false;
         bool foundRight = false;
         for (int j = 0; j < 3; ++j)
         {
-            int idV = tri[j];
-            for (int k = 0; k < idsLeft.size(); ++k)
+            sofa::Index idV = tri[j];
+            for (unsigned int k = 0; k < idsLeft.size(); ++k)
             {
                 if (idsLeft[k] == idV)
                 {
@@ -749,8 +748,8 @@ void PliersToolManager::cutFromTriangles()
         msg_info() << "found: " << i;
         for (int j = 0; j < 3; ++j)
         {
-            int idV = tri[j];
-            for (int k = 0; k < idsRight.size(); ++k)
+            sofa::Index idV = tri[j];
+            for (unsigned int k = 0; k < idsRight.size(); ++k)
             {
                 if (idsRight[k] == idV)
                 {
@@ -877,7 +876,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
     if (m_model == NULL)
         return;
 
-    for (int i = 0; i < m_idgrabed.size(); i++)
+    for (unsigned int i = 0; i < m_idgrabed.size(); i++)
     {
         SReal x = m_model->getPX(m_idgrabed[i]);
         SReal y = m_model->getPY(m_idgrabed[i]);
@@ -893,7 +892,7 @@ void PliersToolManager::draw(const core::visual::VisualParams* vparams)
         return;
     }
 
-    for (int i = 0; i < tetraIdsOnCut.size(); i++)
+    for (unsigned int i = 0; i < tetraIdsOnCut.size(); i++)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
         

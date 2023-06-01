@@ -26,7 +26,6 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/simulation/AnimateEndEvent.h>
-#include <sofa/helper/proximity.h>
 #include <limits>
 
 namespace sofa::infinytoolkit
@@ -40,9 +39,9 @@ int NeedleTrackerClass = core::RegisterObject("Class to track the current positi
 NeedleTracker::NeedleTracker()
     : d_drawDebug(initData(&d_drawDebug, true, "drawBB", "if true, will draw slices BB, ray and intersected triangles"))
     , d_sliceID(initData(&d_sliceID, -1, "sliceID", "ID of the sliced where the needle tip is. -1 if none."))
-    , d_sliceName(initData(&d_sliceName, std::string("None"), "sliceName", "ID of the sliced where the needle tip is. -1 if none."))
-    , isInit(false)
+    , d_sliceName(initData(&d_sliceName, std::string("None"), "sliceName", "ID of the sliced where the needle tip is. -1 if none."))    
     , m_needle(NULL)
+    , isInit(false)
 {
 
 }
@@ -90,7 +89,7 @@ void NeedleTracker::init()
 
 void NeedleTracker::computeSlicesBB()
 {
-    for (int i = 0; i < m_slices.size(); ++i)
+    for (unsigned int i = 0; i < m_slices.size(); ++i)
     {
         MechanicalObject3* meca = m_slices[i];
         Coord& sliceMin = m_min[i];
@@ -101,7 +100,7 @@ void NeedleTracker::computeSlicesBB()
         sliceMax = Coord(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
         size_t nbrDof = meca->getSize();
-        for (int j = 0; j < nbrDof; ++j)
+        for (unsigned int j = 0; j < nbrDof; ++j)
         {
             Coord pos = Coord(meca->getPX(j), meca->getPY(j), meca->getPZ(j));
 
@@ -129,7 +128,7 @@ std::string NeedleTracker::getPositionInSlices(const Coord& tipPosition)
     int sliceID = -1;
     
     // first look at the BB
-    for (int i = 0; i < m_slices.size(); ++i) 
+    for (unsigned int i = 0; i < m_slices.size(); ++i)
     {
         bool insideBB = testSliceBBIntersection(i, tipPosition);
 
@@ -175,7 +174,7 @@ using sofa::core::topology::BaseMeshTopology;
 bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPosition)
 {
     // Todo lanc� de rayon ici
-    if (sliceID >= m_slices.size()) {
+    if (sliceID >= (int)(m_slices.size())) {
         msg_error() << "SlideId " << sliceID << " out fo bounds.";
         return false;
     }
@@ -212,7 +211,7 @@ bool NeedleTracker::testSliceDiscretIntersection(int sliceID, const Coord& tipPo
 
     //static sofa::helper::DistanceSegTri proximitySolver;
     m_triPointInter.clear();
-    for (int i = 0; i < triangles.size(); ++i)
+    for (unsigned int i = 0; i < triangles.size(); ++i)
     {
         const BaseMeshTopology::Triangle& tri = triangles[i];
         type::Vec3 out;
@@ -300,12 +299,11 @@ void NeedleTracker::draw(const core::visual::VisualParams* vparams)
 
     // Draw BB
     {
-        for (int i = 0; i < m_slices.size(); ++i)
+        for (unsigned int i = 0; i < m_slices.size(); ++i)
         {
-            float val = (float)i / m_slices.size();
             sofa::type::RGBAColor colorDefault(0.0f, 1.0f, 0.0f, 1.0f);
 
-            if (d_sliceID.getValue() == i)
+            if (d_sliceID.getValue() == (int)i)
                 colorDefault = sofa::type::RGBAColor(1.0f, 0.0f, 0.0f, 1.0f);
 
             sofa::type::vector<Coord> vertices;

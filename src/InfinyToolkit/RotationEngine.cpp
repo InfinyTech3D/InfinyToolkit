@@ -61,7 +61,7 @@ void RotationEngine::bwdInit()
     sofa::simulation::Node::SPtr rootNode = static_cast<simulation::Node*>(this->getContext()->getRootContext());
     sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = rootNode->getChildren();
 
-    for (int i = 0; i < childNodes.size(); ++i)
+    for (unsigned int i = 0; i < childNodes.size(); ++i)
     {        
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);        
 
@@ -82,7 +82,7 @@ bool RotationEngine::findNode(sofa::simulation::Node::SPtr node)
 
     // check its children
     sofa::type::vector<sofa::core::objectmodel::BaseNode* > childNodes = node->getChildren();
-    for (int i = 0; i < childNodes.size(); ++i)
+    for (unsigned int i = 0; i < childNodes.size(); ++i)
     {
         sofa::simulation::Node* node = dynamic_cast<sofa::simulation::Node*>(childNodes[i]);
         if (node->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
@@ -110,7 +110,7 @@ void RotationEngine::reinit()
 
 void RotationEngine::doUpdate()
 {
-    for (int i = 0; i < m_mstates.size(); i++)
+    for (unsigned int i = 0; i < m_mstates.size(); i++)
     {
         MechanicalObject3* state = m_mstates[i];
         sofa::type::Vec3 rot = state->getRotation();
@@ -124,7 +124,7 @@ void RotationEngine::doUpdate()
 
 void RotationEngine::process()
 {
-    for (int i = 0; i < m_mstates.size(); i++)
+    for (unsigned int i = 0; i < m_mstates.size(); i++)
     {
         MechanicalObject3* state = m_mstates[i];       
         state->setRotation(0, 0, 0.5);
@@ -147,7 +147,7 @@ void RotationEngine::handleEvent(sofa::core::objectmodel::Event* event)
         msg_info() << " handleEvent gets character '" << ke->getKey() << "'. ";
         if (ke->getKey() == 'K') 
         {
-            for (int i = 0; i < m_mstates.size(); i++)
+            for (unsigned int i = 0; i < m_mstates.size(); i++)
             {
                 MechanicalObject3* state = m_mstates[i];
                 //sofa::type::Vec3 rot = state->getRotation();
@@ -157,7 +157,7 @@ void RotationEngine::handleEvent(sofa::core::objectmodel::Event* event)
             }
         }
         else if (ke->getKey() == 'L') {
-            for (int i = 0; i < m_mstates.size(); i++)
+            for (unsigned int i = 0; i < m_mstates.size(); i++)
             {
                 MechanicalObject3* state = m_mstates[i];
                 //sofa::type::Vec3 rot = state->getRotation();
