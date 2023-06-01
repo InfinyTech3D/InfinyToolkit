@@ -218,6 +218,8 @@ void HapticEmulator::activateTool(bool value)
 
 void HapticEmulator::initDevice(int cptInitPass)
 {
+    SOFA_UNUSED(cptInitPass);
+
     //HDSchedulerHandle hStateHandle = HD_INVALID_HANDLE;
     //m_hHD = 1;
     unsigned int mNbThread = 2;
@@ -238,11 +240,11 @@ void HapticEmulator::initDevice(int cptInitPass)
 
 void HapticEmulator::updatePosition()
 {
-    type::Mat3x3d mrot;
+    //type::Mat3x3d mrot;
 
     HapticEmulator::Coord & posDevice = *d_posDevice.beginEdit();    
-    const Quat & orientationTool = d_orientationTool.getValue();
-    const double & scale = d_scale.getValue();
+    //const Quat & orientationTool = d_orientationTool.getValue();
+    //const double & scale = d_scale.getValue();
     
     // for the moment
     //posDevice = d_positionBase.getValue();
@@ -298,6 +300,7 @@ void HapticEmulator::updatePosition()
 
 void HapticEmulator::updateButtonStates(bool emitEvent)
 {
+    SOFA_UNUSED(emitEvent);
     int nbrButton = 2;
     sofa::type::fixed_array<bool, 2> buttons;
     buttons[0] = d_button_1.getValue();
@@ -452,7 +455,7 @@ void HapticEmulator::onKeyPressedEvent(core::objectmodel::KeypressedEvent *kEven
 
 void HapticEmulator::onKeyReleasedEvent(core::objectmodel::KeyreleasedEvent *kEvent)
 {
-
+    SOFA_UNUSED(kEvent);
 }
 
 

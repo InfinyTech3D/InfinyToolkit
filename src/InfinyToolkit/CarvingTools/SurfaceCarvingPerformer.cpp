@@ -132,7 +132,7 @@ void SurfaceCarvingPerformer::draw(const core::visual::VisualParams* vparams)
 
 void SurfaceCarvingPerformer::doMoveCarve1()
 {
-    SReal carveFactor = 0.1f; // d_carvingSpeed.getValue();
+    //SReal carveFactor = 0.1f; // d_carvingSpeed.getValue();
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
     helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());

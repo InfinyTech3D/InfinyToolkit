@@ -167,6 +167,7 @@ template<class DataTypes>
 void MiddleForceField<DataTypes>::addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx )
 {
     //TODO: implement this if really needed...
+    SOFA_UNUSED(mparams);
     SOFA_UNUSED(d_df);
     SOFA_UNUSED(d_dx);
 
@@ -185,8 +186,10 @@ void MiddleForceField<DataTypes>::addKToMatrix(linearalgebra::BaseMatrix* matrix
 }
 
 template<class DataTypes>
-SReal MiddleForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord& x) const
+SReal MiddleForceField<DataTypes>::getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const
 {
+    SOFA_UNUSED(mparams);
+    SOFA_UNUSED(x);
     SReal e = 0;
     return e;
 }

@@ -57,8 +57,12 @@ void BruteForceFeedback::init()
 
 void BruteForceFeedback::computeForce(SReal x, SReal y, SReal z, SReal /*u*/, SReal /*v*/, SReal /*w*/, SReal /*q*/, SReal& fx, SReal& fy, SReal& fz)
 {
+    SOFA_UNUSED(x);
+    SOFA_UNUSED(y);
+    SOFA_UNUSED(z);
+
     const SReal& fCoef = forceCoef.getValue();
-    Vec3 position = Vec3(x, y, z);
+    //Vec3 position = Vec3(x, y, z);
     currentForce = Vec3(0, 0, 0);
     if (m_ACarving)
     {

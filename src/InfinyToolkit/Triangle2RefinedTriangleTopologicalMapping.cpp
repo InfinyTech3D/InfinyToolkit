@@ -157,6 +157,7 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
 
 Index Triangle2RefinedTriangleTopologicalMapping::getFromIndex(Index ind)
 {
+    SOFA_UNUSED(ind);
     return 0;
 }
 
