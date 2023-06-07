@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.03" showBoundingTree="0" gravity="0 -9.8 0">
+    <Node name="RequiredPlugins">
+        <RequiredPlugin name="Sofa.Component.Collision.Detection.Algorithm"/> <!-- Needed to use components [BVHNarrowPhase, BruteForceBroadPhase, BruteForceDetection, DefaultPipeline] -->  
+        <RequiredPlugin name="Sofa.Component.Collision.Detection.Intersection"/> <!-- Needed to use components [MinProximityI                            ntersection] -->
+        <RequiredPlugin name="Sofa.Component.Collision.Response.Contact"/> <!-- Needed to use components [DefaultContactManag                            er] -->
+        <RequiredPlugin name="Sofa.Component.IO.Mesh"/> <!-- Needed to use components [MeshOBJLoader] -->
+        <RequiredPlugin name="Sofa.Component.Mapping.Linear"/> <!-- Needed to use components [IdentityMapping] -->
+        <RequiredPlugin name="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->
+        <RequiredPlugin name="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TriangleSetGeometry                            Algorithms, TriangleSetTopologyContainer, TriangleSetTopologyModifier] -->
+        <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
+        <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
+    </Node>
+
+    <DefaultAnimationLoop />
+    <DefaultVisualManagerLoop />
+    
+    <DefaultPipeline verbose="0" depth="10" draw="0" />
+    <BruteForceBroadPhase/>
+    <BVHNarrowPhase/>
+    <MinProximityIntersection name="Proximity" alarmDistance="0.75" contactDistance="0.5" />
+    <DefaultContactManager name="Response" response="PenalityContactForceField" />
+
+    <Node name="LiverReference">
+        <MeshOBJLoader name="loader" filename="./mesh/liver_visu.obj" handleSeams="1"/>
+
+        <MechanicalObject name="Volume"  position="@loader.position" template="Vec3d"/>
+        <TriangleSetTopologyContainer name="Container" />
+        <TriangleSetTopologyModifier name="Modifier" />
+        <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+        
+        <Node name="LiverReference_visu">
+            <OglModel name="Visual" src="@../loader" texturename="./mesh/textures/diffuse_version3.png"/>
+            <!--<IdentityMapping input="@.." output="@." />-->
+        </Node>
+        
+        <!--
+        <Node name="LiverNew">
+            <MeshOBJLoader name="loader" filename="./mesh/Liver.obj" handleSeams="1" rotation="-20 0 0" scale3d="0.7 0.7 0.7" translation="-2 2 1"/>
+
+            <MechanicalObject name="Volume"  position="@loader.position" template="Vec3d"/>
+            <TriangleSetTopologyContainer name="Container" />
+            <TriangleSetTopologyModifier name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+            
+            <BarycentricMapping />
+            
+            <Node name="LiverNew_visu">
+                <OglModel name="Visual" src="@../loader" texturename="./mesh/textures/diffuse_version3.png"/>
+            
+            </Node>
+
+        </Node>
+-->
+    </Node>
+    
+    
+    
+</Node>
