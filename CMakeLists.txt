@@ -42,6 +42,9 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.h
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.h
+    
+    ## Mesh tools sections
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
 )
@@ -63,6 +66,9 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/BurningPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/SurfaceCarvingPerformer.cpp
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/HapticCarvingManager.cpp
+    
+    ## Mesh tools sections
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 )
