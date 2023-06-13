@@ -361,33 +361,29 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
     if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
+    if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
+    {
+        if (ev->getKey() == 'D')
+        {
+            d_process.setValue(!d_process.getValue());
+        }
+    }
+    
     if (simulation::AnimateEndEvent::checkEventType(event))
     {
         filterCollision();
-    }
-    else if (sofa::core::objectmodel::HapticDeviceEvent * ev = dynamic_cast<sofa::core::objectmodel::HapticDeviceEvent *>(event))
-    {
-        if (ev->getButtonState() == 1) d_active.setValue(true);
-        else if (ev->getButtonState() == 0) d_active.setValue(false);
-    }
 
-    if (sofa::core::objectmodel::KeypressedEvent* ev = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
-    {
-        if (ev->getKey() == 'C')
+        if (d_process.getValue())
         {
-            d_process.setValue(true);            
-        }
-    }
+            for (auto carvingPerformer : m_carvingPerformer)
+            {
+                carvingPerformer->runPerformer();
+                carvingPerformer->clearContacts();
+            }
 
-    if (d_process.getValue())
-    {
-        for (auto carvingPerformer : m_carvingPerformer)
-        {
-            carvingPerformer->runPerformer();
+            //d_process.setValue(false);
         }
-
-        d_process.setValue(false);
-    }
+    }       
 
 }
 
