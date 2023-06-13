@@ -33,7 +33,7 @@ namespace sofa::infinytoolkit
 CuttingPerformer::CuttingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
 {
-
+    m_performerType = "CuttingPerformer";
 }
 
 
@@ -52,6 +52,8 @@ bool CuttingPerformer::initPerformer()
         m_tetraCuttingMgr->init(m_topologyCon->getContext());
         m_tetraCuttingMgr->activateLogs(m_topologyCon->f_printLog.getValue());
 
+        std::cout << "m_tetraCuttingMgr: " << m_topologyCon->getName() << std::endl;
+
         //if (d_surfaceCut.getValue())
         //{
         //    const std::string& textName = d_textureName.getValue();
@@ -66,6 +68,7 @@ bool CuttingPerformer::initPerformer()
 
 void CuttingPerformer::filterContacts()
 {
+    std::cout << "filterContacts()" << std::endl;
     // Create Cut quad
     fixed_array<Vec3, 4> m_planPositions;
 
@@ -109,12 +112,13 @@ void CuttingPerformer::filterContacts()
     Vec3 m_planNormal = (m_planPositions[1] - m_planPositions[0]).cross(cutDir);
 
     // Test all tetra
-    m_tetraCuttingMgr->createCutPlanPath(m_planPositions, m_planNormal, _carvingDistance * 10);
+    m_tetraCuttingMgr->createCutPlanPath(m_planPositions, m_planNormal, _carvingDistance * 0.25);
 }
 
 bool CuttingPerformer::runPerformer()
 {
-    m_tetraCuttingMgr->processCut(1);
+    std::cout << "runPerformer()" << std::endl;
+    m_tetraCuttingMgr->processCut(false);
 
     m_triangleContacts.clear();
     m_pointContacts.clear();

@@ -216,7 +216,10 @@ void AdvancedCarvingManager::bwdInit()
 
     for (auto carvingPerformer : m_carvingPerformer)
     {
-        carvingPerformer->initPerformer();
+        bool res = carvingPerformer->initPerformer();
+        if (!res) {
+            msg_warning() << carvingPerformer->getType() << " initPerformer failed.";
+        }
     }
 
     msg_info() << "bwdInit!";

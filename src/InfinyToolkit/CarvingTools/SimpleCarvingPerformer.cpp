@@ -33,7 +33,7 @@ namespace sofa::infinytoolkit
 SimpleCarvingPerformer::SimpleCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
 {
-
+    m_performerType = "SimpleCarvingPerformer";
 }
 
 
