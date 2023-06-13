@@ -24,6 +24,9 @@
 
 #include <InfinyToolkit/config.h>
 
+#include <sofa/core/ObjectFactory.h>
+using sofa::core::ObjectFactory;
+
 namespace sofa::infinytoolkit
 {
 
@@ -54,26 +57,24 @@ const char* getModuleName()
 
 const char* getModuleVersion()
 {
-    return "0.1";
+    return "1.0";
 }
 
 const char* getModuleLicense()
 {
-    return "";
+    return "GPL";
 }
 
 
 const char* getModuleDescription()
 {
-    return "plugin to interact with Sleeve tool.";
+    return "plugin to add several component tools.";
 }
 
 const char* getModuleComponentList()
 {
-    return "W3CDriver";
+    static std::string classes = ObjectFactory::getInstance()->listClassesFromTarget(sofa_tostring(SOFA_TARGET));
+    return classes.c_str();
 }
 
 } // namespace sofa::infinytoolkit
-
-SOFA_LINK_CLASS(PliersToolManager)
-SOFA_LINK_CLASS(PliersPositionsMapper)
