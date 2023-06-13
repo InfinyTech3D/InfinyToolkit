@@ -367,6 +367,11 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
         {
             d_process.setValue(!d_process.getValue());
         }
+
+        if (ev->getKey() == 'F')
+        {
+            d_active.setValue(!d_active.getValue());
+        }
     }
     
     if (simulation::AnimateEndEvent::checkEventType(event))
@@ -379,9 +384,10 @@ void AdvancedCarvingManager::handleEvent(sofa::core::objectmodel::Event* event)
             {
                 carvingPerformer->runPerformer();
                 carvingPerformer->clearContacts();
-            }
 
-            //d_process.setValue(false);
+                if (carvingPerformer->getType() == "CuttingPerformer")
+                    d_process.setValue(false);
+            }
         }
     }       
 
