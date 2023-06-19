@@ -34,8 +34,6 @@ class SOFA_INFINYTOOLKIT_API SurfaceCarvingPerformer : public BaseCarvingPerform
 public:
 	SurfaceCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr);
 
-	virtual ~SurfaceCarvingPerformer() = default;
-
 	bool initPerformer() override;
 
 	void filterContacts() override;

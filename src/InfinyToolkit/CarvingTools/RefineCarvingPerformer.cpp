@@ -34,7 +34,7 @@ RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::
     : BaseCarvingPerformer(topo, _carvingMgr)
     , m_tetraAlgo(nullptr)
 {
-
+    m_performerType = "RefineCarvingPerformer";
 }
 
 

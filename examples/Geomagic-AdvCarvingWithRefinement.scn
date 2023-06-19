@@ -5,7 +5,7 @@
     <Node name="RequiredPlugins">
         <RequiredPlugin name="Geomagic"/> <!-- Needed to use components [GeomagicDriver] -->  
         <RequiredPlugin name="Sofa.Component.AnimationLoop"/> <!-- Needed to use components [FreeMotionAnimationLoop] -->  
-        <RequiredPlugin name="Sofa.Component.Collision.Detection.Algorithm"/> <!-- Needed to use components [BVHNarrowPhase, BruteForceBroadPhase, BruteForceDetection, DefaultPipeline] -->  
+        <RequiredPlugin name="Sofa.Component.Collision.Detection.Algorithm"/> <!-- Needed to use components [BVHNarrowPhase, BruteForceBroadPhase, BruteForceDetection, CollisionPipeline] -->  
         <RequiredPlugin name="Sofa.Component.Collision.Detection.Intersection"/> <!-- Needed to use components [LocalMinDistance] -->  
         <RequiredPlugin name="Sofa.Component.Collision.Geometry"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->  
         <RequiredPlugin name="Sofa.Component.Collision.Response.Contact"/> <!-- Needed to use components [DefaultContactManager] -->  
@@ -35,7 +35,7 @@
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
     
-    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
     <DefaultContactManager name="response" response="FrictionContactConstraint" />
@@ -43,7 +43,7 @@
     
     <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
         positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" drawDevice="0"/>
-	<AdvancedCarvingManager active="@GeomagicDevice.button1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.2" 
+	<AdvancedCarvingManager active="1" process="@GeomagicDevice.button1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.2" 
         carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0"/>
 	
 

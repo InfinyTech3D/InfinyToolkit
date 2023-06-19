@@ -33,7 +33,7 @@ namespace sofa::infinytoolkit
 SimpleCarvingPerformer::SimpleCarvingPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
 {
-
+    m_performerType = "SimpleCarvingPerformer";
 }
 
 
@@ -52,6 +52,9 @@ bool SimpleCarvingPerformer::initPerformer()
 
 bool SimpleCarvingPerformer::runPerformer()
 {
+    if (m_pointContacts.empty() && m_triangleContacts.empty())
+        return true;
+
     m_tetra2Remove.clear();
     const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
 

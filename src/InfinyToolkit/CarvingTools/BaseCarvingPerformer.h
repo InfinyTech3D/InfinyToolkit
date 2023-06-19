@@ -60,6 +60,8 @@ public:
     virtual ~BaseCarvingPerformer();
 
     void clearContacts();
+
+    const std::string& getType() { return m_performerType; }
     
     virtual bool initPerformer() = 0;
 
@@ -82,6 +84,8 @@ protected:
     TetrahedronSetTopologyContainer::SPtr m_topologyCon = nullptr;
 
     AdvancedCarvingManager* m_carvingMgr = nullptr;
+
+    std::string m_performerType = "BaseCarvingPerformer";
 };
 					
 } // namespace sofa::infinytoolkit

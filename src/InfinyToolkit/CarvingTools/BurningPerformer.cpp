@@ -33,7 +33,7 @@ namespace sofa::infinytoolkit
 BurningPerformer::BurningPerformer(TetrahedronSetTopologyContainer::SPtr topo, AdvancedCarvingManager* _carvingMgr)
     : BaseCarvingPerformer(topo, _carvingMgr)
 {
-
+    m_performerType = "BurningPerformer";
 }
 
 
@@ -50,6 +50,9 @@ bool BurningPerformer::initPerformer()
 
 bool BurningPerformer::runPerformer()
 {
+    if (m_pointContacts.empty())
+        return true;
+
     helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
 
     const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
