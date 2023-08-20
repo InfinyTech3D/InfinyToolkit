@@ -82,12 +82,52 @@ void TriangleCuttingController<DataTypes>::doTest()
     const Topology::Triangle theTri = m_topoContainer->getTriangle(triId);
 
     sofa::helper::ReadAccessor<VecCoord> x = m_state->read(sofa::core::ConstVecCoordId::position())->getValue();
+    Coord pA = x[theTri[0]];
+    Coord pB = x[theTri[1]];
+    Coord pC = x[theTri[2]];
+
+    Coord bary = (pA + pB + pC) / 3;
+
+    //TriangleSubdivider_1Node* subdivider = new TriangleSubdivider_1Node(triId);
+    //subdivider->m_baryCoords = Vec3(0.3333, 0.3333, 0.3333);
+
+    type::vector<SReal> _coefs;
+    type::vector< Topology::PointID > _ancestors;
+    for (unsigned int i = 0; i < 3; ++i)
+    {
+        _ancestors.push_back(theTri[i]);
+        _coefs.push_back(0.3333);
+    }
+    
+    auto nbrPoints = Topology::PointID(this->m_topoContainer->getNbPoints());
+    Topology::PointID uniqID = getUniqueId(theTri[0], theTri[1]);
+    PointToAdd* PTA = new PointToAdd(uniqID, nbrPoints, _ancestors, _coefs);
+    nbrPoints++;
+
+    auto tSplit = new TriangleToSplit(triId, theTri);
+    tSplit->m_points.push_back(PTA);
+    TriangleSubdivider_1Node* subdivider = new TriangleSubdivider_1Node(tSplit);
+
+    subdivider->subdivide(pA, pB, pC);
+
+    // 1. Add all new points and duplicate point from snapped points
+    //m_topoModifier->addPoints(nbrP, p_ancestors, p_baryCoefs);
+
+    // 4. Add all new Tetrahedra from splitted one and remove old. With the corresponding ancestors and coefs
+    // m_topoModifier->addTetrahedra(tetraToAdd, p_ancestors, p_baryCoefs);
+
+     // 6. Propagate change to the topology and remove all tetrahedra registered for removal to the container
+    //m_topoModifier->removeTetrahedra(tetraToRemove);
 
 
-    sofa::type::vector<Topology::TriangleID> triangleToRemove;
-    triangleToRemove.push_back(d_triAID.getValue());
-    m_topoModifier->removeTriangles(triangleToRemove, true, true);
+    // 7. clear all buffers for new cut
+    //clearBuffers()
+
+    //sofa::type::vector<Topology::TriangleID> triangleToRemove;
+    //triangleToRemove.push_back(d_triAID.getValue());
+    //m_topoModifier->removeTriangles(triangleToRemove, true, true);
 }
+
 
 template <class DataTypes>
 void TriangleCuttingController<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
