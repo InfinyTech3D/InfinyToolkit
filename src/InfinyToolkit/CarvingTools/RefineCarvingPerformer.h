@@ -30,6 +30,8 @@
 namespace sofa::infinytoolkit
 {
 
+using namespace sofa::meshrefinement;
+
 class SOFA_INFINYTOOLKIT_API RefineCarvingPerformer : public BaseCarvingPerformer
 {
 public:
