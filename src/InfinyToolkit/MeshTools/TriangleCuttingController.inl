@@ -620,6 +620,46 @@ void TriangleCuttingController<DataTypes>::draw(const core::visual::VisualParams
 
     sofa::type::RGBAColor colorL = sofa::type::RGBAColor::red();
     vparams->drawTool()->drawLine(d_cutPointA.getValue(), d_cutPointB.getValue(), colorL);
+
+    std::vector<Vec3> spheresUp, spheresDown;// , float radius, const type::RGBAColor& color
+    std::vector<Vec3> pointsUp, pointsDown;
+    int cpt = 0;
+    for (auto triSub : m_subviders)
+    {
+        if (cpt == 20000)
+            break;
+       
+        type::vector<TriangleToAdd*>& TTAS = triSub->m_trianglesToAdd;
+        const type::vector<PointToAdd*>& PTAS = triSub->m_triangleToSplit->m_points;
+        for (unsigned int i = 0; i < TTAS.size(); ++i)
+        {
+            TriangleToAdd* TTA = TTAS[i];
+            sofa::type::fixed_array<sofa::type::Vec3, 3> triCoords = TTA->m_triCoords;
+            sofa::type::Vec3 vecG = (triCoords[0] + triCoords[1] + triCoords[2]) / 3;;
+            if (TTA->isUp)
+            {
+                pointsUp.push_back(triCoords[0]);
+                pointsUp.push_back(triCoords[1]);
+                pointsUp.push_back(triCoords[2]);
+                spheresUp.push_back(vecG);
+            }
+            else
+            {
+                pointsDown.push_back(triCoords[0]);
+                pointsDown.push_back(triCoords[1]);
+                pointsDown.push_back(triCoords[2]);
+                spheresDown.push_back(vecG);
+            }
+        }
+
+        cpt++;
+    }
+
+    vparams->drawTool()->drawTriangles(pointsUp, sofa::type::RGBAColor::red());
+    vparams->drawTool()->drawTriangles(pointsDown, sofa::type::RGBAColor::green());
+    vparams->drawTool()->drawSpheres(spheresUp, 0.01, sofa::type::RGBAColor::red());
+    vparams->drawTool()->drawSpheres(spheresDown, 0.01, sofa::type::RGBAColor::green());
+
 }
 
 } //namespace sofa::infinytoolkit
