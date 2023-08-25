@@ -410,13 +410,11 @@ void TriangleCuttingController<DataTypes>::processCut()
     Vec3 ptB = Vec3(pB[0], pB[1], pB[2]);
     d_cutPointA.setValue(ptA);
     d_cutPointB.setValue(ptB);
-    PointID last_point = 0;
 
     sofa::type::vector< TriangleID > triangles_list;
     sofa::type::vector< EdgeID > edges_list;
     sofa::type::vector< Real > coords_list;
-    bool is_on_boundary;
-    m_geometryAlgorithms->computeIntersectedPointsList2(last_point, ptA, ptB, triIds[0], triIds[1], triangles_list, edges_list, coords_list, is_on_boundary);
+    m_geometryAlgorithms->computeIntersectedPointsList2(ptA, ptB, triIds[0], triIds[1], triangles_list, edges_list, coords_list);
 
     std::map < TriangleID, TriangleToSplit*> TTS_map;
     // create triangles to be splitted
@@ -441,6 +439,7 @@ void TriangleCuttingController<DataTypes>::processCut()
         std::cout << "theTris[i]: " << theTris[i] << std::endl;
         Topology::PointID uniqID = getUniqueId(theTris[i][0], theTris[i][1]) + theTris[i][2];
         PointToAdd* PTA = new PointToAdd(uniqID, nbrPoints, _ancestors, _coefs);
+        PTA->m_ancestorType = sofa::geometry::ElementType::TRIANGLE;
         m_pointsToAdd.push_back(PTA);
         nbrPoints++;
         TriangleToSplit* tSplit = TTS_map[triIds[i]];
@@ -451,8 +450,7 @@ void TriangleCuttingController<DataTypes>::processCut()
 
         tSplit->m_points.push_back(PTA);
     }
-
-
+    
     for (unsigned int i = 0; i < edges_list.size(); ++i)
     {
         type::vector<SReal> _coefs;
