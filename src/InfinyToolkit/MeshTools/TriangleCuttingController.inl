@@ -352,6 +352,12 @@ void TriangleCuttingController<DataTypes>::processSubdividers()
     {
         _ancestors.push_back(ptA->m_ancestors);
         _baryCoefs.push_back(ptA->m_coefs);
+
+        if (ptA->m_idClone != sofa::InvalidID)
+        {
+            _ancestors.push_back(ptA->m_ancestors);
+            _baryCoefs.push_back(ptA->m_coefs);
+        }
     }
 
     size_t nbrP = _ancestors.size();
@@ -464,8 +470,10 @@ void TriangleCuttingController<DataTypes>::processCut()
 
         Topology::PointID uniqID = getUniqueId(_ancestors[0], _ancestors[1]);
         PointToAdd* PTA = new PointToAdd(uniqID, nbrPoints, _ancestors, _coefs);
+        PTA->m_ancestorType = sofa::geometry::ElementType::EDGE;
+        PTA->m_idClone = nbrPoints + 1;
         m_pointsToAdd.push_back(PTA);
-        nbrPoints++;
+        nbrPoints = nbrPoints + 2;
 
         const auto& triAEdge = triAEdges[edges_list[i]];
         for (auto triId : triAEdge)
@@ -508,6 +516,71 @@ void TriangleCuttingController<DataTypes>::processCut()
         subdivider->subdivide(points);
     }
 
+    
+    // split path here
+    
+    // create the list of new triangles around the inside path
+    std::map < Topology::PointID, type::vector<TriangleToAdd*> > TTA_map;
+    std::map < Topology::PointID, Topology::PointID> cloneMap;
+    for (auto triSub : m_subviders)
+    {
+        type::vector<TriangleToAdd*>& TTAS = triSub->m_trianglesToAdd;
+        const type::vector<PointToAdd*>& PTAS = triSub->m_triangleToSplit->m_points;
+        for (unsigned int i = 0; i < TTAS.size(); ++i)
+        {
+            Topology::Triangle newTri = TTAS[i]->m_triangle;
+            for (unsigned int j = 0; j < PTAS.size(); ++j)
+            {
+                if (PTAS[j]->m_ancestorType == sofa::geometry::ElementType::TRIANGLE)
+                    continue;
+
+                Topology::PointID idNewPoint = PTAS[j]->m_idPoint;
+                cloneMap[idNewPoint] = PTAS[j]->m_idClone;
+                for (unsigned int k = 0; k < 3; ++k)
+                {
+                    if (newTri[k] == idNewPoint)
+                    {
+                        type::vector<TriangleToAdd*> tris = TTA_map[idNewPoint];
+                        tris.push_back(TTAS[i]);
+                        TTA_map[idNewPoint] = tris;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    const sofa::type::Vec3 AB = x[theTris[0][1]] - x[theTris[0][0]];
+    const sofa::type::Vec3 AC = x[theTris[0][2]] - x[theTris[0][0]];
+    const sofa::type::Vec3 triNorm = AB.cross(AC);
+    const sofa::type::Vec3 cutPath = ptB - ptA;
+
+    for (auto it = TTA_map.begin(); it != TTA_map.end(); ++it)
+    {
+        const type::vector<TriangleToAdd*>& TTAS = it->second;
+        Topology::PointID idClone = cloneMap[it->first];
+        for (unsigned int i = 0; i < TTAS.size(); ++i)
+        {
+            TriangleToAdd* TTA = TTAS[i];
+
+            const sofa::type::fixed_array<sofa::type::Vec3, 3>& triCoords = TTA->m_triCoords;
+            sofa::type::Vec3 m_gravityCenter = (triCoords[0] + triCoords[1] + triCoords[2]) / 3;
+            sofa::type::Vec3 triCutNorm = cutPath.cross(m_gravityCenter - ptA);
+            SReal dotValue = triCutNorm * triNorm;
+
+            if (dotValue < 0)
+            {
+                TTA->isUp = false;
+                for (unsigned int j = 0; j < 3; ++j)
+                {
+                    if (TTA->m_triangle[j] == it->first)
+                        TTA->m_triangle[j] = idClone;
+                } 
+            }
+            else
+                TTA->isUp = true;
+        }
+    }
 
     std::cout << "triangles_list: " << triangles_list << std::endl;
     std::cout << "edges_list: " << edges_list << std::endl;
