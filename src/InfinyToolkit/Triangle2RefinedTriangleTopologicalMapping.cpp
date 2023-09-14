@@ -51,8 +51,8 @@ Triangle2RefinedTriangleTopologicalMapping::Triangle2RefinedTriangleTopologicalM
     : sofa::core::topology::TopologicalMapping()
     , p_drawMapping(initData(&p_drawMapping, false, "drawMapping", "if true, will draw line between mapped triangles"))
 {
-    m_inputType = TopologyElementType::TRIANGLE;
-    m_outputType = TopologyElementType::TRIANGLE;
+    m_inputType = sofa::geometry::ElementType::TRIANGLE;
+    m_outputType = sofa::geometry::ElementType::TRIANGLE;
 }
 
 
