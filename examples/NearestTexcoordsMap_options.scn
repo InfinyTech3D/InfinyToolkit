@@ -37,7 +37,7 @@
     <Node name="Liver">
         <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.0" rayleighMass="1.0" />
         <CGLinearSolver iterations="15" name="linear solver" tolerance="1.0e-5" threshold="1.0e-5" />
-        <MeshGmshLoader name="loader" filename="./mesh/liver_volume.msh" rotation="90 0 0" translation="-5 -4 0"/>
+        <MeshGmshLoader name="loader" filename="./mesh/liver_low_volume.msh" rotation="90 0 0" translation="-5 -4 0"/>
         <MechanicalObject src="@loader" name="Volume" />
         <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
         <TetrahedronSetTopologyModifier name="Modifier" />
@@ -59,9 +59,9 @@
             
             <Node name="Liver_visu">
                 <MeshOBJLoader name="loaderVisu" filename="./mesh/liver_light_visu.obj" handleSeams="1" rotation="90 0 0" translation="-5 -4 0"/>
-                <NearestTexcoordsMap name="mapTexcoords" inputPositions="@../../loader.position" radius="5.0"
-                mapPositions="@loaderVisu.position" mapTexCoords="@loaderVisu.texcoords" />
-                <OglModel name="Visual" texturename="./mesh/textures/Liver_texture_IT3D.jpg" texcoords="@mapTexcoords.outputTexCoords"/>
+                <NearestTexcoordsMap name="mapTexcoords" inputPositions="@../../loader.position" radius="5.0" useInterpolation="0"
+                mapPositions="@loaderVisu.position" mapTexCoords="@loaderVisu.texcoords" drawInterpolation="1"/>
+                <OglModel name="Visual" texturename="textures/colorMap.png" texcoords="@mapTexcoords.outputTexCoords"/>
                 <IdentityMapping input="@../../Volume" output="@Visual"/>
             </Node>
         </Node>
@@ -93,9 +93,9 @@
             
             <Node name="Liver_visu">
                 <MeshOBJLoader name="loaderVisu" filename="./mesh/liver_light_visu.obj" handleSeams="1" rotation="90 0 0" translation="5 -4 0"/>
-                <NearestTexcoordsMap name="mapTexcoords" inputPositions="@../../loader.position" radius="5.0"
-                mapPositions="@loaderVisu.position" mapTexCoords="@loaderVisu.texcoords" />
-                <OglModel name="Visual" texturename="./mesh/textures/Liver_texture_IT3D.jpg" texcoords="@mapTexcoords.outputTexCoords"/>
+                <NearestTexcoordsMap name="mapTexcoords" inputPositions="@../../loader.position" radius="5.0" useInterpolation="1"
+                mapPositions="@loaderVisu.position" mapTexCoords="@loaderVisu.texcoords" drawInterpolation="1" />
+                <OglModel name="Visual" texturename="textures/colorMap.png" texcoords="@mapTexcoords.outputTexCoords"/>
                 <IdentityMapping input="@../../Volume" output="@Visual"/>
             </Node>
         </Node>
