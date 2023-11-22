@@ -74,19 +74,19 @@ void NearestTexcoordsMap::doUpdate()
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
 
     if (d_useInterpolation.getValue())
-        computeMethod2();
+        computeTriangulationMapping();
     else
-        computeMethod1();
+        computeNearestPointMapping();
 
-    m_colors.resize(fullPositions.size());
-    for (unsigned int i = 0; i < m_colors.size(); ++i)
+    m_mapColors.resize(fullPositions.size());
+    for (unsigned int i = 0; i < m_mapColors.size(); ++i)
     {
-        m_colors[i] = sofa::type::RGBAColor(SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, 1._sreal);
+        m_mapColors[i] = sofa::type::RGBAColor(SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, 1._sreal);
     }
 }
 
 
-void NearestTexcoordsMap::computeMethod1()
+void NearestTexcoordsMap::computeNearestPointMapping()
 {
     sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
@@ -94,7 +94,7 @@ void NearestTexcoordsMap::computeMethod1()
     sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
 
     outTexcoords.resize(fullPositions.size());
-    m_mapPos.resize(fullPositions.size());
+    m_mapPositionIds.resize(fullPositions.size());
 
     Vec3 pt2;
     auto dist = [](const Vec3& a, const Vec3& b) { return (b - a).norm(); };
@@ -112,18 +112,18 @@ void NearestTexcoordsMap::computeMethod1()
         {
             auto i1 = std::distance(std::begin(mapPositions), el);
             outTexcoords[i2] = mapTexcoords[i1];
-            m_mapPos[i2] = i1;
+            m_mapPositionIds[i2] = i1;
         }
         else
         {
             outTexcoords[i2] = sofa::type::Vector2(0.0, 0.0);
-            m_mapPos[i2] = 0;
+            m_mapPositionIds[i2] = 0;
         }
     }
 }
 
 
-void NearestTexcoordsMap::computeMethod2()
+void NearestTexcoordsMap::computeTriangulationMapping()
 {
     sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
@@ -131,7 +131,7 @@ void NearestTexcoordsMap::computeMethod2()
     sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
 
     outTexcoords.resize(fullPositions.size());
-    m_mapPos.resize(fullPositions.size() * 3);
+    m_mapPositionIds.resize(fullPositions.size() * 3);
 
     const SReal& maxR = d_radius.getValue();
     for (unsigned int idIn = 0; idIn < fullPositions.size(); ++idIn)
@@ -154,7 +154,7 @@ void NearestTexcoordsMap::computeMethod2()
         {
             idMap[j] = (*itMap).second;            
             ptMap[j] = mapPositions[idMap[j]];
-            m_mapPos[idIn * 3 + j] = idMap[j];
+            m_mapPositionIds[idIn * 3 + j] = idMap[j];
             itMap++;
         }
 
@@ -174,7 +174,7 @@ void NearestTexcoordsMap::computeMethod2()
 
 void NearestTexcoordsMap::draw(const core::visual::VisualParams* vparams)
 {
-    if (m_mapPos.empty() || d_drawInterpolation.getValue() == false)
+    if (m_mapPositionIds.empty() || d_drawInterpolation.getValue() == false)
         return;
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
@@ -185,13 +185,13 @@ void NearestTexcoordsMap::draw(const core::visual::VisualParams* vparams)
     std::vector<sofa::type::Vec3> vertices;
     std::vector<sofa::type::RGBAColor> colors;
 
-    if (m_mapPos.size() == fullPositions.size())
+    if (m_mapPositionIds.size() == fullPositions.size())
     {
         for (unsigned int i = 0; i < fullPositions.size(); ++i)
         {
             vertices.emplace_back(fullPositions[i]);
-            vertices.emplace_back(mapPositions[m_mapPos[i]]);
-            colors.emplace_back(m_colors[i]);
+            vertices.emplace_back(mapPositions[m_mapPositionIds[i]]);
+            colors.emplace_back(m_mapColors[i]);
         }
     }
     else
@@ -201,8 +201,8 @@ void NearestTexcoordsMap::draw(const core::visual::VisualParams* vparams)
             for (unsigned int j = 0; j < 3; ++j)
             {
                 vertices.emplace_back(fullPositions[i]);
-                vertices.emplace_back(mapPositions[m_mapPos[i * 3 + j]]);
-                colors.emplace_back(m_colors[i]);
+                vertices.emplace_back(mapPositions[m_mapPositionIds[i * 3 + j]]);
+                colors.emplace_back(m_mapColors[i]);
             }
         }
     }
