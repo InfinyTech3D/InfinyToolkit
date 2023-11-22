@@ -25,7 +25,9 @@
 #define SOFA_COMPONENT_NEARESTTEXCOORDS_CPP
 #include <InfinyToolkit/MeshTools/NearestTexcoordsMap.h>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/core/visual/VisualParams.h>
 
+#include <sofa/geometry/Triangle.h>
 #include <sofa/simulation/Node.h>
 
 namespace sofa::infinytoolkit
@@ -45,6 +47,8 @@ NearestTexcoordsMap::NearestTexcoordsMap()
     , d_mapPositions(initData(&d_mapPositions, "mapPositions", "Indices of the points on the second model"))
     , d_mapTexCoords(initData(&d_mapTexCoords, "mapTexCoords", "Indices of the points on the second model"))
     , d_radius(initData(&d_radius, (SReal)1, "radius", "Radius to search corresponding fixed point"))
+    , d_useInterpolation(initData(&d_useInterpolation, false, "useInterpolation", "Radius to search corresponding fixed point"))    
+    , d_drawInterpolation(initData(&d_drawInterpolation, false, "drawInterpolation", "Radius to search corresponding fixed point"))
     , d_outputTexCoords(initData(&d_outputTexCoords, "outputTexCoords", "Radius to search corresponding fixed point"))
 {
 
@@ -67,12 +71,30 @@ void NearestTexcoordsMap::init()
 
 void NearestTexcoordsMap::doUpdate()
 {
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
+
+    if (d_useInterpolation.getValue())
+        computeMethod2();
+    else
+        computeMethod1();
+
+    m_colors.resize(fullPositions.size());
+    for (unsigned int i = 0; i < m_colors.size(); ++i)
+    {
+        m_colors[i] = sofa::type::RGBAColor(SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, 1._sreal);
+    }
+}
+
+
+void NearestTexcoordsMap::computeMethod1()
+{
     sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
     sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
 
     outTexcoords.resize(fullPositions.size());
+    m_mapPos.resize(fullPositions.size());
 
     Vec3 pt2;
     auto dist = [](const Vec3& a, const Vec3& b) { return (b - a).norm(); };
@@ -81,22 +103,112 @@ void NearestTexcoordsMap::doUpdate()
     };
 
     const SReal& maxR = d_radius.getValue();
-
     for (unsigned int i2 = 0; i2 < fullPositions.size(); ++i2)
     {
         pt2 = fullPositions[i2];
         auto el = std::min_element(std::begin(mapPositions), std::end(mapPositions), cmp);
+
         if (dist(*el, pt2) < maxR)
         {
             auto i1 = std::distance(std::begin(mapPositions), el);
             outTexcoords[i2] = mapTexcoords[i1];
+            m_mapPos[i2] = i1;
         }
         else
         {
             outTexcoords[i2] = sofa::type::Vector2(0.0, 0.0);
+            m_mapPos[i2] = 0;
+        }
+    }
+}
+
+
+void NearestTexcoordsMap::computeMethod2()
+{
+    sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
+    sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
+
+    outTexcoords.resize(fullPositions.size());
+    m_mapPos.resize(fullPositions.size() * 3);
+
+    const SReal& maxR = d_radius.getValue();
+    for (unsigned int idIn = 0; idIn < fullPositions.size(); ++idIn)
+    {
+        Vec3 ptIn = fullPositions[idIn];
+        
+        // Compute all distance and sort them in ascendant order using a map
+        std::map <SReal, unsigned int> mapDistances;        
+        for (unsigned int i3 = 0; i3 < mapPositions.size(); ++i3)
+        {
+            Vec3 ptmap = mapPositions[i3];
+            mapDistances.insert(std::pair< SReal, unsigned int>((ptIn - ptmap).norm2(), i3));
+        }
+
+        // compute all triangles barycoord
+        auto itMap = mapDistances.begin();
+        sofa::type::fixed_array<Index, 3> idMap;
+        sofa::type::fixed_array<Vec3, 3> ptMap;
+        for (unsigned int j = 0; j < 3; ++j)
+        {
+            idMap[j] = (*itMap).second;            
+            ptMap[j] = mapPositions[idMap[j]];
+            m_mapPos[idIn * 3 + j] = idMap[j];
+            itMap++;
+        }
+
+        auto baryCoords3 = sofa::geometry::Triangle::getBarycentricCoordinates(ptIn, ptMap[0], ptMap[1], ptMap[2]);
+        
+        if (baryCoords3[2] < 0) // no interpolation possible between the 3 points
+        {
+            outTexcoords[idIn] = mapTexcoords[idMap[0]];
+        }
+        else
+        {
+            outTexcoords[idIn] = mapTexcoords[idMap[0]] * baryCoords3[0] + mapTexcoords[idMap[1]] * baryCoords3[1] + mapTexcoords[idMap[2]] * baryCoords3[2];
+        }
+    } 
+} 
+
+
+void NearestTexcoordsMap::draw(const core::visual::VisualParams* vparams)
+{
+    if (m_mapPos.empty() || d_drawInterpolation.getValue() == false)
+        return;
+
+    const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
+    vparams->drawTool()->setLightingEnabled(false);
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
+
+    std::vector<sofa::type::Vec3> vertices;
+    std::vector<sofa::type::RGBAColor> colors;
+
+    if (m_mapPos.size() == fullPositions.size())
+    {
+        for (unsigned int i = 0; i < fullPositions.size(); ++i)
+        {
+            vertices.emplace_back(fullPositions[i]);
+            vertices.emplace_back(mapPositions[m_mapPos[i]]);
+            colors.emplace_back(m_colors[i]);
+        }
+    }
+    else
+    {
+        for (unsigned int i = 0; i < fullPositions.size(); ++i)
+        {
+            for (unsigned int j = 0; j < 3; ++j)
+            {
+                vertices.emplace_back(fullPositions[i]);
+                vertices.emplace_back(mapPositions[m_mapPos[i * 3 + j]]);
+                colors.emplace_back(m_colors[i]);
+            }
         }
     }
 
+    vparams->drawTool()->drawLines(vertices, 1, colors);
 }
+
 
 } //namespace sofa::infinytoolkit
