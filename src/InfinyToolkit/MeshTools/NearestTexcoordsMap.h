@@ -20,7 +20,7 @@
  *                                                                           *
  * Authors: see Authors.txt                                                  *
  * Further information: https://infinytech3d.com                             *
- ****************************************************************************/#pragma once
+ ****************************************************************************/
 #pragma once
 
 #include <InfinyToolkit/config.h>
@@ -40,8 +40,6 @@ class SOFA_INFINYTOOLKIT_API NearestTexcoordsMap : public sofa::core::DataEngine
 public:
     SOFA_CLASS(NearestTexcoordsMap, core::DataEngine);
 
-    typedef sofa::core::topology::BaseMeshTopology::Triangle                     Triangle;
-
     NearestTexcoordsMap();
     ~NearestTexcoordsMap() override;
 
@@ -51,28 +49,34 @@ public:
     void draw(const core::visual::VisualParams* vparams) override;
 
 protected:
-
+    /** Method to find, for each point of full mesh, nearest point under @sa d_radius distance from mapped position
+    * The texcoords of the point found will be applied to full mesh point.
+    * */
+    void computeNearestPointMapping();
+    
+    /** Method to find the 3 closest point from the mapped position for each point from the full mesh. The barycentric coordinates of the points are then 
+    * computed in the 3 closest point frame and the texcoord are interpolated using those barycentric coordinates.
+    * If interpolation is not possible (out from the computed triangle), the nearest point texcoord is used like in method @sa computeNearestPointMapping
+    */
+    void computeTriangulationMapping();
 
 public:
+    /// Inputs Data
     Data< type::vector< Vec3 > > d_inputPositions; ///< Full mesh position
     Data< type::vector< Vec3 > > d_mapPositions; ///< Surface mesh position
     Data< type::vector<sofa::type::Vec2> > d_mapTexCoords; ///< Surface mesh texcoords
     Data<SReal> d_radius; ///< Radius to search corresponding fixed point if no indices are given
     
-    Data<bool> d_useInterpolation;
-    Data<bool> d_drawInterpolation;
-    
-    /// Full mesh texcoords
-    Data< type::vector<sofa::type::Vec2> > d_outputTexCoords;
+    /// Outputs Data
+    Data< type::vector<sofa::type::Vec2> > d_outputTexCoords; ///< Full mesh texcoords
 
-    std::vector<unsigned int> m_mapPos;
-    std::vector<sofa::type::RGBAColor> m_colors;
+    /// Parameters Data
+    Data<bool> d_useInterpolation; ///< Bool option to choose between nearest point or interpolation method
+    Data<bool> d_drawInterpolation; ///< Boop optio to draw the mapping computed between inputPosition and mapPosition    
     
-
-protected:
-    //void computeNearestPointMaps(const VecCoord& x1, const VecCoord& x2);
-    void computeMethod1();
-    void computeMethod2();
+private:
+    std::vector<Index> m_mapPositionIds; ///< vector to store map position Id per position from full mesh. (same size as @d_inputPositions)
+    std::vector<sofa::type::RGBAColor> m_mapColors; ///< vector to store color to draw the mapping per position from full mesh. (same size as @d_inputPositions)    
 };
 
 } //namespace sofa::component::engine
