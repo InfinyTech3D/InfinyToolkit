@@ -1,5 +1,5 @@
 #include <sofa/core/ObjectFactory.h>
-#include <InfinyToolkit/MyComponent.h>
+#include <InfinyToolkit/MyComponent.inl>
 
 namespace sofa::infinytoolkit
 {

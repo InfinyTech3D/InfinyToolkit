@@ -33,7 +33,7 @@ namespace sofa::infinytoolkit
 {
 
     MyComponent::MyComponent()
-       /* : d_myparam(initData(&d_myparam, 0.5, "myparam", "test myparam"))*/
+        : d_myparam(initData(&d_myparam, 0.5f, "myparam", "test myparam"))
     {
 
     }
