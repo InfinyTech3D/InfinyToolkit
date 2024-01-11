@@ -12,18 +12,18 @@ Either as components or script. This repository should be sued as a external SOF
 Several components are still work in progress or just benchmarks. Here are the components that can be highlighted:
 
 - **MiddleForceField:** basically compute a force field to a barycentric coordinate. Can be useful to fake a simple breathing or beating motions. 
-<img align="center" width="50%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/MiddleForceField.gif">
+<img align="center" width="50%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/MiddleForceField.gif">
 
 - **RotationEngine:** allows to apply a succession of rotation to an object.
 - **Triangle2RefinedTriangleTopologicalMapping:** define a topological mapping between a coarse triangulation to a refined triangulation.
 
-|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/Triangle2RefinedTriangleTopologicalMapping_coarse_mesh.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/Triangle2RefinedTriangleTopologicalMapping_refine_mesh.jpg">|
+|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/Triangle2RefinedTriangleTopologicalMapping_coarse_mesh.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/Triangle2RefinedTriangleTopologicalMapping_refine_mesh.jpg">|
 |--|--|
 | Triangle coarse mesh | Mapped triangle refined mesh |
 
 - **NearestTexcoordsMap:** define a mapping for texture coordinates from a surface mesh (obj) to the surface of a volume mesh.
 
-|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_textures.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_wireframe.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_mapping.jpg">|
+|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/NearestTexcoordsMap_textures.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/NearestTexcoordsMap_wireframe.jpg">|<img align="center" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/NearestTexcoordsMap_mapping.jpg">|
 |--|--|--|
 | NearestTexcoordsMap textures| NearestTexcoordsMap wireframe | textures coordinates mapping|
 
@@ -34,7 +34,7 @@ Several components are still work in progress or just benchmarks. Here are the c
     - RefineCarvingPerformer: will refine the volume mesh before carving (using [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement))
     - CuttingPerformer: will define a fine cut or incision in the mesh (using [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement))
 
-<img align="center" width="60%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/MeshRefinement_AdvancedCarving_penetration.gif">
+<img align="center" width="60%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/master/doc/MeshRefinement_AdvancedCarving_penetration.gif">
     
 ### Architecture
 - **examples:** with several examples of the components and some benchmarks.
