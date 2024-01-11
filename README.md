@@ -1,16 +1,31 @@
-# InfinyToolkit
+# InfinyToolkit SOFA plugin
+
+[![Documentation](https://img.shields.io/badge/info-on_website-green.svg)](https://infinytech3d.com/)
+[![Support](https://img.shields.io/badge/support-on_GitHub_Discussions-blue.svg)](https://github.com/sofa-framework/sofa/discussions)
+[![Gitter](https://img.shields.io/badge/chat-on_Gitter-ff69b4.svg)](https://app.gitter.im/#/room/#sofa-framework:gitter.im)
 
 ## Description
-This repository gather all open code from InfinyTech3D that could be of any use with the https://www.sofa-framework.org/
+This repository gather all open code from InfinyTech3D that could be of any use for the https://www.sofa-framework.org/
 Either as components or script. This repository should be sued as a external SOFA plugin.
-
 
 ### Features
 Several components are still work in progress or just benchmarks. Here are the components that can be highlighted:
-- **MiddleForceField:** basically compute a force field to a barycentric coordinate. Can be useful to fake a simple breathing or beating motion.
+
+- **MiddleForceField:** basically compute a force field to a barycentric coordinate. Can be useful to fake a simple breathing or beating motions. 
+<img align="center" width="50%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/MiddleForceField.gif">
 - **RotationEngine:** allows to apply a succession of rotation to an object.
 - **Triangle2RefinedTriangleTopologicalMapping:** define a topological mapping between a coarse triangulation to a refined triangulation.
+
+|<img align="center" width="33%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/Triangle2RefinedTriangleTopologicalMapping_coarse_mesh.jpg">|<img align="center" width="33%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/Triangle2RefinedTriangleTopologicalMapping_refine_mesh.jpg">|
+|--|--|
+| Triangle coarse mesh | Mapped triangle refined mesh |
+
 - **NearestTexcoordsMap:** define a mapping for texture coordinates from a surface mesh (obj) to the surface of a volume mesh.
+
+|<img align="center" width="33%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_textures.jpg">|<img align="center" width="33%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_wireframe.jpg">|<img align="center" width="33%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/NearestTexcoordsMap_mapping.jpg">|
+|--|--|--|
+| NearestTexcoordsMap textures| NearestTexcoordsMap wireframe | textures coordinates mapping|
+
 - **AdvancedCarvingManager:** another version of the SOFA carving manager with several options using performer classes:
     - SimpleCarvingPerformer: similar to SOFA carving manager
     - SurfaceCarvingPerformer: will push the surface without removing element to fake a progressive carving
@@ -18,10 +33,15 @@ Several components are still work in progress or just benchmarks. Here are the c
     - RefineCarvingPerformer: will refine the volume mesh before carving (using [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement))
     - CuttingPerformer: will define a fine cut or incision in the mesh (using [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement))
 
+<img align="center" width="60%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/MeshRefinement_AdvancedCarving_penetration.gif">
     
 ### Architecture
 - **examples:** with several examples of the components and some benchmarks.
-- **scripts:** a bunch of python scripts to apply changes to the SOFA code base or scenes. Such as changing requiredPlugin, updating components names, headers inclusion, etc.
+- **scripts:** a bunch of python scripts to apply changes to the SOFA code base or scenes. Such as:
+	- Changing requiredPlugin in scenes
+	- Updating components names
+	- Update headers inclusion
+	- ...
 - **src/InfinyToolkit:** All the source code of the SOFA components.
 
 
