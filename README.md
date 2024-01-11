@@ -13,6 +13,7 @@ Several components are still work in progress or just benchmarks. Here are the c
 
 - **MiddleForceField:** basically compute a force field to a barycentric coordinate. Can be useful to fake a simple breathing or beating motions. 
 <img align="center" width="50%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/up_readme/doc/MiddleForceField.gif">
+
 - **RotationEngine:** allows to apply a succession of rotation to an object.
 - **Triangle2RefinedTriangleTopologicalMapping:** define a topological mapping between a coarse triangulation to a refined triangulation.
 
