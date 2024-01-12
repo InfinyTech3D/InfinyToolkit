@@ -90,7 +90,7 @@ if (MeshRefinement_FOUND)
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 
-set(README_FILES PluginInfinyToolkit.txt)
+set(README_FILES README.md)
 
 # Create the plugin library.
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES})
