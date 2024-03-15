@@ -25,6 +25,7 @@
 
 #include <InfinyToolkit/config.h>
 #include <sofa/component/haptics/ForceFeedback.h>
+#include <sofa/defaulttype/SolidTypes.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 
