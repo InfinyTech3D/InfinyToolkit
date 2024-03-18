@@ -88,10 +88,10 @@ void NearestTexcoordsMap::doUpdate()
 
 void NearestTexcoordsMap::computeNearestPointMapping()
 {
-    sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
+    sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vec2> > > outTexcoords = d_outputTexCoords;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
-    sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
+    sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vec2> > > mapTexcoords = d_mapTexCoords;
 
     outTexcoords.resize(fullPositions.size());
     m_mapPositionIds.resize(fullPositions.size());
@@ -125,10 +125,10 @@ void NearestTexcoordsMap::computeNearestPointMapping()
 
 void NearestTexcoordsMap::computeTriangulationMapping()
 {
-    sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vector2> > > outTexcoords = d_outputTexCoords;
+    sofa::helper::WriteOnlyAccessor<Data< type::vector<sofa::type::Vec2> > > outTexcoords = d_outputTexCoords;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
-    sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vector2> > > mapTexcoords = d_mapTexCoords;
+    sofa::helper::ReadAccessor< Data< type::vector<sofa::type::Vec2> > > mapTexcoords = d_mapTexCoords;
 
     outTexcoords.resize(fullPositions.size());
     m_mapPositionIds.resize(fullPositions.size() * 3);
