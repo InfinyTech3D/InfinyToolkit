@@ -2,7 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/info-on_website-green.svg)](https://infinytech3d.com/)
 [![Support](https://img.shields.io/badge/support-on_GitHub_Discussions-blue.svg)](https://github.com/sofa-framework/sofa/discussions)
-[![Gitter](https://img.shields.io/badge/chat-on_Gitter-ff69b4.svg)](https://app.gitter.im/#/room/#sofa-framework:gitter.im)
+[![Discord](https://img.shields.io/badge/chat-on_Discord-darkred.svg)](https://discord.gg/G63t3a8Ra6)
 
 ## Description
 This repository gather all open code from InfinyTech3D that could be of any use for the https://www.sofa-framework.org/
