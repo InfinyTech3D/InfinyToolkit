@@ -116,7 +116,7 @@ void NearestTexcoordsMap::computeNearestPointMapping()
         }
         else
         {
-            outTexcoords[i2] = sofa::type::Vector2(0.0, 0.0);
+            outTexcoords[i2] = sofa::type::Vec2(0.0, 0.0);
             m_mapPositionIds[i2] = 0;
         }
     }
