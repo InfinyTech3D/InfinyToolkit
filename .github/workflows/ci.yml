@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11, windows-2019]
-        sofa_branch: [master]
+        os: [ubuntu-22.04, macos-12, windows-2022]
+        sofa_branch: [v23.12]
 
     steps:
       - name: (Mac) Workaround for homebrew
@@ -33,11 +33,11 @@ jobs:
             
       - name: Setup SOFA and environment
         id: sofa
-        uses: sofa-framework/sofa-setup-action@v4
+        uses: sofa-framework/sofa-setup-action@v5
         with:
           sofa_root: ${{ github.workspace }}/sofa
           sofa_version: ${{ matrix.sofa_branch }}
-          sofa_scope: 'full'
+          sofa_scope: 'standard'
       
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -106,7 +106,7 @@ jobs:
 
   deploy:
     name: Deploy artifacts
-    if: always() && startsWith(github.ref, 'refs/heads/') # we are on a branch (not a PR)
+    if: always() && startsWith(github.ref, 'refs/heads/main') # we are on a branch (not a PR)
     needs: [build-and-test]
     runs-on: ubuntu-latest
     continue-on-error: true
