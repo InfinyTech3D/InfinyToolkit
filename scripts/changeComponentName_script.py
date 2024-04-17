@@ -3,16 +3,26 @@ import sys
 import fileinput, re
 from subprocess import call
 
-#print ('test', len(sys.argv))
-#print (str(sys.argv[1]))
+print ('test', len(sys.argv))
+print (str(sys.argv[1]))
 
-#CollisionPipeline DefaultPipeline
-#CollisionResponse DefaultContactManager
 #CollisionGroup DefaultCollisionGroupManager
 #EulerImplicit EulerImplicitSolver
 #TriangleModel TriangleCollisionModel
 #LineModel LineCollisionModel
 #PointModel PointCollisionModel
+
+#target = "DefaultPipeline"
+#fixname = "CollisionPipeline"
+
+#target = "DefaultContactManager"
+#fixname = "CollisionResponse"
+
+target = "MeshObjLoader"
+fixname = "MeshOBJLoader"
+
+#FixedProjectiveConstraint FixedConstraint
+
 
 for root, dirs, files in os.walk(sys.argv[1]):
     for file in files:
@@ -23,15 +33,15 @@ for root, dirs, files in os.walk(sys.argv[1]):
             with open(filePath, 'r') as thefile:
                 data = thefile.readlines()                        
             
-            target = "<PointModel"
-            target2 = "< PointModel"
+            findTarget = "<" + target
+            findTarget2 = "< " + target
             
             # parsing file for PointModel
             includes = {}
             for idx, line in enumerate(data):
-                if re.search(target, line):
+                if re.search(findTarget, line):
                     includes[idx] = line
-                if re.search(target2, line):
+                if re.search(findTarget2, line):
                     includes[idx] = line
                         
             if (not includes):
@@ -45,9 +55,9 @@ for root, dirs, files in os.walk(sys.argv[1]):
             for key, value in includes.items():
                 #print("----------------")
                 #print("Before: ", key, value)
-                value.replace("<PointModel", "<PointCollisionModel")
-                line = value.replace("<PointModel", "<PointCollisionModel")
-                line = line.replace("< PointModel", "<PointCollisionModel")
+                #value.replace("<FixedConstraint", "<FixedProjectiveConstraint")
+                line = value.replace("<" + target, "<" + fixname)
+                line = line.replace("< " + target, "<" + fixname)
                 #print("After: ", key, line)
                 #print("----------------")
                 

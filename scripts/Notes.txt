@@ -1,0 +1,2 @@
+python ./sofa_plugins/Regression/regression_test.py /c/projects/sofa-build/bin/Release/Regression_test.exe /c/projects/sofa-src/ /c/projects/sofa_plugins/Regression/references/examples/ /c/projects/sofa-build/
+python ./sofa_plugins/Regression/regression_test.py /c/projects/sofa-build/bin/Release/Regression_test.exe /c/projects/sofa_plugins/BeamAdapter/examples/ /c/projects/sofa_plugins/BeamAdapter/regression/references/ /c/projects/sofa-build/
