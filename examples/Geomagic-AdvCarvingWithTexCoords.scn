@@ -39,7 +39,7 @@
     <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
-    <DefaultContactManager name="response" response="FrictionContactConstraint" />
+    <CollisionResponse name="response" response="FrictionContactConstraint" />
     <MinProximityIntersection name="Proximity" alarmDistance="0.8" contactDistance="0.2" />
     
     <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="0" 
@@ -72,7 +72,7 @@
         <DiagonalMass massDensity="10.0" />
 
         <BoxROI name="box" box="-1 -1 -1 12 0 14" drawBoxes="true" />
-        <FixedConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
+        <FixedProjectiveConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
 
         <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="5000" poissonRatio="0.3" method="large" />
         <LinearSolverConstraintCorrection/>
