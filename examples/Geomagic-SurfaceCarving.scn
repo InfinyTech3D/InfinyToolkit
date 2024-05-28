@@ -16,7 +16,7 @@
     
     <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceDetection name="detection" />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <CollisionResponse name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="0.5" contactDistance="0.1" angleCone="0.0" />
 
     <FreeMotionAnimationLoop/>

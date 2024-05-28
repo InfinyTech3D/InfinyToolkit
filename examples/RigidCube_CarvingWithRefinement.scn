@@ -17,6 +17,7 @@
         <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->  
         <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
         <RequiredPlugin name="InfinyToolkit" />
+        <RequiredPlugin name="MeshRefinement" />
     </Node>
     <VisualStyle displayFlags="showCollisionModels hideVisual" />
   
@@ -25,7 +26,7 @@
     <CollisionPipeline verbose="0" />
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
-    <DefaultContactManager response="PenalityContactForceField" />
+    <CollisionResponse response="PenalityContactForceField" />
     <MinProximityIntersection name="Proximity" alarmDistance="2.0" contactDistance="0.3" />
 
     <Node name="carving">

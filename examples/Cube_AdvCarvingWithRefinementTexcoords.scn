@@ -21,6 +21,7 @@
         <RequiredPlugin name="Sofa.Component.Topology.Mapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->  
         <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->  
         <RequiredPlugin name="InfinyToolkit" />
+        <RequiredPlugin name="MeshRefinement" />
     </Node>
 
     <DefaultAnimationLoop />
@@ -28,14 +29,14 @@
     <CollisionPipeline verbose="0" />
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
-    <DefaultContactManager response="PenalityContactForceField" />
+    <CollisionResponse response="PenalityContactForceField" />
     <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1" />
 
     <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
     <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-        carvingWithBurning="1" carvingWithRefinement="1" drawContacts="0"/>
+        carvingWithBurning="1" carvingWithRefinement="1" drawContacts="0" process="1"/>
 
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
@@ -65,7 +66,7 @@
         <DiagonalMass massDensity="1.0" />
 
         <BoxROI name="box" box="-1 -1 -1 11 0 11" drawBoxes="true" />
-        <FixedConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
+        <FixedProjectiveConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
 
         <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="100" poissonRatio="0.3" method="large" />
 
