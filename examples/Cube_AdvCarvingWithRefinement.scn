@@ -22,6 +22,7 @@
         <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->  
         <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->  
         <RequiredPlugin name="InfinyToolkit" />
+        <RequiredPlugin name="MeshRefinement" />
     </Node>
 
     <VisualStyle displayFlags="hideCollisionModels showVisual" />
@@ -38,7 +39,7 @@
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
     <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0"/>
+    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0" process="1"/>
 
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
