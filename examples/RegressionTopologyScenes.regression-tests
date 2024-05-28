@@ -1,0 +1,9 @@
+# WARNING: 
+# REGRESSION_TEST DOES NOT SUPPORT DASHES ("-") IN SCENE NAMES.
+# USE UNDERSCORES ("_") INSTEAD.
+
+### References relative path ###
+#../regression/references
+
+### Topology scenes ###
+Triangle2RefinedTriangleTopologicalMapping.scn 100 1e-4 1
