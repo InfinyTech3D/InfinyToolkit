@@ -8,6 +8,5 @@
 BeatingCube.scn 200 1e-4 1 1
 BeatingCube_moving.scn 200 1e-4 1 1
 Cube_AdvCarvingTexcoords.scn 500 1e-4 1 1
-# to be activated when SofaCarving is shipped
-#Cube_Carving.scn 500 1e-4 1 1
-#Cube_CarvingWithPenetration.scn 500 1e-4 1 1
+Cube_Carving.scn 500 1e-4 1 1
+Cube_CarvingWithPenetration.scn 500 1e-4 1 1
