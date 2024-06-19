@@ -25,7 +25,8 @@ set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 set(INFINYTOOLKIT_SRC_DIR src/InfinyToolkit)
 
 set(HEADER_FILES
-    ${INFINYTOOLKIT_SRC_DIR}/config.h.in
+    ${INFINYTOOLKIT_SRC_DIR}/config.h.in    
+    ${INFINYTOOLKIT_SRC_DIR}/CollisionDetectionDisplay.h
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.h
     ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.h
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.h
@@ -50,6 +51,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${INFINYTOOLKIT_SRC_DIR}/CollisionDetectionDisplay.cpp
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.cpp
     ${INFINYTOOLKIT_SRC_DIR}/PliersToolManager.cpp
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.cpp
