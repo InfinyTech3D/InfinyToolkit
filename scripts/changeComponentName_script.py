@@ -18,10 +18,12 @@ print (str(sys.argv[1]))
 #target = "DefaultContactManager"
 #fixname = "CollisionResponse"
 
-target = "MeshObjLoader"
-fixname = "MeshOBJLoader"
+#target = "MeshObjLoader"
+#fixname = "MeshOBJLoader"
 
-#FixedProjectiveConstraint FixedConstraint
+target = "FixedConstraint"
+fixname = "FixedProjectiveConstraint"
+
 
 
 for root, dirs, files in os.walk(sys.argv[1]):
@@ -55,7 +57,6 @@ for root, dirs, files in os.walk(sys.argv[1]):
             for key, value in includes.items():
                 #print("----------------")
                 #print("Before: ", key, value)
-                #value.replace("<FixedConstraint", "<FixedProjectiveConstraint")
                 line = value.replace("<" + target, "<" + fixname)
                 line = line.replace("< " + target, "<" + fixname)
                 #print("After: ", key, line)
