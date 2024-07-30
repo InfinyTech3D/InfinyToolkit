@@ -23,10 +23,12 @@
  ****************************************************************************/
 #pragma once
 
+#include <InfinyToolkit/config.h>
 #include <sofa/type/Vec.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
-#include <InfinyToolkit/config.h>
+#include <sofa/core/CollisionModel.h>
+
 
 namespace sofa::infinytoolkit
 {
@@ -60,7 +62,9 @@ protected:
 	virtual void deActivateImpl() {}
 
 public:
-	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel;
+	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawController;
+	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawDofs;
+	SingleLink<BaseJawModel, sofa::core::CollisionModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawCollision;
 
 
 protected:

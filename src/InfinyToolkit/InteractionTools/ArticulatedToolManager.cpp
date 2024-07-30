@@ -232,6 +232,17 @@ void ArticulatedToolManager::filterCollision()
                 info->idTool = c.elem.second.getIndex();
                 sofa::Index idTri = c.elem.first.getIndex();
                 info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+
+                if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
+                {
+                    std::cout << "elem.second: Jaw1" << std::endl;
+                    info->toolId = 0;
+                }
+                else
+                {
+                    std::cout << "elem.second: Jaw2" << std::endl;
+                    info->toolId = 1;
+                }
             }
             else
             {
@@ -239,6 +250,17 @@ void ArticulatedToolManager::filterCollision()
                 info->idTool = c.elem.first.getIndex();
                 sofa::Index idTri = c.elem.second.getIndex();
                 info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+
+                if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
+                {
+                    std::cout << "elem.first: Jaw1" << std::endl;
+                    info->toolId = 0;
+                }
+                else
+                {
+                    std::cout << "elem.first: Jaw2" << std::endl;
+                    info->toolId = 1;
+                }
             }
 
             info->normal = c.normal;
@@ -371,83 +393,83 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         }
         case '8': // Up
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         case '5': // Down
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, -0.1, 0);
             break;
         }
         case '4': // Left
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(-0.1, 0, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(-0.1, 0, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(-0.1, 0, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(-0.1, 0, 0);
             break;
         }
         case '6': // Right
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.1, 0, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.1, 0, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0.1, 0, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0.1, 0, 0);
             break;
         }
         case '+': // forward
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.0, 0, -0.1);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.0, 0, -0.1);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0.0, 0, -0.1);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0.0, 0, -0.1);
             break;
         }
         case '-': // backward
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.0, 0, 0.1);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.0, 0, 0.1);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0.0, 0, 0.1);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0.0, 0, 0.1);
             break;
         }
         case '9': // turn right
         {
-            l_jawModel1.get()->l_jawModel.get()->applyRotation(0.0, 1.0, 0.0);
-            l_jawModel2.get()->l_jawModel.get()->applyRotation(0.0, 1.0, 0.0);
+            l_jawModel1.get()->l_jawController.get()->applyRotation(0.0, 1.0, 0.0);
+            l_jawModel2.get()->l_jawController.get()->applyRotation(0.0, 1.0, 0.0);
             break;
         }
         case '7': // turn left
         {
-            l_jawModel1.get()->l_jawModel.get()->applyRotation(0.0, -1.0, 0.0);
-            l_jawModel2.get()->l_jawModel.get()->applyRotation(0.0, -1.0, 0.0);
+            l_jawModel1.get()->l_jawController.get()->applyRotation(0.0, -1.0, 0.0);
+            l_jawModel2.get()->l_jawController.get()->applyRotation(0.0, -1.0, 0.0);
             break;
         }
         case '1': // turn right
         {
-            l_jawModel1.get()->l_jawModel.get()->applyRotation(1.0, 0.0, 0.0);
-            l_jawModel2.get()->l_jawModel.get()->applyRotation(1.0, 0.0, 0.0);
+            l_jawModel1.get()->l_jawController.get()->applyRotation(1.0, 0.0, 0.0);
+            l_jawModel2.get()->l_jawController.get()->applyRotation(1.0, 0.0, 0.0);
             break;
         }
         case '3': // turn left
         {
-            l_jawModel1.get()->l_jawModel.get()->applyRotation(-1.0, 0.0, 0.0);
-            l_jawModel2.get()->l_jawModel.get()->applyRotation(-1.0, 0.0, 0.0);
+            l_jawModel1.get()->l_jawController.get()->applyRotation(-1.0, 0.0, 0.0);
+            l_jawModel2.get()->l_jawController.get()->applyRotation(-1.0, 0.0, 0.0);
             break;
         }
         case 'Y':
         case 'y':
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         case 'H':
         case 'h':
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, -0.1, 0);
             break;
         }
         case 'J':
         case 'j':
         {
-            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
-            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         }
@@ -464,6 +486,8 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
 
 
     auto m_model = l_targetModel.get();
+    auto m_jaw1 = l_jawModel1.get()->l_jawDofs;
+    auto m_jaw2 = l_jawModel2.get()->l_jawDofs;
 
     if (d_drawContacts.getValue())
     {
@@ -471,13 +495,19 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
         {
             std::vector<Vec3> vertices;
 
-            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[0]), m_model->getPY(cInfo->idsModel[0]), m_model->getPZ(cInfo->idsModel[0])));
-            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[1]), m_model->getPY(cInfo->idsModel[1]), m_model->getPZ(cInfo->idsModel[1])));
-            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[2]), m_model->getPY(cInfo->idsModel[2]), m_model->getPZ(cInfo->idsModel[2])));
+            for (int i = 0; i < 3; ++i)
+            {
+                if (cInfo->toolId == 0)
+                    vertices.push_back(Vec3(m_jaw1->getPX(cInfo->idTool), m_jaw1->getPY(cInfo->idTool), m_jaw1->getPZ(cInfo->idTool)));
+                else
+                    vertices.push_back(Vec3(m_jaw2->getPX(cInfo->idTool), m_jaw2->getPY(cInfo->idTool), m_jaw2->getPZ(cInfo->idTool)));
+
+                vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[i]), m_model->getPY(cInfo->idsModel[i]), m_model->getPZ(cInfo->idsModel[i])));
+            }
 
             sofa::type::RGBAColor color4(1.0f, 1.0, 0.0f, 1.0);
 
-            vparams->drawTool()->drawLines(vertices, 1, color4);
+            vparams->drawTool()->drawLines(vertices, 10, color4);
         }
     }
 

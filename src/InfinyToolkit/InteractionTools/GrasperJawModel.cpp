@@ -30,6 +30,14 @@ namespace sofa::infinytoolkit
 int GrasperJawModelClass = core::RegisterObject("Handle grasper.")
 	.add< GrasperJawModel >();
 
+//using namespace sofa::core::objectmodel;
+
+GrasperJawModel::GrasperJawModel()
+	: BaseJawModel()
+	, d_stiffness(initData(&d_stiffness, SReal(100.0), "stiffness", "jaw speed factor."))
+{
+}
+
 
 void GrasperJawModel::activateImpl()
 {
@@ -265,7 +273,7 @@ void GrasperJawModel::releaseGrab()
 
 int GrasperJawModel::createFF(float _stiffness)
 {
-	m_stiffness = _stiffness;
+	//m_stiffness = _stiffness;
 
 	//m_forcefield = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord1));
 	//StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefield.get());

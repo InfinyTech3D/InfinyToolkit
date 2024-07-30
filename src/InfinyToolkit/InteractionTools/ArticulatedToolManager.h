@@ -40,6 +40,7 @@ public:
     //Vec3 pointB;
     sofa::type::Vec3 normal; // equal to ||pB - pA||
     double dist; // equalt to (pB - pA).norm - contactDistance
+    int toolId;
 };
 
 
