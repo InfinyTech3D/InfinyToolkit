@@ -51,7 +51,8 @@ public:
 	Data<SReal> d_stiffness;
 
 protected:
-	int createFF(float _stiffness);
+	int createStiffSpringFF();
+	void addModelSprings();
 
 	// API from grabing
 	const sofa::type::vector< int >& grabModel();
