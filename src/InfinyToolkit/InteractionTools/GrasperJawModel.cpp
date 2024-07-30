@@ -23,9 +23,12 @@
  ****************************************************************************/
 
 #include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
+#include <sofa/core/ObjectFactory.h>
 
 namespace sofa::infinytoolkit
 {
+int GrasperJawModelClass = core::RegisterObject("Handle grasper.")
+	.add< GrasperJawModel >();
 
 
 void GrasperJawModel::activateImpl()

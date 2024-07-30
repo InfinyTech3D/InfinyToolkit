@@ -59,7 +59,7 @@ protected:
 	void releaseGrab();
 
 private:
-	float m_stiffness;
+	float m_stiffness = 100.0;
 	
 	StiffSpringFF::SPtr m_forcefield = nullptr;
 };

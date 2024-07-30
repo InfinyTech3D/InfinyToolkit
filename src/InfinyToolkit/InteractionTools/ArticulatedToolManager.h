@@ -26,9 +26,22 @@
 #include <InfinyToolkit/config.h>
 #include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
 #include <InfinyToolkit/InteractionTools/ScissorJawModel.h>
+#include <sofa/core/collision/NarrowPhaseDetection.h>
 
 namespace sofa::infinytoolkit
 {
+
+class GrabContactInfo
+{
+public:
+    sofa::Index idTool; // in global mesh
+    sofa::core::topology::BaseMeshTopology::Triangle idsModel; // in global mesh
+    //Vec3 pointA;
+    //Vec3 pointB;
+    sofa::type::Vec3 normal; // equal to ||pB - pA||
+    double dist; // equalt to (pB - pA).norm - contactDistance
+};
+
 
 /** 
 *
@@ -40,6 +53,7 @@ public:
 
     using Vec3 = sofa::type::Vec3;
     using RigidCoord = sofa::defaulttype::RigidTypes::Coord;
+    using ContactVector = type::vector<core::collision::DetectionOutput>;
 
 protected:
     ArticulatedToolManager();
@@ -73,10 +87,21 @@ public:
     
     void draw(const core::visual::VisualParams* vparams) override;
 
+protected:
+    void clearContacts();
+
+    void filterCollision();
+
 public:
     // Path to the different JawModel
     SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel1;
     SingleLink<ArticulatedToolManager, BaseJawModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawModel2;
+
+    // link to the scene detection Method component (Narrow phase only)
+    SingleLink<ArticulatedToolManager, core::collision::NarrowPhaseDetection, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_detectionNP;
+
+    SingleLink<ArticulatedToolManager, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_targetModel;
+
     
     Data<SReal> d_angleJaw1; //up
     Data<SReal> d_angleJaw2; //down
@@ -85,6 +110,7 @@ public:
     Data <RigidCoord> d_inputPosition;
 
     Data <type::vector<RigidCoord> > d_outputPositions;
+    Data<bool> d_drawContacts; ///< if true, draw the collision outputs
 
 protected:
     // Buffer of points ids 
@@ -101,6 +127,9 @@ protected:
 
     SReal m_oldCollisionStiffness;
     float m_stiffness;
+
+    /// List of contacts filter during collision 
+    sofa::type::vector<GrabContactInfo*> m_contactInfos;
 };
 
 

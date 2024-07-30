@@ -60,9 +60,12 @@ int ArticulatedToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
 ArticulatedToolManager::ArticulatedToolManager()
     : l_jawModel1(initLink("jawModel1", "link to the first jaw model component, if not set will search through graph and take first one encountered."))
     , l_jawModel2(initLink("jawModel2", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
+    , l_detectionNP(initLink("detectionNP", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
+    , l_targetModel(initLink("targetModel", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
     , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
     , m_stiffness(500)
+    , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
 {
     this->f_listening.setValue(true);
     m_idgrabed.clear();
@@ -71,6 +74,8 @@ ArticulatedToolManager::ArticulatedToolManager()
 
 void ArticulatedToolManager::init()
 {
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Loading);
+
     if (l_jawModel1.get() == nullptr || l_jawModel2.get() == nullptr)
     {
         std::vector<BaseJawModel*> jawModels;
@@ -95,7 +100,27 @@ void ArticulatedToolManager::init()
 
     if (m_jawModel1 == nullptr || m_jawModel2 == nullptr)
     {
-        msg_error() << "error mechanical state not found";
+        msg_error() << "Error mechanical state not found";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        return;
+    }
+
+    if (l_targetModel.get() == nullptr)
+    {
+        msg_error() << "Error no target mechanical state found";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        return;
+    }
+
+
+    // If no NarrowPhaseDetection is set using the link try to find the component
+    if (l_detectionNP.get() == nullptr)
+    {
+        l_detectionNP.set(getContext()->get<core::collision::NarrowPhaseDetection>());
+    }
+
+    if (l_detectionNP.get() == nullptr) {
+        msg_error() << "NarrowPhaseDetection not found";
         sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         return;
     }
@@ -158,6 +183,90 @@ void ArticulatedToolManager::computeVertexIdsInBroadPhase(float margin)
     //    //    m_idBroadPhase.push_back(i);
     //    //}
     //}
+}
+
+
+void ArticulatedToolManager::filterCollision()
+{
+    if (!this->isComponentStateValid())
+        return;
+
+    clearContacts();
+
+    // get the collision output
+    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = l_detectionNP.get()->getDetectionOutputs();
+    if (detectionOutputs.size() == 0) // exit if no collision
+    {
+        return;
+    }
+
+    // loop on the contact to get the one between the CarvingSurface and the CarvingTool collision model
+    const ContactVector* contacts = nullptr;
+    for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
+    {
+        sofa::core::CollisionModel* collMod1 = it->first.first;
+        sofa::core::CollisionModel* collMod2 = it->first.second;
+
+        dmsg_info() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
+        dmsg_info() << "collMod1: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
+
+
+        // Get the number of contacts        
+        contacts = dynamic_cast<const ContactVector*>(it->second);
+        if (contacts == nullptr)
+            continue;
+
+        size_t ncontacts = contacts->size();
+        if (contacts->size() == 0)
+            continue;
+
+        for (size_t j = 0; j < ncontacts; ++j)
+        {
+            // update the triangle id if a mapping is present
+            GrabContactInfo* info = new GrabContactInfo();
+
+            const ContactVector::value_type& c = (*contacts)[j];
+
+            if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is target model
+            {
+                info->idTool = c.elem.second.getIndex();
+                sofa::Index idTri = c.elem.first.getIndex();
+                info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+            }
+            else
+            {
+
+                info->idTool = c.elem.first.getIndex();
+                sofa::Index idTri = c.elem.second.getIndex();
+                info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+            }
+
+            info->normal = c.normal;
+            info->dist = c.value;
+            std::cout << "Type first: " << c.elem.first.getCollisionModel()->getEnumType() << std::endl;
+            std::cout << "Type second: " << c.elem.second.getCollisionModel()->getEnumType() << std::endl;
+
+
+            dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
+                << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
+                << " | normal: " << c.normal << " d: " << c.value
+                << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
+
+
+            m_contactInfos.push_back(info);
+        }
+    }
+}
+
+
+void ArticulatedToolManager::clearContacts()
+{
+    for (unsigned int i = 0; i < m_contactInfos.size(); i++)
+    {
+        delete m_contactInfos[i];
+        m_contactInfos[i] = nullptr;
+    }
+    m_contactInfos.clear();
 }
 
 
@@ -241,8 +350,10 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         {
             //releaseGrab();
 
-            computeVertexIdsInBroadPhase();
-            closeTool();
+            //computeVertexIdsInBroadPhase();
+            //closeTool();
+
+            filterCollision();
            
             break;
         }
@@ -252,25 +363,91 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
             openTool();
             break;
         }
+        case '0':
+        {
+            //releaseGrab();
+            computeBoundingBox();
+            break;
+        }
+        case '8': // Up
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            break;
+        }
+        case '5': // Down
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
+            break;
+        }
+        case '4': // Left
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(-0.1, 0, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(-0.1, 0, 0);
+            break;
+        }
+        case '6': // Right
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.1, 0, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.1, 0, 0);
+            break;
+        }
+        case '+': // forward
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.0, 0, -0.1);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.0, 0, -0.1);
+            break;
+        }
+        case '-': // backward
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0.0, 0, 0.1);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0.0, 0, 0.1);
+            break;
+        }
+        case '9': // turn right
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyRotation(0.0, 1.0, 0.0);
+            l_jawModel2.get()->l_jawModel.get()->applyRotation(0.0, 1.0, 0.0);
+            break;
+        }
+        case '7': // turn left
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyRotation(0.0, -1.0, 0.0);
+            l_jawModel2.get()->l_jawModel.get()->applyRotation(0.0, -1.0, 0.0);
+            break;
+        }
+        case '1': // turn right
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyRotation(1.0, 0.0, 0.0);
+            l_jawModel2.get()->l_jawModel.get()->applyRotation(1.0, 0.0, 0.0);
+            break;
+        }
+        case '3': // turn left
+        {
+            l_jawModel1.get()->l_jawModel.get()->applyRotation(-1.0, 0.0, 0.0);
+            l_jawModel2.get()->l_jawModel.get()->applyRotation(-1.0, 0.0, 0.0);
+            break;
+        }
         case 'Y':
         case 'y':
         {
-            //m_mord1->applyTranslation(0, -0.1, 0);
-            //m_mord2->applyTranslation(0, 0.1, 0);
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         case 'H':
         case 'h':
         {
-            //m_mord1->applyTranslation(0, 0.1, 0);
-            //m_mord2->applyTranslation(0, -0.1, 0);
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, -0.1, 0);
             break;
         }
         case 'J':
         case 'j':
         {
-            //m_mord1->applyTranslation(0, 0.1, 0);
-            //m_mord2->applyTranslation(0, 0.1, 0);
+            l_jawModel1.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
+            l_jawModel2.get()->l_jawModel.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         }
@@ -281,6 +458,28 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
 {
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
+
+    if (!this->isComponentStateValid())
+        return;
+
+
+    auto m_model = l_targetModel.get();
+
+    if (d_drawContacts.getValue())
+    {
+        for (GrabContactInfo* cInfo : m_contactInfos)
+        {
+            std::vector<Vec3> vertices;
+
+            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[0]), m_model->getPY(cInfo->idsModel[0]), m_model->getPZ(cInfo->idsModel[0])));
+            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[1]), m_model->getPY(cInfo->idsModel[1]), m_model->getPZ(cInfo->idsModel[1])));
+            vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[2]), m_model->getPY(cInfo->idsModel[2]), m_model->getPZ(cInfo->idsModel[2])));
+
+            sofa::type::RGBAColor color4(1.0f, 1.0, 0.0f, 1.0);
+
+            vparams->drawTool()->drawLines(vertices, 1, color4);
+        }
+    }
 
     //sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
     //vparams->drawTool()->drawLine(m_min, m_max, sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
