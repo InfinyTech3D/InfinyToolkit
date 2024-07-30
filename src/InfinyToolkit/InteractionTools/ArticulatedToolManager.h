@@ -31,18 +31,6 @@
 namespace sofa::infinytoolkit
 {
 
-class GrabContactInfo
-{
-public:
-    sofa::Index idTool; // in global mesh
-    sofa::core::topology::BaseMeshTopology::Triangle idsModel; // in global mesh
-    //Vec3 pointA;
-    //Vec3 pointB;
-    sofa::type::Vec3 normal; // equal to ||pB - pA||
-    double dist; // equalt to (pB - pA).norm - contactDistance
-    int toolId;
-};
-
 
 /** 
 *
@@ -130,7 +118,7 @@ protected:
     float m_stiffness;
 
     /// List of contacts filter during collision 
-    sofa::type::vector<GrabContactInfo*> m_contactInfos;
+    //sofa::type::vector<GrabContactInfo*> m_contactInfos;
 };
 
 

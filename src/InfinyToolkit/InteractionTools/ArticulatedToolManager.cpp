@@ -135,6 +135,9 @@ void ArticulatedToolManager::init()
 
     computeBoundingBox();
 
+    l_jawModel1->setTargetModel(l_targetModel.get());
+    l_jawModel2->setTargetModel(l_targetModel.get());
+
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 }
 
@@ -224,9 +227,9 @@ void ArticulatedToolManager::filterCollision()
         {
             // update the triangle id if a mapping is present
             GrabContactInfo* info = new GrabContactInfo();
+            bool firstJaw = false;
 
             const ContactVector::value_type& c = (*contacts)[j];
-
             if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is target model
             {
                 info->idTool = c.elem.second.getIndex();
@@ -234,48 +237,30 @@ void ArticulatedToolManager::filterCollision()
                 info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
 
                 if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
-                {
-                    std::cout << "elem.second: Jaw1" << std::endl;
-                    info->toolId = 0;
-                }
-                else
-                {
-                    std::cout << "elem.second: Jaw2" << std::endl;
-                    info->toolId = 1;
-                }
+                    firstJaw = true;
             }
             else
             {
-
                 info->idTool = c.elem.first.getIndex();
                 sofa::Index idTri = c.elem.second.getIndex();
                 info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
 
                 if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
-                {
-                    std::cout << "elem.first: Jaw1" << std::endl;
-                    info->toolId = 0;
-                }
-                else
-                {
-                    std::cout << "elem.first: Jaw2" << std::endl;
-                    info->toolId = 1;
-                }
+                    firstJaw = true;
             }
 
             info->normal = c.normal;
             info->dist = c.value;
-            std::cout << "Type first: " << c.elem.first.getCollisionModel()->getEnumType() << std::endl;
-            std::cout << "Type second: " << c.elem.second.getCollisionModel()->getEnumType() << std::endl;
-
 
             dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
                 << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
                 << " | normal: " << c.normal << " d: " << c.value
                 << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
 
-
-            m_contactInfos.push_back(info);
+            if (firstJaw)
+                l_jawModel1->addContact(info);
+            else
+                l_jawModel2->addContact(info);
         }
     }
 }
@@ -283,12 +268,11 @@ void ArticulatedToolManager::filterCollision()
 
 void ArticulatedToolManager::clearContacts()
 {
-    for (unsigned int i = 0; i < m_contactInfos.size(); i++)
-    {
-        delete m_contactInfos[i];
-        m_contactInfos[i] = nullptr;
-    }
-    m_contactInfos.clear();
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return;
+
+    m_jawModel1->clearContacts();
+    m_jawModel2->clearContacts();
 }
 
 
@@ -326,6 +310,8 @@ void ArticulatedToolManager::stopAction()
     if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
+    m_jawModel1->stopAction();
+    m_jawModel2->stopAction();
 }
 
 
@@ -370,12 +356,14 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         case 'T':
         case 't':
         {
-            //releaseGrab();
+            stopAction();
 
             //computeVertexIdsInBroadPhase();
             //closeTool();
 
             filterCollision();
+
+            performAction();
            
             break;
         }
@@ -491,24 +479,9 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
 
     if (d_drawContacts.getValue())
     {
-        for (GrabContactInfo* cInfo : m_contactInfos)
-        {
-            std::vector<Vec3> vertices;
-
-            for (int i = 0; i < 3; ++i)
-            {
-                if (cInfo->toolId == 0)
-                    vertices.push_back(Vec3(m_jaw1->getPX(cInfo->idTool), m_jaw1->getPY(cInfo->idTool), m_jaw1->getPZ(cInfo->idTool)));
-                else
-                    vertices.push_back(Vec3(m_jaw2->getPX(cInfo->idTool), m_jaw2->getPY(cInfo->idTool), m_jaw2->getPZ(cInfo->idTool)));
-
-                vertices.push_back(Vec3(m_model->getPX(cInfo->idsModel[i]), m_model->getPY(cInfo->idsModel[i]), m_model->getPZ(cInfo->idsModel[i])));
-            }
-
-            sofa::type::RGBAColor color4(1.0f, 1.0, 0.0f, 1.0);
-
-            vparams->drawTool()->drawLines(vertices, 10, color4);
-        }
+        // first jaw
+        l_jawModel1->drawImpl(vparams);
+        l_jawModel2->drawImpl(vparams);
     }
 
     //sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);

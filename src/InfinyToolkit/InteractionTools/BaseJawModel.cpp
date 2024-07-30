@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <InfinyToolkit/InteractionTools/BaseJawModel.h>
+#include <sofa/core/visual/VisualParams.h>
 
 namespace sofa::infinytoolkit
 {
@@ -33,6 +34,17 @@ BaseJawModel::BaseJawModel()
     , l_jawCollision(initLink("jawCollision", "link to the first jaw model component, if not set will search through graph and take first one encountered."))
 {
 
+}
+
+void BaseJawModel::init()
+{
+    m_jaw = l_jawDofs.get();
+
+    if (m_jaw == nullptr)
+    {
+        msg_error() << "Error mechanical state not given";
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+    }
 }
 
 
@@ -80,6 +92,23 @@ bool BaseJawModel::computeBoundingBox()
 }
 
 
+void BaseJawModel::addContact(GrabContactInfo* grabInfo)
+{
+    m_contactInfos.push_back(grabInfo);
+}
+
+
+void BaseJawModel::clearContacts()
+{
+    for (unsigned int i = 0; i < m_contactInfos.size(); i++)
+    {
+        delete m_contactInfos[i];
+        m_contactInfos[i] = nullptr;
+    }
+    m_contactInfos.clear();
+}
+
+
 void BaseJawModel::activeTool(bool value)
 {
     m_isActivated = value;
@@ -91,6 +120,11 @@ void BaseJawModel::activeTool(bool value)
 
 
 void BaseJawModel::performAction()
+{
+
+}
+
+void BaseJawModel::stopAction()
 {
 
 }
@@ -115,6 +149,25 @@ void BaseJawModel::computeAxis()
     Vec3 zDir = (zAxis - zero); zDir.normalize();
 
     matP = sofa::type::Mat3x3(xDir, yDir, zDir);
+}
+
+
+void BaseJawModel::drawImpl(const core::visual::VisualParams* vparams)
+{
+    // draw contacts
+    for (GrabContactInfo* cInfo : m_contactInfos)
+    {
+        std::vector<Vec3> vertices;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            vertices.push_back(Vec3(m_jaw->getPX(cInfo->idTool), m_jaw->getPY(cInfo->idTool), m_jaw->getPZ(cInfo->idTool)));
+            vertices.push_back(Vec3(m_target->getPX(cInfo->idsModel[i]), m_target->getPY(cInfo->idsModel[i]), m_target->getPZ(cInfo->idsModel[i])));
+        }
+
+        sofa::type::RGBAColor color4(1.0f, 1.0, 0.0f, 1.0);
+        vparams->drawTool()->drawLines(vertices, 10, color4);
+    }
 }
 
 } // namespace sofa::infinytoolkit

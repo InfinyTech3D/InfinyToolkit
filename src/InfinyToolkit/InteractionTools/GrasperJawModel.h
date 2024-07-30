@@ -44,6 +44,7 @@ public:
 	virtual ~GrasperJawModel() = default;
 	
 	void performAction() override;
+	void stopAction() override;
 	void activateImpl() override;
 	void deActivateImpl() override;
 

@@ -101,8 +101,14 @@ void GrasperJawModel::deActivateImpl()
 
 void GrasperJawModel::performAction()
 {
-
+	std::cout << "GrasperJawModel::performAction()" << std::endl;
 }
+
+void GrasperJawModel::stopAction()
+{
+	std::cout << "GrasperJawModel::stopAction()" << std::endl;
+}
+
 
 const sofa::type::vector< int >& GrasperJawModel::grabModel()
 {
