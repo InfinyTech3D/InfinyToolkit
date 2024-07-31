@@ -107,7 +107,7 @@ void BaseJawModel::clearContacts()
 }
 
 
-void BaseJawModel::activeTool(bool value)
+void BaseJawModel::activateTool(bool value)
 {
     m_isActivated = value;
     if (m_isActivated)

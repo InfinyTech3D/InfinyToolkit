@@ -74,50 +74,15 @@ void GrasperJawModel::deActivateImpl()
 
 void GrasperJawModel::performAction()
 {
-	std::cout << "GrasperJawModel::performAction()" << std::endl;
 	deActivateImpl();	
-	addModelSprings();	
+	addJawSprings();
 }
 
 void GrasperJawModel::stopAction()
 {
-	std::cout << "GrasperJawModel::stopAction()" << std::endl;
 	// clean springs
 	m_forcefield->clear();
 	activateImpl();
-}
-
-
-void GrasperJawModel::releaseGrab()
-{
-	//if (!m_forcefieldUP || !m_forcefieldDOWN)
-	//	return;
-	//m_idgrabed.clear();
-	//m_idBroadPhase.clear();
-
-	//// Clear springs created during the grab
-	//StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-	//stiffspringforcefield_UP->clear();
-
-	//StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-	//stiffspringforcefield_DOWN->clear();
-
-	//// Restaure the default collision behavior
-	//std::vector<SphereModel*> col_models;
-	//m_mord1->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	//if (!col_models.empty())
-	//{
-	//	SphereModel* col_model = col_models[0];
-	//	col_model->setContactStiffness(m_oldCollisionStiffness); // TODO: check why this doesn't work
-	//}
-
-	//col_models.clear();
-	//m_mord2->getContext()->get<SphereModel>(&col_models, sofa::core::objectmodel::BaseContext::Local);
-	//if (!col_models.empty())
-	//{
-	//	SphereModel* col_model = col_models[0];
-	//	col_model->setContactStiffness(m_oldCollisionStiffness);
-	//}
 }
 
 
@@ -138,7 +103,7 @@ int GrasperJawModel::createStiffSpringFF()
 }
 
 
-void GrasperJawModel::addModelSprings()
+void GrasperJawModel::addJawSprings()
 {
 	StiffSpringFF* stiffspringforcefield = static_cast<StiffSpringFF*>(m_forcefield.get());
 	SReal stiffness = d_stiffness.getValue();

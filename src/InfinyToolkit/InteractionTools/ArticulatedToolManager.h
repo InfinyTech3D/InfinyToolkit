@@ -58,14 +58,14 @@ public:
 
 
     // global methods    
-    void computeBoundingBox();
-    void computeVertexIdsInBroadPhase(float margin = 0.0);
+    bool computeBoundingBox();
 
-	void unactiveTool();
-	void reactiveTool();
+    // Main API to activate or 
+	bool deActivateTool();
+	bool activateTool();
 
-    void performAction();
-    void stopAction();
+    int performAction();
+    bool stopAction();
 
     void closeTool();
     void openTool();
@@ -110,15 +110,6 @@ protected:
     BaseJawModel::SPtr m_jawModel1 = nullptr;
     BaseJawModel::SPtr m_jawModel2 = nullptr;
 
-    // Pointer to the stiffspring FF created.
-    StiffSpringFF::SPtr m_forcefieldUP = nullptr;
-    StiffSpringFF::SPtr m_forcefieldDOWN = nullptr;
-
-    SReal m_oldCollisionStiffness;
-    float m_stiffness;
-
-    /// List of contacts filter during collision 
-    //sofa::type::vector<GrabContactInfo*> m_contactInfos;
 };
 
 

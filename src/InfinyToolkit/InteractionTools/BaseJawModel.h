@@ -59,7 +59,7 @@ public:
 	int getModelId() { return m_modelId; }
 
 	/// Main API public method to activate/deactivate tool. Will call @sa activateImpl or @sa deActivateImpl
-	void activeTool(bool value);
+	void activateTool(bool value);
 	bool isToolActivated() { return m_isActivated; }
 
 	/// Main API public method to launch the action of the Jaw

@@ -64,7 +64,6 @@ ArticulatedToolManager::ArticulatedToolManager()
     , l_targetModel(initLink("targetModel", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
     , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
-    , m_stiffness(500)
     , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
 {
     this->f_listening.setValue(true);
@@ -154,38 +153,106 @@ int ArticulatedToolManager::testModels()
 }
 
 
-void ArticulatedToolManager::computeBoundingBox()
+bool ArticulatedToolManager::computeBoundingBox()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return false;
+
+    m_jawModel1->computeBoundingBox();
+    m_jawModel2->computeBoundingBox();
+
+    return true;
+}
+
+
+bool ArticulatedToolManager::deActivateTool()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return false;
+
+    m_jawModel1->activateTool(false);
+    m_jawModel2->activateTool(false);
+    
+    return true;
+}
+
+
+bool ArticulatedToolManager::activateTool()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return false;
+
+    m_jawModel1->activateTool(true);
+    m_jawModel2->activateTool(true);
+
+    return true;
+}
+
+
+int ArticulatedToolManager::performAction()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return -1;
+
+    filterCollision();
+
+    int nbrContacts = (int)(m_jawModel1->getContacts().size() + m_jawModel2->getContacts().size());
+
+    m_jawModel1->performAction();
+    m_jawModel2->performAction();
+
+    return nbrContacts;
+}
+
+
+bool ArticulatedToolManager::stopAction()
+{
+    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
+        return false;
+
+    m_jawModel1->stopAction();
+    m_jawModel2->stopAction();
+
+    return true;
+}
+
+
+
+void ArticulatedToolManager::openTool()
+{
+    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
+    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
+    const SReal& factor = d_handleFactor.getValue();
+
+    jawAngle1 += factor;
+    jawAngle2 -= factor;
+
+    if (jawAngle1 < 0.1)
+        stopAction();
+}
+
+
+void ArticulatedToolManager::closeTool()
+{
+    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
+    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
+    const SReal& factor = d_handleFactor.getValue();
+
+    jawAngle1 -= factor;
+    jawAngle2 += factor;
+
+    if (jawAngle1 < 0.1)
+        performAction();
+}
+
+
+void ArticulatedToolManager::clearContacts()
 {
     if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
-    m_jawModel1->computeBoundingBox();
-    m_jawModel2->computeBoundingBox();
-}
-
-
-void ArticulatedToolManager::computeVertexIdsInBroadPhase(float margin)
-{
-    // First compute boundingbox
-    computeBoundingBox();    
-
-    //if (m_model == nullptr)
-    //    return;
-
-    //// Add to m_idBroadPhase all model vertices inside the BB
-    //m_idBroadPhase.clear();
-    //for (Index i = 0; i < m_model->getSize(); i++)
-    //{
-    //    SReal x = m_model->getPX(i);
-    //    SReal y = m_model->getPY(i);
-    //    SReal z = m_model->getPZ(i);
-    //    //if (x > m_min[0] - margin && x < m_max[0] + margin
-    //    //    && y > m_min[1] - margin && y < m_max[1] + margin
-    //    //    && z > m_min[2] - margin && z < m_max[2] + margin)
-    //    //{
-    //    //    m_idBroadPhase.push_back(i);
-    //    //}
-    //}
+    m_jawModel1->clearContacts();
+    m_jawModel2->clearContacts();
 }
 
 
@@ -266,84 +333,6 @@ void ArticulatedToolManager::filterCollision()
 }
 
 
-void ArticulatedToolManager::clearContacts()
-{
-    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
-        return;
-
-    m_jawModel1->clearContacts();
-    m_jawModel2->clearContacts();
-}
-
-
-void ArticulatedToolManager::unactiveTool()
-{
-    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
-        return;
-
-    m_jawModel1->activeTool(false);
-    m_jawModel2->activeTool(false);
-}
-
-
-void ArticulatedToolManager::reactiveTool()
-{
-    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
-        return;
-
-    m_jawModel1->activeTool(true);
-    m_jawModel2->activeTool(true);
-}
-
-void ArticulatedToolManager::performAction()
-{
-    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
-        return;
-
-    m_jawModel1->performAction();
-    m_jawModel2->performAction();
-}
-
-
-void ArticulatedToolManager::stopAction()
-{
-    if (this->d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
-        return;
-
-    m_jawModel1->stopAction();
-    m_jawModel2->stopAction();
-}
-
-
-
-void ArticulatedToolManager::openTool()
-{
-    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
-    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
-    const SReal& factor = d_handleFactor.getValue();
-
-    jawAngle1 += factor;
-    jawAngle2 -= factor;
-
-    if (jawAngle1 < 0.1)
-        stopAction();
-}
-
-
-void ArticulatedToolManager::closeTool()
-{
-    helper::WriteAccessor<Data<SReal>> jawAngle1 = d_angleJaw1;
-    helper::WriteAccessor<Data<SReal>> jawAngle2 = d_angleJaw2;
-    const SReal& factor = d_handleFactor.getValue();
-
-    jawAngle1 -= factor;
-    jawAngle2 += factor;
-
-    if (jawAngle1 < 0.1)
-        performAction();
-}
-
-
 void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
     if (KeypressedEvent::checkEventType(event))
@@ -358,7 +347,6 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         {
             stopAction();
 
-            //computeVertexIdsInBroadPhase();
             //closeTool();
 
             filterCollision();
