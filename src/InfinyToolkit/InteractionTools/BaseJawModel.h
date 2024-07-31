@@ -58,17 +58,23 @@ public:
 	
 	int getModelId() { return m_modelId; }
 
-	bool computeBoundingBox();
-	
+	/// Main API public method to activate/deactivate tool. Will call @sa activateImpl or @sa deActivateImpl
 	void activeTool(bool value);
 	bool isToolActivated() { return m_isActivated; }
 
-	virtual void performAction();
-	virtual void stopAction();
+	/// Main API public method to launch the action of the Jaw
+	virtual void performAction() {}
+	/// Main API public method to stop the action of the Jaw
+	virtual void stopAction() {}
 
+
+	/// Method to compute tool axis. Will fill @sa m_matP, @sa m_origin, @sa m_xAxis, @sa m_yAxis, @sa m_zAxis
 	void computeAxis();
-	void setAxis(sofa::type::Mat3x3 _matP) { matP = _matP; }
-	void setOrigin(Vec3 _zero) { zero = _zero; }
+	void setAxis(sofa::type::Mat3x3 _matP) { m_matP = _matP; }
+	void setOrigin(Vec3 _origin) { m_origin = _origin; }
+
+	/// Method to compute BoundingBox, will fill @sa m_min, @sa m_max
+	bool computeBoundingBox();
 
 	virtual void addContact(GrabContactInfo* grabInfo);
 	virtual void clearContacts();
@@ -78,31 +84,37 @@ public:
 	virtual void drawImpl(const core::visual::VisualParams* vparams);
 
 protected:
+	/// Internal API to init the component, will be called by @sa init()
+	virtual bool initImpl() { return true; }
+
+	/// Internal API to activate/deActivate the jaw
 	virtual void activateImpl() {}
 	virtual void deActivateImpl() {}
 
 public:
+	/// Link to the Jaw controller (mechanicalOjbect linked to the restShapeSpringFF)
 	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawController;
+	/// Link to the Jaw current Dofs (mechanicalOjbect under the restShapeSpringFF)
 	SingleLink<BaseJawModel, sofa::core::behavior::BaseMechanicalState, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawDofs;
+	/// Link to the Jaw collision model (CollisionModel in the same node as the mechanicalObject(linked to the restShapeSpringFF)
 	SingleLink<BaseJawModel, sofa::core::CollisionModel, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_jawCollision;
 
 
 protected:
-	// Buffer of points ids 
-	sofa::type::vector <int> m_idgrabed;
-	sofa::type::vector <int> m_idBroadPhase;
-
 	int m_modelId = sofa::InvalidID;
 	bool m_isActivated = false;
 
-	// Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier
-	sofa::type::Mat3x3 matP;
-	Vec3 zero;
-	Vec3 xAxis;
-	Vec3 yAxis;
-	Vec3 zAxis;
+	// Projection matrix to move into plier coordinate. X = along the plier, Y -> up, Z -> ortho to plier. 
+	// Will be computed by computeAxis
+	sofa::type::Mat3x3 m_matP;
+	Vec3 m_origin;
+	Vec3 m_xAxis;
+	Vec3 m_yAxis;
+	Vec3 m_zAxis;
 
+	// Min Max value of the boundingBox
 	sofa::type::Vec3 m_min, m_max;
+
 
 	sofa::core::behavior::BaseMechanicalState* m_jaw = nullptr;
 	sofa::core::behavior::BaseMechanicalState* m_target = nullptr;

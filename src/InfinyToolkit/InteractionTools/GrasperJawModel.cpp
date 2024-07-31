@@ -40,6 +40,13 @@ GrasperJawModel::GrasperJawModel()
 }
 
 
+bool GrasperJawModel::initImpl()
+{
+	//return (createStiffSpringFF() == 1);
+	return true;
+}
+
+
 void GrasperJawModel::activateImpl()
 {
 	sofa::core::CollisionModel* toolCol = l_jawCollision.get();
@@ -63,43 +70,24 @@ void GrasperJawModel::deActivateImpl()
 	}
 
 	toolCol->setActive(false);
-
-
-	//if (!m_forcefieldUP || !m_forcefieldDOWN)
-	//	return false;
-	//m_idgrabed.clear();
-	//m_idBroadPhase.clear();
-
-	//// Clear springs created during the grab
-	//StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-	//stiffspringforcefield_UP->clear();
-
-	//StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
-	//stiffspringforcefield_DOWN->clear();
 }
 
 
 void GrasperJawModel::performAction()
 {
 	std::cout << "GrasperJawModel::performAction()" << std::endl;
-	deActivateImpl();
-	createStiffSpringFF();
-	addModelSprings();
-
+	deActivateImpl();	
+	addModelSprings();	
 }
 
 void GrasperJawModel::stopAction()
 {
 	std::cout << "GrasperJawModel::stopAction()" << std::endl;
+	// clean springs
+	m_forcefield->clear();
+	activateImpl();
 }
 
-
-const sofa::type::vector< int >& GrasperJawModel::grabModel()
-{
-	
-	//msg_info() << "Narrow Phase detection: " << m_idgrabed.size();
-	return m_idgrabed;
-}
 
 void GrasperJawModel::releaseGrab()
 {
@@ -136,9 +124,8 @@ void GrasperJawModel::releaseGrab()
 
 int GrasperJawModel::createStiffSpringFF()
 {
+	std::cout << this->getName() << " + createStiffSpringFF()" << std::endl;
 	SReal stiffness = d_stiffness.getValue();
-	std::cout << "stiffness: " << stiffness << std::endl;
-	//m_stiffness = _stiffness;
 
 	m_forcefield = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
 	StiffSpringFF* stiffspringforcefield = static_cast<StiffSpringFF*>(m_forcefield.get());
@@ -147,7 +134,7 @@ int GrasperJawModel::createStiffSpringFF()
 	stiffspringforcefield->setStiffness(stiffness);
 	stiffspringforcefield->setDamping(0);
 	stiffspringforcefield->init();
-	return -1001;
+	return 1;
 }
 
 

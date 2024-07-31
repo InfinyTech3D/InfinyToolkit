@@ -50,6 +50,11 @@ public:
 	void cutFromTriangles();
 
 private:
+	// Buffer of points ids 
+	sofa::type::vector <int> m_idgrabed;
+	sofa::type::vector <int> m_idBroadPhase;
+
+
 	// Keep it for debug drawing
 	sofa::type::vector<TetrahedronID> tetraIdsOnCut;
 	sofa::type::vector<TriangleID> triIdsOnCut;

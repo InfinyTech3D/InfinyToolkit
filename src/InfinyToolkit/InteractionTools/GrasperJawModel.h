@@ -51,11 +51,12 @@ public:
 	Data<SReal> d_stiffness;
 
 protected:
+	bool initImpl() override;
 	int createStiffSpringFF();
 	void addModelSprings();
 
 	// API from grabing
-	const sofa::type::vector< int >& grabModel();
+	//const sofa::type::vector< int >& grabModel();
 
 	void releaseGrab();
 

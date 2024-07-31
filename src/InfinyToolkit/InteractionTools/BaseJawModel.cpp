@@ -45,20 +45,18 @@ void BaseJawModel::init()
         msg_error() << "Error mechanical state not given";
         sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
     }
+
+    if (initImpl())
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+    else
+        sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
 }
 
 
 bool BaseJawModel::computeBoundingBox()
 {
     if (m_jaw == nullptr)
-    {
-        msg_info() << "error mechanical state not found";
-        const std::string& pathMord1 = l_jawDofs.getPath();
-        this->getContext()->get(m_jaw, pathMord1);
-
-        if (m_jaw == nullptr)
-            return false;
-    }
+        return false;
 
     for (int i = 0; i < 3; ++i)
     {
@@ -119,36 +117,26 @@ void BaseJawModel::activeTool(bool value)
 }
 
 
-void BaseJawModel::performAction()
-{
-
-}
-
-void BaseJawModel::stopAction()
-{
-
-}
-
 void BaseJawModel::computeAxis()
 {
-    zero = Vec3(0, 0, 0);
-    xAxis = Vec3(1, 0, 0);
-    yAxis = Vec3(0, 1, 0);
-    zAxis = Vec3(0, 0, 1);
+    m_origin = Vec3(0, 0, 0);
+    m_xAxis = Vec3(1, 0, 0);
+    m_yAxis = Vec3(0, 1, 0);
+    m_zAxis = Vec3(0, 0, 1);
 
     if (m_jaw == nullptr)
         return;
 
-    zero = Vec3(m_jaw->getPX(0), m_jaw->getPY(0), m_jaw->getPZ(0));
-    xAxis = Vec3(m_jaw->getPX(1), m_jaw->getPY(1), m_jaw->getPZ(1));
-    yAxis = Vec3(m_jaw->getPX(20), m_jaw->getPY(20), m_jaw->getPZ(20));
-    zAxis = Vec3(m_jaw->getPX(100), m_jaw->getPY(100), m_jaw->getPZ(100));
+    m_origin = Vec3(m_jaw->getPX(0), m_jaw->getPY(0), m_jaw->getPZ(0));
+    m_xAxis = Vec3(m_jaw->getPX(1), m_jaw->getPY(1), m_jaw->getPZ(1));
+    m_yAxis = Vec3(m_jaw->getPX(20), m_jaw->getPY(20), m_jaw->getPZ(20));
+    m_zAxis = Vec3(m_jaw->getPX(100), m_jaw->getPY(100), m_jaw->getPZ(100));
 
-    Vec3 xDir = (xAxis - zero); xDir.normalize();
-    Vec3 yDir = (yAxis - zero); yDir.normalize();
-    Vec3 zDir = (zAxis - zero); zDir.normalize();
+    Vec3 xDir = (m_xAxis - m_origin); xDir.normalize();
+    Vec3 yDir = (m_yAxis - m_origin); yDir.normalize();
+    Vec3 zDir = (m_zAxis - m_origin); zDir.normalize();
 
-    matP = sofa::type::Mat3x3(xDir, yDir, zDir);
+    m_matP = sofa::type::Mat3x3(xDir, yDir, zDir);
 }
 
 

@@ -48,7 +48,7 @@ int ScissorJawModel::cutFromTetra(float minX, float maxX, bool cut)
     for (int i = 0; i < m_idBroadPhase.size(); i++)
     {
         Vec3 vert = Vec3(m_jaw->getPX(m_idBroadPhase[i]), m_jaw->getPY(m_idBroadPhase[i]), m_jaw->getPZ(m_idBroadPhase[i]));
-        vert = matP * (vert - zero);
+        vert = m_matP * (vert - m_origin);
 
         if (vert[2] < -20.0 || vert[2] > 20.0) // outside on the borders
             continue;
@@ -229,7 +229,7 @@ void ScissorJawModel::cutFromTriangles()
     for (int i = 0; i < m_idgrabed.size(); i++)
     {
         Vec3 vert = Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
-        vert = matP * (vert - zero);
+        vert = m_matP * (vert - m_origin);
 
         if (vert[0] < 0.0 || vert[0] > 8.0)
             continue;
@@ -309,6 +309,29 @@ void ScissorJawModel::cutFromTriangles()
     //tetraIdsOnCut.resize(30);
     triModifs[1]->removeItems(triIdsOnCut);
 }
+
+
+// DrawImpl()
+//{
+//TetrahedronSetTopologyContainer* tetraCon;
+    //m_model->getContext()->get(tetraCon);
+    //if (tetraCon == nullptr) {
+    //    msg_info() << "Error: NO tetraCon";
+    //    return;
+    //}
+
+    //for (unsigned int i = 0; i < tetraIdsOnCut.size(); i++)
+    //{
+    //    const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
+    //    
+    //    Vec3 p0 = Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
+    //    Vec3 p1 = Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
+    //    Vec3 p2 = Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
+    //    Vec3 p3 = Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
+
+    //    vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
+    //}
+//}
 
 
 } // namespace sofa::infinytoolkit

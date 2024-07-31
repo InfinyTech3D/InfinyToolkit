@@ -483,44 +483,6 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
         l_jawModel1->drawImpl(vparams);
         l_jawModel2->drawImpl(vparams);
     }
-
-    //sofa::type::RGBAColor color(0.2f, 1.0f, 1.0f, 1.0f);
-    //vparams->drawTool()->drawLine(m_min, m_max, sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
-    //
-    //vparams->drawTool()->drawLine(zero, xAxis, sofa::type::RGBAColor(1.0, 0.0, 0.0, 0.0));
-    //vparams->drawTool()->drawLine(zero, yAxis, sofa::type::RGBAColor(0.0, 1.0, 0.0, 0.0));
-    //vparams->drawTool()->drawLine(zero, zAxis, sofa::type::RGBAColor(0.0, 0.0, 1.0, 0.0));
-
-    //if (m_model == nullptr)
-    //    return;
-
-    //for (unsigned int i = 0; i < m_idgrabed.size(); i++)
-    //{
-    //    SReal x = m_model->getPX(m_idgrabed[i]);
-    //    SReal y = m_model->getPY(m_idgrabed[i]);
-    //    SReal z = m_model->getPZ(m_idgrabed[i]);
-    //    vparams->drawTool()->drawPoint(Vec3(x, y, z), sofa::type::RGBAColor(255.0, 0.0, 0.0, 1.0));
-    //}
-
-
-    //TetrahedronSetTopologyContainer* tetraCon;
-    //m_model->getContext()->get(tetraCon);
-    //if (tetraCon == nullptr) {
-    //    msg_info() << "Error: NO tetraCon";
-    //    return;
-    //}
-
-    //for (unsigned int i = 0; i < tetraIdsOnCut.size(); i++)
-    //{
-    //    const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIdsOnCut[i]);
-    //    
-    //    Vec3 p0 = Vec3(m_model->getPX(tetra[0]), m_model->getPY(tetra[0]), m_model->getPZ(tetra[0]));
-    //    Vec3 p1 = Vec3(m_model->getPX(tetra[1]), m_model->getPY(tetra[1]), m_model->getPZ(tetra[1]));
-    //    Vec3 p2 = Vec3(m_model->getPX(tetra[2]), m_model->getPY(tetra[2]), m_model->getPZ(tetra[2]));
-    //    Vec3 p3 = Vec3(m_model->getPX(tetra[3]), m_model->getPY(tetra[3]), m_model->getPZ(tetra[3]));
-
-    //    vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
-    //}
 }
 
 } // namespace sofa::infinytoolkit
