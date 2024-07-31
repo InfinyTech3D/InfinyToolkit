@@ -39,25 +39,18 @@ SOFA_DECL_CLASS(PliersPositionsMapper)
 using namespace defaulttype;
 using namespace sofa::core::topology;
 
-int PliersPositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
+const int PliersPositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
         .add< PliersPositionsMapper >();
 
 
 PliersPositionsMapper::PliersPositionsMapper()
-    : m_topo(nullptr)
-	, d_positions(initData(&d_positions, "position", "Rest position coordinates of the degrees of freedom."))
+    : d_positions(initData(&d_positions, "position", "Rest position coordinates of the degrees of freedom."))
 	, m_tetraTube(initData(&m_tetraTube, "tetraTube", "list of tetra id representing the tube"))
 	, m_tetraFat(initData(&m_tetraFat, "tetraFat", "list of tetra id representing the fat"))
 	, m_tubePositions(initData(&m_tubePositions, "tubePositions", "list of tetra id representing the fat"))
 	, m_grasPositions(initData(&m_grasPositions, "grasPositions", "list of tetra id representing the fat"))
 {
     this->f_listening.setValue(true);
-
-}
-
-
-PliersPositionsMapper::~PliersPositionsMapper()
-{
 
 }
 
@@ -77,10 +70,6 @@ void PliersPositionsMapper::init()
 	setDirtyValue();
 }
 
-void PliersPositionsMapper::reinit()
-{
-
-}
 
 void PliersPositionsMapper::doUpdate()
 {
@@ -251,7 +240,6 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
 		vparams->drawTool()->drawPoint(grasPositions[i], sofa::type::RGBAColor(1.0, 0.0, 1.0, 1.0));
 	}
 
-   // msg_info() << "drawLine: " << m_min[0] << " " << m_min[1] << " " << m_min[2];
 }
 
 
