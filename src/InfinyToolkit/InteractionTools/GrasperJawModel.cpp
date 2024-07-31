@@ -42,8 +42,7 @@ GrasperJawModel::GrasperJawModel()
 
 bool GrasperJawModel::initImpl()
 {
-	//return (createStiffSpringFF() == 1);
-	return true;
+	return (createStiffSpringFF() == 1);
 }
 
 
@@ -130,10 +129,11 @@ int GrasperJawModel::createStiffSpringFF()
 	m_forcefield = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
 	StiffSpringFF* stiffspringforcefield = static_cast<StiffSpringFF*>(m_forcefield.get());
 	stiffspringforcefield->setName(this->getName() + "_StiffSpringFF");
-	this->getContext()->addObject(stiffspringforcefield);
+	m_target->getContext()->addObject(stiffspringforcefield);
+	//this->getContext()->addObject(stiffspringforcefield);
 	stiffspringforcefield->setStiffness(stiffness);
 	stiffspringforcefield->setDamping(0);
-	stiffspringforcefield->init();
+	//stiffspringforcefield->init();
 	return 1;
 }
 
