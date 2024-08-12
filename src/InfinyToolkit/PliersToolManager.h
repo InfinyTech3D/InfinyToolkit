@@ -25,14 +25,13 @@
 
 #include <InfinyToolkit/config.h>
 
-#include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
+#include <sofa/component/solidmechanics/spring/SpringForceField.h>
 #include <sofa/component/constraint/projective/AttachConstraint.h>
 
 namespace sofa::infinytoolkit
 {
 
-typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
-typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
+typedef sofa::component::solidmechanics::spring::SpringForceField< sofa::defaulttype::Vec3Types > SpringFF;
 typedef sofa::component::constraint::projective::AttachConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
 
 /** 
@@ -126,8 +125,8 @@ protected:
     sofa::core::behavior::BaseMechanicalState* m_model;
 
     // Pointer to the stiffspring FF created.
-    StiffSpringFF::SPtr m_forcefieldUP;
-    StiffSpringFF::SPtr m_forcefieldDOWN;
+    SpringFF::SPtr m_forcefieldUP;
+    SpringFF::SPtr m_forcefieldDOWN;
 
     SReal m_oldCollisionStiffness;
     float m_stiffness;

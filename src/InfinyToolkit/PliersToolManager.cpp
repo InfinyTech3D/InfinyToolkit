@@ -249,10 +249,10 @@ bool PliersToolManager::unactiveTool()
 	m_idBroadPhase.clear();
 
 	// Clear springs created during the grab
-	StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
+	SpringFF* stiffspringforcefield_UP = static_cast<SpringFF*>(m_forcefieldUP.get());
 	stiffspringforcefield_UP->clear();
 
-	StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
+	SpringFF* stiffspringforcefield_DOWN = static_cast<SpringFF*>(m_forcefieldDOWN.get());
 	stiffspringforcefield_DOWN->clear();
 
 	return true;
@@ -291,8 +291,8 @@ const sofa::type::vector< int >& PliersToolManager::grabModel()
         createFF(500);
 
 
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
+    SpringFF* stiffspringforcefield_UP = static_cast<SpringFF*>(m_forcefieldUP.get());
+    SpringFF* stiffspringforcefield_DOWN = static_cast<SpringFF*>(m_forcefieldDOWN.get());
 
     // For each point in the broadphase search the neariest point of the plier
     // If none under minDist = 2; point is rejected
@@ -420,10 +420,10 @@ void PliersToolManager::releaseGrab()
     m_idBroadPhase.clear();
 
     // Clear springs created during the grab
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
+    SpringFF* stiffspringforcefield_UP = static_cast<SpringFF*>(m_forcefieldUP.get());
     stiffspringforcefield_UP->clear();
 
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
+    SpringFF* stiffspringforcefield_DOWN = static_cast<SpringFF*>(m_forcefieldDOWN.get());
     stiffspringforcefield_DOWN->clear();
 
     // Restaure the default collision behavior
@@ -448,20 +448,16 @@ int PliersToolManager::createFF(float _stiffness)
 {
     m_stiffness = _stiffness;
 
-    m_forcefieldUP = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord1));
-    StiffSpringFF* stiffspringforcefield_UP = static_cast<StiffSpringFF*>(m_forcefieldUP.get());
+    m_forcefieldUP = sofa::core::objectmodel::New<SpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord1));
+    SpringFF* stiffspringforcefield_UP = static_cast<SpringFF*>(m_forcefieldUP.get());
     stiffspringforcefield_UP->setName("pince_Forcefield_UP");
     this->getContext()->addObject(stiffspringforcefield_UP);
-    stiffspringforcefield_UP->setStiffness(m_stiffness);
-    stiffspringforcefield_UP->setDamping(0);
     stiffspringforcefield_UP->init();
 
-    m_forcefieldDOWN = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord2));
-    StiffSpringFF* stiffspringforcefield_DOWN = static_cast<StiffSpringFF*>(m_forcefieldDOWN.get());
+    m_forcefieldDOWN = sofa::core::objectmodel::New<SpringFF>(dynamic_cast<mechaState*>(m_model), dynamic_cast<mechaState*>(m_mord2));
+    SpringFF* stiffspringforcefield_DOWN = static_cast<SpringFF*>(m_forcefieldDOWN.get());
     stiffspringforcefield_DOWN->setName("pince_Forcefield_DOWN");
     this->getContext()->addObject(stiffspringforcefield_DOWN);
-    stiffspringforcefield_DOWN->setStiffness(m_stiffness);
-    stiffspringforcefield_DOWN->setDamping(0);
     stiffspringforcefield_DOWN->init();
 
     if (m_forcefieldUP == NULL)
