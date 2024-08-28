@@ -91,21 +91,18 @@ int GrasperJawModel::createStiffSpringFF()
 	std::cout << this->getName() << " + createStiffSpringFF()" << std::endl;
 	SReal stiffness = d_stiffness.getValue();
 
-	m_forcefield = sofa::core::objectmodel::New<StiffSpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
-	StiffSpringFF* stiffspringforcefield = static_cast<StiffSpringFF*>(m_forcefield.get());
-	stiffspringforcefield->setName(this->getName() + "_StiffSpringFF");
+	m_forcefield = sofa::core::objectmodel::New<SpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
+	SpringFF* stiffspringforcefield = static_cast<SpringFF*>(m_forcefield.get());
+	stiffspringforcefield->setName(this->getName() + "_SpringFF");
 	m_target->getContext()->addObject(stiffspringforcefield);
-	//this->getContext()->addObject(stiffspringforcefield);
-	stiffspringforcefield->setStiffness(stiffness);
-	stiffspringforcefield->setDamping(0);
-	//stiffspringforcefield->init();
+
 	return 1;
 }
 
 
 void GrasperJawModel::addJawSprings()
 {
-	StiffSpringFF* stiffspringforcefield = static_cast<StiffSpringFF*>(m_forcefield.get());
+	SpringFF* stiffspringforcefield = static_cast<SpringFF*>(m_forcefield.get());
 	SReal stiffness = d_stiffness.getValue();
 
 	for (GrabContactInfo* cInfo : m_contactInfos)

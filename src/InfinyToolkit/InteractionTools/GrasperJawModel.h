@@ -26,13 +26,13 @@
 #include <InfinyToolkit/config.h>
 #include <InfinyToolkit/InteractionTools/BaseJawModel.h>
 
-#include <sofa/component/solidmechanics/spring/StiffSpringForceField.h>
+#include <sofa/component/solidmechanics/spring/SpringForceField.h>
 #include <sofa/component/constraint/projective/AttachProjectiveConstraint.h>
 
 namespace sofa::infinytoolkit
 {
 
-typedef sofa::component::solidmechanics::spring::StiffSpringForceField< sofa::defaulttype::Vec3Types > StiffSpringFF;
+typedef sofa::component::solidmechanics::spring::SpringForceField< sofa::defaulttype::Vec3Types > SpringFF;
 typedef sofa::component::constraint::projective::AttachProjectiveConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
 
 
@@ -56,7 +56,7 @@ protected:
 	void addJawSprings();
 
 private:
-	StiffSpringFF::SPtr m_forcefield = nullptr;
+	SpringFF::SPtr m_forcefield = nullptr;
 };
 					
 } // namespace sofa::infinytoolkit
