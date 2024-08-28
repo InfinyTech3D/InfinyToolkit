@@ -74,7 +74,7 @@ void GrasperJawModel::deActivateImpl()
 
 void GrasperJawModel::performAction()
 {
-	deActivateImpl();	
+	//deActivateImpl();	
 	addJawSprings();
 }
 
@@ -82,7 +82,7 @@ void GrasperJawModel::stopAction()
 {
 	// clean springs
 	m_forcefield->clear();
-	activateImpl();
+	//activateImpl();
 }
 
 
