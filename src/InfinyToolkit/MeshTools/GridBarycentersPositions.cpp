@@ -46,8 +46,7 @@ GridBaryCentersPositions::GridBaryCentersPositions()
     : d_inputPositions(initData(&d_inputPositions, "positions", "Indices of the points on the first model"))
     , d_tetrahedra(initData(&d_tetrahedra, "tetrahedra", "Indices of input tetrahedra"))
     , d_n(initData(&d_n, type::Vec3i(2, 2, 2), "n", "grid resolution"))
-    , d_useInterpolation(initData(&d_useInterpolation, false, "useInterpolation", "Radius to search corresponding fixed point"))    
-    , d_drawInterpolation(initData(&d_drawInterpolation, false, "drawInterpolation", "Radius to search corresponding fixed point"))
+    , d_drawGrid(initData(&d_drawGrid, false, "drawGrid", "Debug draw of the grid and barycenters points"))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "Radius to search corresponding fixed point"))
     , d_outputGrid(initData(&d_outputGrid, "outputGrid", "Radius to search corresponding fixed point"))
 {
@@ -82,17 +81,6 @@ void GridBaryCentersPositions::doUpdate()
 {
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
     computeSurfaceMeshGrid();
-
-   /* if (d_useInterpolation.getValue())
-        computeTriangulationMapping();
-    else
-        computeNearestPointMapping();
-
-    m_mapColors.resize(fullPositions.size());
-    for (unsigned int i = 0; i < m_mapColors.size(); ++i)
-    {
-        m_mapColors[i] = sofa::type::RGBAColor(SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, SReal(rand()) / RAND_MAX, 1._sreal);
-    }*/
 }
 
 
@@ -100,7 +88,7 @@ void GridBaryCentersPositions::computeSurfaceMeshGrid()
 {
     sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
     m_fullMin = { std::numeric_limits<float>::max() , std::numeric_limits<float>::max() , std::numeric_limits<float>::max() };
-    m_fullMax = { std::numeric_limits<float>::min() , std::numeric_limits<float>::min() , std::numeric_limits<float>::min() };
+    m_fullMax = { -std::numeric_limits<float>::max() , -std::numeric_limits<float>::max() , -std::numeric_limits<float>::max() };
 
     for (auto pos : fullPositions)
     {
@@ -113,14 +101,14 @@ void GridBaryCentersPositions::computeSurfaceMeshGrid()
                 m_fullMax[i] = pos[i];
         }
     }
-    std::cout << "m_fullMin: " << m_fullMin << " | m_fullMax: " << m_fullMax << std::endl;
-    sofa::type::Vec3i grid = d_n.getValue();
+    
+    const sofa::type::Vec3i& grid = d_n.getValue();
 
     sofa::type::Vec3 steps;
     for (int i = 0; i < 3; i++)
     {
         steps[i] = (m_fullMax[i] - m_fullMin[i]) / grid[i];
-        std::cout << "length: " << (m_fullMax[i] - m_fullMin[i]) << " | " << steps[i] << std::endl;
+        //std::cout << "length: " << (m_fullMax[i] - m_fullMin[i]) << " | " << steps[i] << std::endl;
     }
     
 
@@ -128,7 +116,6 @@ void GridBaryCentersPositions::computeSurfaceMeshGrid()
     {
         SReal xmin = m_fullMin[0] + steps[0] * i;
         SReal xmax = m_fullMin[0] + steps[0] * (i + 1);
-        std::cout << "xmin: " << xmin << " | xmax: " << xmax << std::endl;
         for (int j = 0; j < grid[1]; j++)
         {
             SReal ymin = m_fullMin[1] + steps[1] * j;
@@ -143,7 +130,39 @@ void GridBaryCentersPositions::computeSurfaceMeshGrid()
         }
     }
 
-    std::cout << "m_minBBoxes: " << m_minBBoxes.size() << std::endl;
+    m_indicesPerCell.resize(m_minBBoxes.size());
+
+    for (int i = 0; i < fullPositions.size(); i++)
+    {
+        sofa::type::Vec< 3, int > gridPos;
+        for (int j = 0; j < 3; ++j)
+        {
+            SReal localCoord = fullPositions[i][j] - m_fullMin[j];
+            gridPos[j] = int(localCoord / steps[j]);
+        }
+        
+        int vecPosition = gridPos[2] + gridPos[1] * grid[2] + gridPos[0] * grid[2] * grid[1];
+        std::cout << "pos: " << fullPositions[i] << " | " << gridPos << " | " << vecPosition << std::endl;
+        m_indicesPerCell[vecPosition].push_back(i);
+    }
+
+    sofa::helper::WriteAccessor< Data< type::vector< Vec3 > > > outputPositions = d_outputPositions;
+    for (int i = 0; i < m_indicesPerCell.size(); i++)
+    {
+        sofa::type::vector<int>& indices = m_indicesPerCell[i];
+
+        if (indices.empty())
+            continue;
+
+        Vec3 bary = Vec3(0.0, 0.0, 0.0);
+        for (int id : indices)
+        {
+            bary += fullPositions[id];
+        }
+        bary /= indices.size();
+
+        outputPositions.push_back(bary);
+    }
 }
 
 
@@ -155,8 +174,8 @@ void GridBaryCentersPositions::computeOutputPositions()
 
 void GridBaryCentersPositions::draw(const core::visual::VisualParams* vparams)
 {
-    /*if (m_mapPositionIds.empty() || d_drawInterpolation.getValue() == false)
-        return;*/
+    if (d_drawGrid.getValue() == false)
+        return;
 
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
     vparams->drawTool()->setLightingEnabled(false);
@@ -169,35 +188,13 @@ void GridBaryCentersPositions::draw(const core::visual::VisualParams* vparams)
     {
         vparams->drawTool()->drawBoundingBox(m_minBBoxes[i], m_maxBBoxes[i], 0.1);
     }
-    //sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > fullPositions = d_inputPositions;
-    //sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > mapPositions = d_mapPositions;
 
     //std::vector<sofa::type::Vec3> vertices;
     //std::vector<sofa::type::RGBAColor> colors;
-
-    //if (m_mapPositionIds.size() == fullPositions.size())
-    //{
-    //    for (unsigned int i = 0; i < fullPositions.size(); ++i)
-    //    {
-    //        vertices.emplace_back(fullPositions[i]);
-    //        vertices.emplace_back(mapPositions[m_mapPositionIds[i]]);
-    //        colors.emplace_back(m_mapColors[i]);
-    //    }
-    //}
-    //else
-    //{
-    //    for (unsigned int i = 0; i < fullPositions.size(); ++i)
-    //    {
-    //        for (unsigned int j = 0; j < 3; ++j)
-    //        {
-    //            vertices.emplace_back(fullPositions[i]);
-    //            vertices.emplace_back(mapPositions[m_mapPositionIds[i * 3 + j]]);
-    //            colors.emplace_back(m_mapColors[i]);
-    //        }
-    //    }
-    //}
-
-    //vparams->drawTool()->drawLines(vertices, 1, colors);
+    type::RGBAColor green = type::RGBAColor::green();
+    sofa::helper::ReadAccessor< Data< type::vector< Vec3 > > > outPositions = d_outputPositions;
+    vparams->drawTool()->drawSpheres(outPositions, 0.1, green);
+   
 }
 
 

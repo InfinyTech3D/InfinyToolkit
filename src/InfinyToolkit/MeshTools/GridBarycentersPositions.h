@@ -66,21 +66,19 @@ public:
     /// Inputs Data
     Data< type::vector< Vec3 > > d_inputPositions; ///< Full mesh position
     Data< SeqTetrahedra > d_tetrahedra; ///< Tetrahedra of mesh subset
-    //Data< type::vector< Vec3 > > d_mapPositions; ///< Surface mesh position
-    //Data< type::vector<sofa::type::Vec2> > d_mapTexCoords; ///< Surface mesh texcoords
-    //Data<SReal> d_radius; ///< Radius to search corresponding fixed point if no indices are given
     Data< sofa::type::Vec< 3, int > > d_n;
     /// Outputs Data
     Data< type::vector< Vec3 > > d_outputPositions; ///< Full mesh texcoords
     Data< SeqHexahedra > d_outputGrid; ///< Hexahedra of mesh subset
 
     /// Parameters Data
-    Data<bool> d_useInterpolation; ///< Bool option to choose between nearest point or interpolation method
-    Data<bool> d_drawInterpolation; ///< Boop optio to draw the mapping computed between inputPosition and mapPosition    
+    Data<bool> d_drawGrid; ///< Boop optio to draw the mapping computed between inputPosition and mapPosition    
     
 private:
     sofa::type::vector<Vec3> m_minBBoxes;
     sofa::type::vector<Vec3> m_maxBBoxes;
+    sofa::type::vector<sofa::type::vector<int> > m_indicesPerCell;
+
     //sofa::type::fixed_array<QuadID, 6>
     Vec3 m_fullMin, m_fullMax;
 };
