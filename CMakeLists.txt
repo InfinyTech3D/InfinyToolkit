@@ -46,6 +46,7 @@ set(HEADER_FILES
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.h
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
 )
@@ -71,6 +72,7 @@ set(SOURCE_FILES
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
 )
