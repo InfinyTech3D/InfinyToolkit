@@ -93,7 +93,8 @@ set(SOURCE_FILES
 # Add component for carving using refinement mesh
 find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
-    message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
+    message("## ${PROJECT_NAME}: MeshRefinement plugin found")
+
     list(APPEND HEADER_FILES 
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/RefineCarvingPerformer.h
         ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/CuttingPerformer.h
@@ -107,6 +108,34 @@ if (MeshRefinement_FOUND)
     add_definitions(-DHAS_MESHREFINEMENT_PLUGIN)
 endif()
 
+
+find_package(Sofa.GUI.Qt QUIET)
+if (Sofa.GUI.Qt_FOUND)
+    message("## ${PROJECT_NAME}: Sofa.GUI.Qt plugin found")
+
+    list(APPEND HEADER_FILES
+        ${INFINYTOOLKIT_SRC_DIR}/MouseCarvingOperation/CarvingOperation.h   
+    )
+    list(APPEND SOURCE_FILES
+        ${INFINYTOOLKIT_SRC_DIR}/MouseCarvingOperation/CarvingOperation.cpp
+        ${INFINYTOOLKIT_SRC_DIR}/MouseCarvingOperation/QCarvingOperation.cpp
+    )
+    
+    set(MOC_HEADER_FILES
+        ${INFINYTOOLKIT_SRC_DIR}/MouseCarvingOperation/QCarvingOperation.h
+    )
+
+    if (Qt5Core_FOUND)
+        qt5_wrap_cpp(MOC_FILES ${MOC_HEADER_FILES})
+        qt5_wrap_ui(FORM_FILES ${UI_FILES})
+    elseif (Qt6Core_FOUND)
+        qt6_wrap_cpp(MOC_FILES ${MOC_HEADER_FILES})
+        qt6_wrap_ui(FORM_FILES ${UI_FILES})
+    endif()
+    
+    add_definitions(-DUSE_GUI)
+endif()
+
 set(README_FILES README.md)
 
 # Create the plugin library.
@@ -116,7 +145,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME} PUBLIC
     Sofa.Component.StateContainer 
     Sofa.Component.MechanicalLoad 
     Sofa.Component.Topology.Container.Dynamic
@@ -131,6 +160,10 @@ target_link_libraries(${PROJECT_NAME}
 
 if(MeshRefinement_FOUND)
     target_link_libraries(${PROJECT_NAME} MeshRefinement)
+endif()
+
+if(Sofa.GUI.Qt_FOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Sofa.GUI.Qt)
 endif()
 
 
