@@ -33,12 +33,12 @@
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
     <CollisionResponse response="PenalityContactForceField" />
-    <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1" />
+    <MinProximityIntersection name="Proximity" alarmDistance="2.0" contactDistance="0.1" />
 
     <EulerImplicitSolver name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
-    <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
+    <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.5" refineCriteria="0.5" carvingDistance="0.5" 
     carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0" process="1"/>
 
     <Node name="carvingElement">
