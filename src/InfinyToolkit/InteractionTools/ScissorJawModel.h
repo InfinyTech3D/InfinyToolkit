@@ -33,6 +33,8 @@ namespace sofa::infinytoolkit
 class SOFA_INFINYTOOLKIT_API ScissorJawModel : public BaseJawModel
 {
 public:
+	SOFA_CLASS(ScissorJawModel, sofa::infinytoolkit::BaseJawModel);
+
 	using TriangleID = sofa::core::topology::Topology::TriangleID;
 	using TetrahedronID = sofa::core::topology::Topology::TetrahedronID;
 	ScissorJawModel() : BaseJawModel()

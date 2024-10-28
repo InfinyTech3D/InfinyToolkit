@@ -39,6 +39,8 @@ typedef sofa::component::constraint::projective::AttachProjectiveConstraint< sof
 class SOFA_INFINYTOOLKIT_API GrasperJawModel : public BaseJawModel
 {
 public:
+	SOFA_CLASS(GrasperJawModel, sofa::infinytoolkit::BaseJawModel);
+	
 	GrasperJawModel();
 
 	virtual ~GrasperJawModel() = default;
