@@ -51,6 +51,7 @@ set(HEADER_FILES
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.h
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.h
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/TriangleCuttingController.h
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/TriangleCuttingController.inl
     
@@ -83,6 +84,7 @@ set(SOURCE_FILES
     
     ## Mesh tools sections
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/NearestTexcoordsMap.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.cpp
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/TriangleCuttingController.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
