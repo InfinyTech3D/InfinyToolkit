@@ -1,0 +1,106 @@
+<Node name="Group"> 
+    <Node name="Jaws_up_controller_right"> 
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+        <MeshTopology name="Jaws_up_right_mesh" src="@loader" />
+        <MechanicalObject name="dofs" src="@loader" />
+        
+    </Node>
+    
+    <Node name="Jaws_down_controller_right">
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+        <MeshTopology name="Jaws_down_right_mesh" src="@loader" />
+        <MechanicalObject name="dofs" src="@loader" />
+    </Node>
+    
+   
+    
+    <Node name="Jaws_up_controller_left">
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+        <MeshTopology name="Jaws_up_left_mesh" src="@loader" />
+        <MechanicalObject name="dofs" src="@loader" />
+    </Node>
+    
+    <Node name="Jaws_down_controller_left">
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+        <MeshTopology name="Jaws_down_left_mesh" src="@loader" />
+        <MechanicalObject name="dofs" src="@loader" />
+    </Node> 
+        
+        
+    <Node name="Jaws_up_right" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+        
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+		<MechanicalObject name="instrumentState" src="@loader" />
+        <MeshTopology name="InstrumentCollisionModel" src="@loader"/>
+		<UniformMass name="mass" totalMass="1" />
+		
+		<RestShapeSpringsForceField stiffness='1e8' angularStiffness='1e8' external_rest_shape='@../Jaws_up_controller_right/dofs'  />
+        <LinearSolverConstraintCorrection/>
+        
+        
+        <SphereCollisionModel name="sphereColUpRight" radius="0.01" simulated="1" moving="1" group="3" />
+        
+        <GrasperJawModel name="grasperJawUpRight" jawController="@../Jaws_up_controller_right/dofs" jawDofs="@instrumentState" jawCollision="@sphereColUpRight" stiffness="1000"/> 
+    </Node>
+    
+    
+    <Node name="Jaws_down_right" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+        
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+		<MechanicalObject name="instrumentState" src="@loader" />
+        
+		<UniformMass name="mass" totalMass="1" />
+		
+		<RestShapeSpringsForceField stiffness='1e8' angularStiffness='1e8' external_rest_shape='@../Jaws_down_controller_right/dofs'  />
+        <LinearSolverConstraintCorrection/>
+        
+        <SphereCollisionModel name="sphereColDownRight" radius="0.01" simulated="1" moving="1" group="3" />
+        
+        <GrasperJawModel name="grasperJawDownRight" jawController="@../Jaws_down_controller_right/dofs" jawDofs="@instrumentState" jawCollision="@sphereColDownRight" stiffness="1000"/> 
+    </Node>
+    
+     
+    
+    
+    
+    <Node name="Jaws_up_left" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+        
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+		<MechanicalObject name="instrumentState" src="@loader" />
+        <MeshTopology name="InstrumentCollisionModel" src="@loader"/>
+		<UniformMass name="mass" totalMass="1" />
+		
+		<RestShapeSpringsForceField stiffness='1e8' angularStiffness='1e8' external_rest_shape='@../Jaws_up_controller_left/dofs'  />
+        <LinearSolverConstraintCorrection/>
+        
+        <SphereCollisionModel name="sphereColUpLeft" radius="0.01" simulated="1" moving="1" group="3"/>
+        <GrasperJawModel name="grasperJawUpLeft" jawController="@../Jaws_up_controller_left/dofs" jawDofs="@instrumentState" jawCollision="@sphereColUpLeft" stiffness="1000"/> 
+    </Node>
+    
+    
+    <Node name="Jaws_down_left" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+        
+        <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
+		<MechanicalObject name="instrumentState" src="@loader" />
+        <MeshTopology name="InstrumentCollisionModel" src="@loader"/>
+		<UniformMass name="mass" totalMass="1" />
+		
+		<RestShapeSpringsForceField stiffness='1e8' angularStiffness='1e8' external_rest_shape='@../Jaws_down_controller_left/dofs'  />
+        <LinearSolverConstraintCorrection/>
+        
+        <SphereCollisionModel name="sphereColDownLeft" radius="0.01" simulated="1" moving="1" group="3"/>
+        <GrasperJawModel name="grasperJawDownLeft" jawController="@../Jaws_down_controller_left/dofs" jawDofs="@instrumentState" jawCollision="@sphereColDownLeft" stiffness="1000"/> 
+    </Node>
+    
+    <ArticulatedToolManager name="Grasper_right_manager" jawModel1="@Jaws_up_right/grasperJawUpRight" jawModel2="@Jaws_down_right/grasperJawDownRight" targetModel="@Organs/dofs" printLog="0" drawContacts="0"/>
+    <ArticulatedToolManager name="Grasper_left_manager" jawModel1="@Jaws_up_left/grasperJawUpLeft" jawModel2="@Jaws_down_left/grasperJawDownLeft" targetModel="@Organs/dofs" printLog="0" drawContacts="0"/>
+    
+</Node>
