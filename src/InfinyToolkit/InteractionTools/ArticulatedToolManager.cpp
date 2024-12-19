@@ -340,8 +340,8 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         switch (ev->getKey())
         {
 
-        case 'T':
-        case 't':
+        case 'J':
+        case 'j':
         {
             stopAction();
 
@@ -437,13 +437,6 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
         {
             l_jawModel1.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
             l_jawModel2.get()->l_jawController.get()->applyTranslation(0, -0.1, 0);
-            break;
-        }
-        case 'J':
-        case 'j':
-        {
-            l_jawModel1.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
-            l_jawModel2.get()->l_jawController.get()->applyTranslation(0, 0.1, 0);
             break;
         }
         }
