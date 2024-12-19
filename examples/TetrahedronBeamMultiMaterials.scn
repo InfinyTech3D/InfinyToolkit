@@ -21,9 +21,15 @@
     </Node>
 
     <VisualStyle displayFlags="showForceFields showBehaviorModels" />
-    <ConstraintAttachButtonSetting/> <!-- The presence of this component sets the mouse interaction to Lagrangian-based constraints at the GUI launch -->
-    <FreeMotionAnimationLoop />
-    <GenericConstraintSolver maxIterations="200" tolerance="1.0e-8"/>
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000" mu="0.1"/>
+    
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceBroadPhase/>
+    <BVHNarrowPhase/>
+    <CollisionResponse name="response" response="FrictionContactConstraint" />
+    <!--<MinProximityIntersection name="Proximity" alarmDistance="0.5" contactDistance="0.1" />-->
+    <LocalMinDistance name="localmindistance" alarmDistance="0.5" contactDistance="0.1" angleCone='0.0' coneFactor='0.8' />
 
     <Node name="grid">
         <RegularGridTopology name="hexaGrid" min="0 0 0" max="1 1 2.7" n="4 4 11" p0="0 0 0"/>
@@ -37,46 +43,89 @@
     </Node>
 
     <Node name="hyperelasticity">
-        <EulerImplicitSolver name="odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
-
-        <ConstantSparsityPatternSystem template="CompressedRowSparseMatrix"/>
-        <SparseLDLSolver template="CompressedRowSparseMatrix"/>
-
+        <EulerImplicitSolver name="cg_odesolver" printLog="false"  rayleighStiffness="0.0" rayleighMass="0.0" />
+        <CGLinearSolver iterations="50" name="linear solver" tolerance="1.0e-6" threshold="1.0e-6" />
+        
         <TetrahedronSetTopologyContainer name="Container" src="@../grid/tetras/Container"/>
         <TetrahedronSetTopologyModifier name="Modifier" />
         <TetrahedronSetGeometryAlgorithms template="Vec3" name="GeomAlgo" />
 
         <MechanicalObject name="mechObj"/>
-        <MeshMatrixMass totalMass="10"/>
-        <LinearSolverConstraintCorrection/>
+        <DiagonalMass  name="mass" totalMass="50" topology="@Container" />
 
         <Node name="material1">
             <BoxROI name="materialBox" box="-0.1 -0.1 -0.1  1.1 1.1 1.36" position="@../Container.position" tetrahedra="@../Container.tetrahedra"/>
 
-            <TetrahedronSetTopologyContainer name="Container" position="@../Container.position"
+            <TetrahedronSetTopologyContainer name="ContainerTetra" position="@../Container.position"
                                              tetrahedra="@materialBox.tetrahedraInROI"/>
             <TetrahedronSetTopologyModifier name="Modifier" />
             <TetrahedronSetGeometryAlgorithms template="Vec3" name="GeomAlgo" />
 
-            <TetrahedronHyperelasticityFEMForceField name="FEM" topology="@Container"
-                ParameterSet="3448.2759 31034.483" materialName="StableNeoHookean"/>
-
+            <TetrahedralCorotationalFEMForceField name="CFEM" topology="@ContainerTetra" youngModulus="10000" poissonRatio="0.3" method="large" />
+                
+            <!--TetrahedralCorotationalFEMForceField-->
         </Node>
 
         <Node name="material2">
             <BoxROI name="materialBox" box="-0.1 -0.1 1.34  1.1 1.1 2.8" position="@../Container.position" tetrahedra="@../Container.tetrahedra"/>
 
-            <TetrahedronSetTopologyContainer name="Container" position="@../Container.position"
+            <TetrahedronSetTopologyContainer name="ContainerTetra" position="@../Container.position"
                                              tetrahedra="@materialBox.tetrahedraInROI"/>
             <TetrahedronSetTopologyModifier name="Modifier" />
             <TetrahedronSetGeometryAlgorithms template="Vec3" name="GeomAlgo" />
 
-            <TetrahedronHyperelasticityFEMForceField name="FEM"
-                ParameterSet="5000 7000 10" materialName="MooneyRivlin"/>
+            <TetrahedralCorotationalFEMForceField name="CFEM" topology="@ContainerTetra" youngModulus="1000" poissonRatio="0.3" method="large" />
+                
+            
         </Node>
 
         <BoxROI name="box" drawBoxes="true" box="0 0 0  1 1 0.05"/>
         <FixedProjectiveConstraint indices="@box.indices"/>
+        
+        <Node name="material2_surface">
+            <TriangleSetTopologyContainer  name="ContainerTri" />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" />
+            
+            <Tetra2TriangleTopologicalMapping input="@../Container" output="@ContainerTri" />
+
+            <TriangleCollisionModel selfCollision="0" group="1" />
+        </Node>
+        
+        <UncoupledConstraintCorrection defaultCompliance="0.01"/>
+    </Node>
+    
+    
+    
+    <Node name="hyperelasticity2">
+        <EulerImplicitSolver name="cg_odesolver" printLog="false"  rayleighStiffness="0.0" rayleighMass="0.0" />
+        <CGLinearSolver iterations="50" name="linear solver" tolerance="1.0e-6" threshold="1.0e-6" />
+        
+        <TetrahedronSetTopologyContainer name="Container" src="@../grid/tetras/Container"/>
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms template="Vec3" name="GeomAlgo" />
+
+        <MechanicalObject name="mechObj" translation="2 0 0"/>
+        <DiagonalMass  name="mass" totalMass="50" topology="@Container" />
+        <TetrahedralCorotationalFEMForceField name="CFEM" topology="@Container" poissonRatio="0.3" method="large" 
+            youngModulus="500 10000 10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 10000	10000 10000 10000 10000 10000 10000 10000 10000 10000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000
+"
+        />
+        
+        <BoxROI name="box" drawBoxes="true" box="2 0 0  3 1 0.05   2 0 2.6  3 1 2.75"/>
+        <FixedProjectiveConstraint indices="@box.indices"/>
+        
+        <Node name="material2_surface">
+            <TriangleSetTopologyContainer  name="ContainerTri" />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" />
+            
+            <Tetra2TriangleTopologicalMapping input="@../Container" output="@ContainerTri" />
+
+            <TriangleCollisionModel selfCollision="0" group="1" />
+        </Node>
+        
+        <UncoupledConstraintCorrection defaultCompliance="0.01"/>
     </Node>
 
 </Node>
