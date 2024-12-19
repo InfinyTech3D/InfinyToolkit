@@ -141,7 +141,7 @@ void GridBaryCentersPositions::computeSurfaceMeshGrid()
             gridPos[j] = int(localCoord / steps[j]);
         }
         
-        int vecPosition = gridPos[2] + gridPos[1] * grid[2] + gridPos[0] * grid[2] * grid[1];
+        int vecPosition = gridPos[2] + gridPos[1] * (grid[2]-1) + gridPos[0] * (grid[2]-1) * (grid[1]-1);
         std::cout << "pos: " << fullPositions[i] << " | " << gridPos << " | " << vecPosition << std::endl;
         m_indicesPerCell[vecPosition].push_back(i);
     }
