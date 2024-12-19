@@ -22,7 +22,7 @@
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
 
-#include <InfinyToolkit/config.h>
+#include <InfinyToolkit/initInfinyToolkit.h>
 
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::ObjectFactory;
@@ -41,7 +41,7 @@ extern "C" {
     SOFA_INFINYTOOLKIT_API const char* getModuleComponentList();
 }
 
-void initExternalModule()
+void initInfinyToolkit()
 {
     static bool first = true;
     if (first)
@@ -50,14 +50,19 @@ void initExternalModule()
     }
 }
 
+void initExternalModule()
+{
+    initInfinyToolkit();
+}
+
 const char* getModuleName()
 {
-    return "InfinyToolkit";
+    return sofa_tostring(SOFA_TARGET);
 }
 
 const char* getModuleVersion()
 {
-    return "1.0";
+    return sofa_tostring(PLUGIN_VERSION);
 }
 
 const char* getModuleLicense()
