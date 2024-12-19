@@ -36,8 +36,6 @@ namespace sofa::infinytoolkit
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
 
-SOFA_DECL_CLASS(NearestTexcoordsMap)
-
 const int NearestTexcoordsMapClass = core::RegisterObject("NearestTexcoordsMap test.")
     .add< NearestTexcoordsMap >()
 ;

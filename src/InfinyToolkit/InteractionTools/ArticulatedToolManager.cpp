@@ -39,8 +39,6 @@
 namespace sofa::infinytoolkit
 {
 
-SOFA_DECL_CLASS(ArticulatedToolManager)
-
 using namespace defaulttype;
 using namespace sofa::core::topology;
 using namespace sofa::component::topology::container::dynamic;
