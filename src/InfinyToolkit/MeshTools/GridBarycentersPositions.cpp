@@ -36,8 +36,6 @@ namespace sofa::infinytoolkit
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
 
-SOFA_DECL_CLASS(GridBaryCentersPositions)
-
 const int GridBaryCentersPositionsClass = core::RegisterObject("GridBaryCentersPositions test.")
     .add< GridBaryCentersPositions >()
 ;

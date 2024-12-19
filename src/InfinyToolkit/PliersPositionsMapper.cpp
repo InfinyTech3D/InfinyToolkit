@@ -34,8 +34,6 @@
 namespace sofa::infinytoolkit
 {
 
-SOFA_DECL_CLASS(PliersPositionsMapper)
-
 using namespace defaulttype;
 using namespace sofa::core::topology;
 

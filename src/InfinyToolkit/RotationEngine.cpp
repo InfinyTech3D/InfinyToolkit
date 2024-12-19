@@ -32,10 +32,6 @@
 namespace sofa::infinytoolkit
 {
 
-    
-
-SOFA_DECL_CLASS(SurfaceCarvingManager)
-
 int RotationEngineClass = core::RegisterObject("RotationEngine test.")
 .add< RotationEngine >()
 ;
