@@ -24,58 +24,45 @@
 #pragma once
 
 #include <InfinyToolkit/config.h>
-#include <sofa/core/DataEngine.h>
-
-
-namespace sofa::component::topology::container::dynamic
-{
-    class TetrahedronSetTopologyContainer;
-}
+#include <InfinyToolkit/InteractionTools/BaseJawModel.h>
+#include <sofa/core/topology/BaseMeshTopology.h>
 
 namespace sofa::infinytoolkit
 {
 
-using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
-/** 
-*
-*/
-class SOFA_INFINYTOOLKIT_API PliersPositionsMapper: public sofa::core::DataEngine
+class SOFA_INFINYTOOLKIT_API ScissorJawModel : public BaseJawModel
 {
 public:
-    SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
-    
+	SOFA_CLASS(ScissorJawModel, sofa::infinytoolkit::BaseJawModel);
 
-protected:
-    PliersPositionsMapper();
+	using TriangleID = sofa::core::topology::Topology::TriangleID;
+	using TetrahedronID = sofa::core::topology::Topology::TetrahedronID;
+	ScissorJawModel() : BaseJawModel()
+	{}
 
-    ~PliersPositionsMapper() override = default; 
+	virtual ~ScissorJawModel() = default;
+	
+	const sofa::type::vector<TriangleID>& getTriangleIdsOnCut() const { return triIdsOnCut; }
+	const sofa::type::vector<TetrahedronID>& getTetraIdsOnCut() const { return tetraIdsOnCut; }
 
-public:
-    void init() override;
-	void doUpdate() override;
+
+	// API for cutting
+	int cutFromTetra(float minX, float maxX, bool cut = true);
+	int pathCutFromTetra(float minX, float maxX);
+	void cutFromTriangles();
+
+private:
+	// Buffer of points ids 
+	sofa::type::vector <int> m_idgrabed;
+	sofa::type::vector <int> m_idBroadPhase;
 
 
-    void draw(const core::visual::VisualParams* vparams) override;
+	// Keep it for debug drawing
+	sofa::type::vector<TetrahedronID> tetraIdsOnCut;
+	sofa::type::vector<TriangleID> triIdsOnCut;
 
-	void handleTopologyChange();
-
-    /// Pre-construction check method called by ObjectFactory.
-    /// Check that DataTypes matches the MeshTopology.
-    template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
-    {
-        return BaseObject::canCreate(obj, context, arg);
-    }
-
-protected:
-	TetrahedronSetTopologyContainer* m_topo = nullptr;
-
-	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
-	Data<sofa::type::vector<int> > m_tetraTube;
-	Data<sofa::type::vector<int> > m_tetraFat;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_tubePositions;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_grasPositions;
+	sofa::core::behavior::BaseMechanicalState* m_model = nullptr;
 };
 
-
 } // namespace sofa::infinytoolkit
+	

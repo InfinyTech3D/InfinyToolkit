@@ -21,60 +21,45 @@
  * Authors: see Authors.txt                                                  *
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
+#pragma once
 
 #include <InfinyToolkit/config.h>
+#include <InfinyToolkit/InteractionTools/BaseJawModel.h>
 
-#include <sofa/core/ObjectFactory.h>
-using sofa::core::ObjectFactory;
+#include <sofa/component/solidmechanics/spring/SpringForceField.h>
+#include <sofa/component/constraint/projective/AttachProjectiveConstraint.h>
 
 namespace sofa::infinytoolkit
 {
 
-//Here are just several convenient functions to help user to know what contains the plugin
+typedef sofa::component::solidmechanics::spring::SpringForceField< sofa::defaulttype::Vec3Types > SpringFF;
+typedef sofa::component::constraint::projective::AttachProjectiveConstraint< sofa::defaulttype::Vec3Types > AttachConstraint;
 
-extern "C" {
-    SOFA_INFINYTOOLKIT_API void initExternalModule();
-    SOFA_INFINYTOOLKIT_API const char* getModuleName();
-    SOFA_INFINYTOOLKIT_API const char* getModuleVersion();
-    SOFA_INFINYTOOLKIT_API const char* getModuleLicense();
-    SOFA_INFINYTOOLKIT_API const char* getModuleDescription();
-    SOFA_INFINYTOOLKIT_API const char* getModuleComponentList();
-}
 
-void initExternalModule()
+class SOFA_INFINYTOOLKIT_API GrasperJawModel : public BaseJawModel
 {
-    static bool first = true;
-    if (first)
-    {
-        first = false;
-    }
-}
+public:
+	SOFA_CLASS(GrasperJawModel, sofa::infinytoolkit::BaseJawModel);
+	
+	GrasperJawModel();
 
-const char* getModuleName()
-{
-    return "InfinyToolkit";
-}
+	virtual ~GrasperJawModel() = default;
+	
+	void performAction() override;
+	void stopAction() override;
+	void activateImpl() override;
+	void deActivateImpl() override;
 
-const char* getModuleVersion()
-{
-    return "1.0";
-}
+	Data<SReal> d_stiffness;
 
-const char* getModuleLicense()
-{
-    return "GPL";
-}
+protected:
+	bool initImpl() override;
+	int createStiffSpringFF();
+	void addJawSprings();
 
-
-const char* getModuleDescription()
-{
-    return "plugin to add several component tools.";
-}
-
-const char* getModuleComponentList()
-{
-    static std::string classes = ObjectFactory::getInstance()->listClassesFromTarget(sofa_tostring(SOFA_TARGET));
-    return classes.c_str();
-}
-
+private:
+	SpringFF::SPtr m_forcefield = nullptr;
+};
+					
 } // namespace sofa::infinytoolkit
+	

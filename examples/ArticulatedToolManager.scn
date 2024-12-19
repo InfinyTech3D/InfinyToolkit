@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.05" gravity="0 -9 0" >
+    <VisualStyle displayFlags="hideVisualModels hideBehaviorModels showCollisionModels hideMappings hideForceFields" />
+
+    <Node name="RequiredPlugins">
+        <RequiredPlugin name="Geomagic"/> <!-- Needed to use components [GeomagicDriver] -->
+        <RequiredPlugin name="Sofa.Component.AnimationLoop"/> <!-- Needed to use components [FreeMotionAnimationLoop] -->
+        <RequiredPlugin name="Sofa.Component.Collision.Detection.Algorithm"/> <!-- Needed to use components [BVHNarrowPhase, BruteForceBroadPhase, DefaultPipeline] -->
+        <RequiredPlugin name="Sofa.Component.Collision.Detection.Intersection"/> <!-- Needed to use components [LocalMinDistance] -->
+        <RequiredPlugin name="Sofa.Component.Collision.Geometry"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
+        <RequiredPlugin name="Sofa.Component.Collision.Response.Contact"/> <!-- Needed to use components [DefaultContactManager] -->
+        <RequiredPlugin name="Sofa.Component.Constraint.Lagrangian.Correction"/> <!-- Needed to use components [LinearSolverConstraintCorrection] -->
+        <RequiredPlugin name="Sofa.Component.Constraint.Lagrangian.Solver"/> <!-- Needed to use components [LCPConstraintSolver] -->
+        <RequiredPlugin name="Sofa.Component.Constraint.Projective"/> <!-- Needed to use components [FixedConstraint] -->
+        <RequiredPlugin name="Sofa.Component.Engine.Select"/> <!-- Needed to use components [BoxROI] -->
+        <RequiredPlugin name="Sofa.Component.Haptics"/> <!-- Needed to use components [LCPForceFeedback] -->
+        <RequiredPlugin name="Sofa.Component.IO.Mesh"/> <!-- Needed to use components [MeshOBJLoader] -->
+        <RequiredPlugin name="Sofa.Component.LinearSolver.Direct"/> <!-- Needed to use components [SparseLDLSolver] -->
+        <RequiredPlugin name="Sofa.Component.Mapping.Linear"/> <!-- Needed to use components [IdentityMapping] -->
+        <RequiredPlugin name="Sofa.Component.Mapping.NonLinear"/> <!-- Needed to use components [RigidMapping] -->
+        <RequiredPlugin name="Sofa.Component.Mass"/> <!-- Needed to use components [DiagonalMass, UniformMass] -->
+        <RequiredPlugin name="Sofa.Component.ODESolver.Backward"/> <!-- Needed to use components [EulerImplicitSolver] -->
+        <RequiredPlugin name="Sofa.Component.SolidMechanics.FEM.Elastic"/> <!-- Needed to use components [TetrahedralCorotationalFEMForceField] -->
+        <RequiredPlugin name="Sofa.Component.SolidMechanics.Spring"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
+        <RequiredPlugin name="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->
+        <RequiredPlugin name="Sofa.Component.Topology.Container.Constant"/> <!-- Needed to use components [MeshTopology] -->
+        <RequiredPlugin name="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TetrahedronSetGeometryAlgorithms, TetrahedronSetTopologyContainer, TetrahedronSetTopologyModifier, TriangleSetGeometryAlgorithms, TriangleSetTopologyContainer, TriangleSetTopologyModifier] -->
+        <RequiredPlugin name="Sofa.Component.Topology.Container.Grid"/> <!-- Needed to use components [RegularGridTopology] -->
+        <RequiredPlugin name="Sofa.Component.Topology.Mapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
+        <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
+        <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
+        <RequiredPlugin name="InfinyToolkit" />        
+    </Node>
+    
+    <DefaultVisualManagerLoop />    
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
+    
+    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceBroadPhase/>
+    <BVHNarrowPhase/>
+    <DefaultContactManager name="response" response="FrictionContactConstraint" />
+    <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1" />
+    
+    <GeomagicDriver name="GeomagicDevice" deviceName="Default Device" scale="1" drawDeviceFrame="1" 
+        positionBase="0 0 0" orientationBase="0 0.707 0 -0.707" drawDevice="0"/>
+	
+    <ArticulatedToolManager name="toolManager" jawModel1="@Instrument/JawUp_collision/jawUp" jawModel2="@Instrument/JawDown_collision/jawDown" />
+
+    <Node name="ToolController">
+        <MechanicalObject template="Rigid3" name="GrasperDOFs" position="@GeomagicDevice.positionDevice"/>
+    </Node>
+	
+	
+    
+     
+    
+	
+    <Node name="Instrument" >
+        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+        
+		<MechanicalObject name="instrumentState" template="Rigid3" tags="GeomagicDevice" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1    0 0 0  0 0 0 1"/>
+		<UniformMass name="mass" totalMass="0.1" />
+		
+		<RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000' angularStiffness='100000000000000 100000000000000 100000000000000' 
+        external_rest_shape='@../ToolController/DOFs' points='0' external_points='0' />
+        <LCPForceFeedback activate="true" forceCoef="0.001"/>
+        <LinearSolverConstraintCorrection/>
+        
+        <Node name="CollisionModel" >
+            <MeshOBJLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
+            <TriangleCollisionModel name="triangleCol" tags="toolCollision_shaft"/>
+            <LineCollisionModel name="instrumentLine" tags="toolCollision_shaft"/>
+            <PointCollisionModel name="pointCol" tags="toolCollision_shaft"/>
+
+            <RigidMapping input="@.." output="@instrumentCollisionState" index="0"/>
+        </Node>
+        
+        <Node name="Shaft_visu" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
+        </Node>
+        
+        <Node name="JawUp_collision" >
+            <MeshOBJLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            
+            <GrasperJawModel name="jawUp" jawModel="@instrumentCollisionState"/>
+            
+            <TriangleCollisionModel name="triangleCol" tags="toolCollision_jaws"/>
+            <LineCollisionModel name="instrumentLine" tags="toolCollision_jaws"/>
+            <PointCollisionModel name="pointCol" tags="toolCollision_jaws"/>
+            <RigidMapping input="@.." output="@instrumentCollisionState" index="1"/>
+        </Node>
+        
+        <Node name="JawUp_visu" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping input="@.." output="@InstrumentVisualModel" index="1"/>
+        </Node>
+
+        <Node name="JawDown_collision" >
+            <MeshOBJLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            
+            <GrasperJawModel name="jawDown" jawModel="@instrumentCollisionState"/>
+            
+            <TriangleCollisionModel name="triangleCol" tags="toolCollision_jaws"/>
+            <LineCollisionModel name="instrumentLine" tags="toolCollision_jaws"/>
+            <PointCollisionModel name="pointCol" tags="toolCollision_jaws"/>
+            <RigidMapping input="@.." output="@instrumentCollisionState" index="2"/>
+        </Node>
+        
+        <Node name="JawDown_visu" >
+            <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping input="@.." output="@InstrumentVisualModel" index="2"/>
+        </Node>
+    </Node>
+	
+</Node>

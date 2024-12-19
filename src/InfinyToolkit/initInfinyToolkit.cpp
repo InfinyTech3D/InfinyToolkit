@@ -21,61 +21,65 @@
  * Authors: see Authors.txt                                                  *
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
-#pragma once
 
-#include <InfinyToolkit/config.h>
-#include <sofa/core/DataEngine.h>
+#include <InfinyToolkit/initInfinyToolkit.h>
 
-
-namespace sofa::component::topology::container::dynamic
-{
-    class TetrahedronSetTopologyContainer;
-}
+#include <sofa/core/ObjectFactory.h>
+using sofa::core::ObjectFactory;
 
 namespace sofa::infinytoolkit
 {
 
-using sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
-/** 
-*
-*/
-class SOFA_INFINYTOOLKIT_API PliersPositionsMapper: public sofa::core::DataEngine
+//Here are just several convenient functions to help user to know what contains the plugin
+
+extern "C" {
+    SOFA_INFINYTOOLKIT_API void initExternalModule();
+    SOFA_INFINYTOOLKIT_API const char* getModuleName();
+    SOFA_INFINYTOOLKIT_API const char* getModuleVersion();
+    SOFA_INFINYTOOLKIT_API const char* getModuleLicense();
+    SOFA_INFINYTOOLKIT_API const char* getModuleDescription();
+    SOFA_INFINYTOOLKIT_API const char* getModuleComponentList();
+}
+
+void initInfinyToolkit()
 {
-public:
-    SOFA_CLASS(PliersPositionsMapper, sofa::core::DataEngine);
-    
-
-protected:
-    PliersPositionsMapper();
-
-    ~PliersPositionsMapper() override = default; 
-
-public:
-    void init() override;
-	void doUpdate() override;
-
-
-    void draw(const core::visual::VisualParams* vparams) override;
-
-	void handleTopologyChange();
-
-    /// Pre-construction check method called by ObjectFactory.
-    /// Check that DataTypes matches the MeshTopology.
-    template<class T>
-    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+    static bool first = true;
+    if (first)
     {
-        return BaseObject::canCreate(obj, context, arg);
+        first = false;
     }
+}
 
-protected:
-	TetrahedronSetTopologyContainer* m_topo = nullptr;
+void initExternalModule()
+{
+    initInfinyToolkit();
+}
 
-	Data< type::vector<sofa::type::Vec<3, SReal> > > d_positions;
-	Data<sofa::type::vector<int> > m_tetraTube;
-	Data<sofa::type::vector<int> > m_tetraFat;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_tubePositions;
-	Data< type::vector<sofa::type::Vec<3, SReal> > > m_grasPositions;
-};
+const char* getModuleName()
+{
+    return sofa_tostring(SOFA_TARGET);
+}
 
+const char* getModuleVersion()
+{
+    return sofa_tostring(PLUGIN_VERSION);
+}
+
+const char* getModuleLicense()
+{
+    return "GPL";
+}
+
+
+const char* getModuleDescription()
+{
+    return "plugin to add several component tools.";
+}
+
+const char* getModuleComponentList()
+{
+    static std::string classes = ObjectFactory::getInstance()->listClassesFromTarget(sofa_tostring(SOFA_TARGET));
+    return classes.c_str();
+}
 
 } // namespace sofa::infinytoolkit
