@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #define SOFA_COMPONENT_GRIDBARYCENTERPOSITIONS_CPP
-#include <InfinyToolkit/MeshTools/GridBaryCentersPositions.h>
+#include <InfinyToolkit/MeshTools/GridBarycentersPositions.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/visual/VisualParams.h>
 
