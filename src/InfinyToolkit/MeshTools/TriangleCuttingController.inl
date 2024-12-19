@@ -413,7 +413,7 @@ void TriangleCuttingController<DataTypes>::processCut()
     sofa::type::vector< TriangleID > triangles_list;
     sofa::type::vector< EdgeID > edges_list;
     sofa::type::vector< Real > coords_list;
-    m_geometryAlgorithms->computeIntersectedPointsList2(ptA, ptB, triIds[0], triIds[1], triangles_list, edges_list, coords_list);
+    //m_geometryAlgorithms->computeIntersectedPointsList2(ptA, ptB, triIds[0], triIds[1], triangles_list, edges_list, coords_list);
 
     std::map < TriangleID, std::vector<PointToAdd*> > PTA_map;
     // create map to store point to be added
