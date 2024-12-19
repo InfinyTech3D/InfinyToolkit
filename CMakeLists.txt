@@ -26,6 +26,8 @@ set(INFINYTOOLKIT_SRC_DIR src/InfinyToolkit)
 
 set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/config.h.in
+    ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkit.h
+
     ${INFINYTOOLKIT_SRC_DIR}/CollisionDetectionDisplay.h
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.h
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.h
@@ -59,6 +61,8 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkit.cpp
+
     ${INFINYTOOLKIT_SRC_DIR}/CollisionDetectionDisplay.cpp
     ${INFINYTOOLKIT_SRC_DIR}/RotationEngine.cpp
     ${INFINYTOOLKIT_SRC_DIR}/PliersPositionsMapper.cpp
@@ -66,7 +70,6 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.cpp
     ${INFINYTOOLKIT_SRC_DIR}/Triangle2RefinedTriangleTopologicalMapping.cpp
-    ${INFINYTOOLKIT_SRC_DIR}/initInfinyToolkitPlugin.cpp
     
     ## Carving tools sections
     ${INFINYTOOLKIT_SRC_DIR}/CarvingTools/AdvancedCarvingManager.cpp
