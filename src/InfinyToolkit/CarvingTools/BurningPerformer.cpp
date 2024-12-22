@@ -44,6 +44,14 @@ bool BurningPerformer::initPerformer()
     helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
     texcoords.resize(m_topologyCon->getNbPoints());
 
+    const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+
+    if (_refineDistance < _carvingDistance)
+    {
+        msg_warning("BurningPerformer") << "d_refineDistance used for burning should be higher than the d_carvingDistance";
+    }
+
     return true;
 }
 
@@ -56,15 +64,21 @@ bool BurningPerformer::runPerformer()
     helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_carvingMgr->m_vtexcoords;
 
     const SReal& _refineDistance = m_carvingMgr->d_refineDistance.getValue();
-    const SReal invRefDistance = 1 / _refineDistance;
+    const SReal& _carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
+    const SReal invRefDistance = 1 / (_refineDistance - _carvingDistance);
 
     for (contactInfo * cInfo : m_pointContacts)
     {
-        SReal dist = (cInfo->pointB - cInfo->pointA).norm();
+        const SReal& dist = cInfo->dist;// (cInfo->pointB - cInfo->pointA).norm();
         if (dist > _refineDistance)
             continue;
 
-        float coef = float((_refineDistance - dist) * invRefDistance);
+        float coef = 1.f - float((dist - _carvingDistance) * invRefDistance);
+        if (coef < 0.f)
+            coef = 0.f;
+        else if (coef > 1.f)
+            coef = 1.f;
+
         float& val = texcoords[cInfo->elemId][0];
         if (coef > val)
         {
