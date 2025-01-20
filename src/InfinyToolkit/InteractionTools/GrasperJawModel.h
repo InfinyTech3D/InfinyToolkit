@@ -50,6 +50,11 @@ public:
 	void activateImpl() override;
 	void deActivateImpl() override;
 
+	/// Main API public method to launch the action of the Jaw
+	void performSecondaryAction() override;
+	/// Main API public method to stop the action of the Jaw
+	void stopSecondaryAction() override;
+
 	Data<SReal> d_stiffness;
 
 protected:
