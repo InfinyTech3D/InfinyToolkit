@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
+
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa::infinytoolkit
@@ -87,7 +88,28 @@ void GrasperJawModel::stopAction()
 {
 	// clean springs
 	m_forcefield->clear();
+	m_rawIds.clear();
 	//activateImpl();
+}
+
+
+void GrasperJawModel::performSecondaryAction()
+{
+	/*TetrahedronSetTopologyContainer* tetraCon;
+	m_target->getContext()->get(tetraCon);
+
+	if (tetraCon == nullptr) {
+		msg_warning("GrasperJawModel") << "Error: NO tetraCon";
+		return;
+	}*/
+
+
+}
+
+
+void GrasperJawModel::stopSecondaryAction()
+{
+
 }
 
 
@@ -114,13 +136,41 @@ void GrasperJawModel::addJawSprings()
 	{
 		Vec3 posTool = Vec3(m_jaw->getPX(cInfo->idTool), m_jaw->getPY(cInfo->idTool), m_jaw->getPZ(cInfo->idTool));
 
-		for (int i = 0; i < 3; ++i)
+		if (cInfo->idvModel != sofa::InvalidID) // pointModel
 		{
-			Vec3 posModel = Vec3(m_target->getPX(cInfo->idsModel[i]), m_target->getPY(cInfo->idsModel[i]), m_target->getPZ(cInfo->idsModel[i]));
+			Vec3 posModel = Vec3(m_target->getPX(cInfo->idvModel), m_target->getPY(cInfo->idvModel), m_target->getPZ(cInfo->idvModel));
 			SReal dist = (posModel - posTool).norm();
-			stiffspringforcefield->addSpring(cInfo->idTool, cInfo->idsModel[i], stiffness, 0.0, dist);
+			stiffspringforcefield->addSpring(cInfo->idTool, cInfo->idvModel, stiffness, 0.0, dist);
+			
+			bool found = false;
+			for (int id : m_rawIds)
+			{
+				if (id == cInfo->idvModel)
+				{
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found)
+				m_rawIds.push_back(cInfo->idvModel);
+
+			std::cout << "Add spring: " << cInfo->idTool << " model: " << cInfo->idvModel << std::endl;
 		}
+		else
+		{
+
+		}
+
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	Vec3 posModel = Vec3(m_target->getPX(cInfo->idsModel[i]), m_target->getPY(cInfo->idsModel[i]), m_target->getPZ(cInfo->idsModel[i]));
+		//	SReal dist = (posModel - posTool).norm();
+		//	stiffspringforcefield->addSpring(cInfo->idTool, cInfo->idsModel[i], stiffness, 0.0, dist);
+		//}
 	}
+
+	std::cout << "m_rawIds: " << m_rawIds << std::endl;
 }
 
 

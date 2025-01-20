@@ -29,6 +29,7 @@
 
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
+#include <sofa/simulation/AnimateEndEvent.h>
 
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
@@ -65,6 +66,8 @@ ArticulatedToolManager::ArticulatedToolManager()
     , l_targetModel(initLink("targetModel", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
     , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
+    , d_isCutter(initData(&d_isCutter, false, "isCutter", "if true, will draw slices BB, ray and intersected triangles"))
+    , d_isControlled(initData(&d_isControlled, false, "isControlled", "if true, will draw slices BB, ray and intersected triangles"))
     , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
 {
     this->f_listening.setValue(true);
@@ -218,6 +221,93 @@ bool ArticulatedToolManager::stopAction()
 }
 
 
+int ArticulatedToolManager::performSecondaryAction()
+{
+    m_performCut = true;
+}
+
+
+ void ArticulatedToolManager::performCut()
+{
+    msg_warning() << "performSecondaryAction()";
+    if (!d_isCutter.getValue())
+        return;
+
+    sofa::type::vector<int> idGraps1 = l_jawModel1.get()->getRawContactModelIds();
+    sofa::type::vector<int> idGraps2 = l_jawModel2.get()->getRawContactModelIds();
+
+    // Detect all tetra on the cut path
+    TetrahedronSetTopologyContainer* tetraCon;
+    l_targetModel->getContext()->get(tetraCon);
+    if (tetraCon == nullptr) {
+        msg_info() << "Error: NO tetraCon";
+        return;
+    }
+
+    TetrahedronSetTopologyModifier* tetraModif;
+    tetraCon->getContext()->get(tetraModif);
+
+    if (tetraModif == nullptr) {
+        msg_info() << "Error: NO tetraModif";
+        return;
+    }
+
+    // First get all tetra that are on the first side
+    sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> tetraIds;
+    for (auto id : idGraps1)
+    {
+        const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
+        for (int j = 0; j < tetraAV.size(); ++j)
+        {
+            int tetraId = tetraAV[j];
+            bool found = false;
+            for (int k = 0; k < tetraIds.size(); ++k)
+                if (tetraIds[k] == tetraId)
+                {
+                    found = true;
+                    break;
+                }
+
+            if (!found)
+                tetraIds.push_back(tetraId);
+        }
+    }
+
+    for (auto id : idGraps2)
+    {
+        const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
+        for (int j = 0; j < tetraAV.size(); ++j)
+        {
+            int tetraId = tetraAV[j];
+            bool found = false;
+            for (int k = 0; k < tetraIds.size(); ++k)
+                if (tetraIds[k] == tetraId)
+                {
+                    found = true;
+                    break;
+                }
+
+            if (!found)
+                tetraIds.push_back(tetraId);
+        }
+    }
+
+    std::cout << "tetra2Rmove: " << tetraIds << std::endl;
+
+    // remove springs first
+    stopAction();
+    tetraModif->removeTetrahedra(tetraIds);
+   
+
+    return;
+}
+
+int ArticulatedToolManager::stopSecondaryAction()
+{
+    msg_warning() << "stopSecondaryAction()";
+    return 0;
+}
+
 
 void ArticulatedToolManager::openTool()
 {
@@ -278,8 +368,8 @@ void ArticulatedToolManager::filterCollision()
         sofa::core::CollisionModel* collMod1 = it->first.first;
         sofa::core::CollisionModel* collMod2 = it->first.second;
 
-        dmsg_info() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
-        dmsg_info() << "collMod1: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
+        dmsg_warning() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
+        dmsg_warning() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
 
 
         // Get the number of contacts        
@@ -295,26 +385,44 @@ void ArticulatedToolManager::filterCollision()
         {
             // update the triangle id if a mapping is present
             GrabContactInfo* info = new GrabContactInfo();
+            const ContactVector::value_type& c = (*contacts)[j];
             bool firstJaw = false;
 
-            const ContactVector::value_type& c = (*contacts)[j];
-            if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is target model
+            if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.first.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // first model is a jaw
+            {
+                info->idTool = c.elem.first.getIndex(); // id of the tool collision model
+                if (c.elem.second.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
+                {
+                    sofa::Index idTri = c.elem.second.getIndex();
+                    info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                }
+                else
+                {
+                    info->idvModel = c.elem.second.getIndex();
+                }
+                
+                if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
+                    firstJaw = true;
+            }
+            else if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.second.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // second model is a jaw
             {
                 info->idTool = c.elem.second.getIndex();
-                sofa::Index idTri = c.elem.first.getIndex();
-                info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
+                {
+                    sofa::Index idTri = c.elem.first.getIndex();
+                    info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                }
+                else
+                {
+                    info->idvModel = c.elem.first.getIndex();
+                }
 
                 if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
                     firstJaw = true;
             }
-            else
+            else // not related to this tool
             {
-                info->idTool = c.elem.first.getIndex();
-                sofa::Index idTri = c.elem.second.getIndex();
-                info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
-
-                if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
-                    firstJaw = true;
+                continue;
             }
 
             info->normal = c.normal;
@@ -336,8 +444,18 @@ void ArticulatedToolManager::filterCollision()
 
 void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
+    if (m_performCut && sofa::simulation::AnimateEndEvent::checkEventType(event))
+    {
+        performCut();
+        m_performCut = false;
+    }
+
+
     if (KeypressedEvent::checkEventType(event))
     {
+        if (!d_isControlled.getValue())
+            return;
+
         KeypressedEvent *ev = static_cast<KeypressedEvent *>(event);
 
         switch (ev->getKey())
@@ -350,16 +468,25 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 
             //closeTool();
 
-            filterCollision();
+            //filterCollision();
 
             performAction();
+            deActivateTool();
            
             break;
         }
         case 'G':
         case 'g':
         {
-            openTool();
+            stopAction();
+            activateTool();
+
+            break;
+        }
+        case 'U':
+        case 'u':
+        {
+            performSecondaryAction();
             break;
         }
         case '0':

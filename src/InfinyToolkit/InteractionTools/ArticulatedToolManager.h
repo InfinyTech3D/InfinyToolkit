@@ -67,6 +67,9 @@ public:
     int performAction();
     bool stopAction();
 
+    int performSecondaryAction();
+    int stopSecondaryAction();
+
     void closeTool();
     void openTool();
 
@@ -80,6 +83,8 @@ protected:
     void clearContacts();
 
     void filterCollision();
+
+    void performCut();
 
 public:
     // Path to the different JawModel
@@ -99,6 +104,8 @@ public:
     Data <RigidCoord> d_inputPosition;
 
     Data <type::vector<RigidCoord> > d_outputPositions;
+    Data<bool> d_isCutter;
+    Data<bool> d_isControlled;
     Data<bool> d_drawContacts; ///< if true, draw the collision outputs
 
 protected:
@@ -110,6 +117,7 @@ protected:
     BaseJawModel::SPtr m_jawModel1 = nullptr;
     BaseJawModel::SPtr m_jawModel2 = nullptr;
 
+    bool m_performCut = false;
 };
 
 
