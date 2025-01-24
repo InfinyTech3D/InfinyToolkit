@@ -44,6 +44,9 @@ public:
     using RigidCoord = sofa::defaulttype::RigidTypes::Coord;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
 
+    using TexCoord = sofa::type::Vec<2, float>;
+    using VecTexCoord = type::vector<TexCoord>;
+
 protected:
     ArticulatedToolManager();
 
@@ -108,6 +111,9 @@ public:
     Data<bool> d_isControlled;
     Data<bool> d_drawContacts; ///< if true, draw the collision outputs
 
+    Data<bool> d_manageBurning; ///< if true, draw the collision outputs
+    core::topology::PointData< VecTexCoord > m_vtexcoords; ///< coordinates of the texture
+
 protected:
     // Buffer of points ids 
     sofa::type::vector <int> m_idgrabed;
@@ -118,6 +124,7 @@ protected:
     BaseJawModel::SPtr m_jawModel2 = nullptr;
 
     bool m_performCut = false;
+    int m_cutCount = 0;
 };
 
 

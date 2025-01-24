@@ -69,6 +69,8 @@ ArticulatedToolManager::ArticulatedToolManager()
     , d_isCutter(initData(&d_isCutter, false, "isCutter", "if true, will draw slices BB, ray and intersected triangles"))
     , d_isControlled(initData(&d_isControlled, false, "isControlled", "if true, will draw slices BB, ray and intersected triangles"))
     , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
+    , d_manageBurning(initData(&d_manageBurning, false, "manageBurning", "if true, will draw slices BB, ray and intersected triangles"))
+    , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
 {
     this->f_listening.setValue(true);
     m_idgrabed.clear();
@@ -140,6 +142,15 @@ void ArticulatedToolManager::init()
 
     l_jawModel1->setTargetModel(l_targetModel.get());
     l_jawModel2->setTargetModel(l_targetModel.get());
+
+
+    if (d_manageBurning.getValue())
+    {
+        TetrahedronSetTopologyContainer* tetraCon;
+        l_targetModel->getContext()->get(tetraCon);
+
+        m_vtexcoords.createTopologyHandler(tetraCon);
+    }
 
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 }
@@ -224,6 +235,7 @@ bool ArticulatedToolManager::stopAction()
 int ArticulatedToolManager::performSecondaryAction()
 {
     m_performCut = true;
+    return 0;
 }
 
 
@@ -233,8 +245,8 @@ int ArticulatedToolManager::performSecondaryAction()
     if (!d_isCutter.getValue())
         return;
 
-    sofa::type::vector<int> idGraps1 = l_jawModel1.get()->getRawContactModelIds();
-    sofa::type::vector<int> idGraps2 = l_jawModel2.get()->getRawContactModelIds();
+    sofa::type::vector<int> idVGrab1 = l_jawModel1.get()->getRawContactModelIds();
+    sofa::type::vector<int> idVGrab2 = l_jawModel2.get()->getRawContactModelIds();
 
     // Detect all tetra on the cut path
     TetrahedronSetTopologyContainer* tetraCon;
@@ -243,6 +255,43 @@ int ArticulatedToolManager::performSecondaryAction()
         msg_info() << "Error: NO tetraCon";
         return;
     }
+
+    std::set<int> idVGrab;
+    for (auto id : idVGrab1)
+    {
+        idVGrab.insert(id);
+    }
+
+    for (auto id : idVGrab2)
+    {
+        idVGrab.insert(id);
+    }
+
+    if (m_cutCount < 10)
+    {
+
+        helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+        if (texcoords.empty())
+        {
+            helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+            texcoords.resize(tetraCon->getNbPoints());
+        }
+
+        float coef = float(m_cutCount + 1) / 10.f;
+        for (auto id : idVGrab)
+        {
+            texcoords[id][0] = coef;
+            texcoords[id][1] = coef;
+        }
+
+        m_cutCount++;
+        return;
+    }
+
+
+    m_cutCount = 0;
+    
+    
 
     TetrahedronSetTopologyModifier* tetraModif;
     tetraCon->getContext()->get(tetraModif);
@@ -254,44 +303,34 @@ int ArticulatedToolManager::performSecondaryAction()
 
     // First get all tetra that are on the first side
     sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> tetraIds;
-    for (auto id : idGraps1)
+    std::map< sofa::core::topology::Topology::TetrahedronID, int> tetraCounter;
+    for (auto id : idVGrab)
     {
         const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
         for (int j = 0; j < tetraAV.size(); ++j)
         {
             int tetraId = tetraAV[j];
-            bool found = false;
-            for (int k = 0; k < tetraIds.size(); ++k)
-                if (tetraIds[k] == tetraId)
-                {
-                    found = true;
-                    break;
-                }
 
-            if (!found)
-                tetraIds.push_back(tetraId);
+            auto elem = tetraCounter.find(tetraId);
+            if (elem == tetraCounter.end()) // first time
+            {
+                tetraCounter[tetraId] = 1;
+            }
+            else
+            {
+                tetraCounter[tetraId] = elem->second + 1;
+            }
         }
     }
 
-    for (auto id : idGraps2)
+    for (auto elem : tetraCounter)
     {
-        const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
-        for (int j = 0; j < tetraAV.size(); ++j)
+        if (elem.second > 1)
         {
-            int tetraId = tetraAV[j];
-            bool found = false;
-            for (int k = 0; k < tetraIds.size(); ++k)
-                if (tetraIds[k] == tetraId)
-                {
-                    found = true;
-                    break;
-                }
-
-            if (!found)
-                tetraIds.push_back(tetraId);
+            tetraIds.push_back(elem.first);
         }
     }
-
+    
     std::cout << "tetra2Rmove: " << tetraIds << std::endl;
 
     // remove springs first
