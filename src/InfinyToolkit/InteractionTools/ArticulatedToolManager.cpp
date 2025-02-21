@@ -67,11 +67,13 @@ ArticulatedToolManager::ArticulatedToolManager()
     , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
     , d_isCutter(initData(&d_isCutter, false, "isCutter", "if true, will draw slices BB, ray and intersected triangles"))
+    , d_cutMaxStep(initData(&d_cutMaxStep, int(10), "cutMaxStep", "number of step before really cutting"))
+    , d_cutMode(initData(&d_cutMode, int(0), "cutMode", "mode of cut (debug)"))
     , d_isControlled(initData(&d_isControlled, false, "isControlled", "if true, will draw slices BB, ray and intersected triangles"))
     , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
     , d_manageBurning(initData(&d_manageBurning, false, "manageBurning", "if true, will draw slices BB, ray and intersected triangles"))
     , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
-{
+{    
     this->f_listening.setValue(true);
     m_idgrabed.clear();
 }
@@ -144,15 +146,24 @@ void ArticulatedToolManager::init()
     l_jawModel2->setTargetModel(l_targetModel.get());
 
 
+    m_cutCount = 0;
+
+    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+}
+
+
+void ArticulatedToolManager::bwdInit()
+{
     if (d_manageBurning.getValue())
     {
         TetrahedronSetTopologyContainer* tetraCon;
         l_targetModel->getContext()->get(tetraCon);
 
         m_vtexcoords.createTopologyHandler(tetraCon);
+    
+        helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+        texcoords.resize(tetraCon->getNbPoints());
     }
-
-    sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 }
 
 
@@ -232,16 +243,16 @@ bool ArticulatedToolManager::stopAction()
 }
 
 
-int ArticulatedToolManager::performSecondaryAction()
+bool ArticulatedToolManager::performSecondaryAction()
 {
     m_performCut = true;
-    return 0;
+    return true;
 }
 
 
  void ArticulatedToolManager::performCut()
 {
-    msg_warning() << "performSecondaryAction()";
+    //msg_warning() << "performSecondaryAction()";
     if (!d_isCutter.getValue())
         return;
 
@@ -267,27 +278,24 @@ int ArticulatedToolManager::performSecondaryAction()
         idVGrab.insert(id);
     }
 
-    if (m_cutCount < 10)
+    const int cutMax = d_cutMaxStep.getValue();
+    float invC = 1.0 / float(cutMax);
+    if (m_cutCount < cutMax)
     {
 
         helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
-        if (texcoords.empty())
-        {
-            helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
-            texcoords.resize(tetraCon->getNbPoints());
-        }
-
-        float coef = float(m_cutCount + 1) / 10.f;
+        float coef = float(m_cutCount) * invC;
         for (auto id : idVGrab)
         {
             texcoords[id][0] = coef;
             texcoords[id][1] = coef;
         }
+    }
 
+    if (m_cutCount < cutMax * 2) {
         m_cutCount++;
         return;
     }
-
 
     m_cutCount = 0;
     
@@ -323,11 +331,24 @@ int ArticulatedToolManager::performSecondaryAction()
         }
     }
 
-    for (auto elem : tetraCounter)
+    if (d_cutMode.getValue() == 0)
     {
-        if (elem.second > 1)
+        for (auto elem : tetraCounter)
         {
-            tetraIds.push_back(elem.first);
+            if (elem.second > 0)
+            {
+                tetraIds.push_back(elem.first);
+            }
+        }
+    }
+    else
+    {
+        for (auto elem : tetraCounter)
+        {
+            if (elem.second > 1)
+            {
+                tetraIds.push_back(elem.first);
+            }
         }
     }
     
@@ -341,10 +362,10 @@ int ArticulatedToolManager::performSecondaryAction()
     return;
 }
 
-int ArticulatedToolManager::stopSecondaryAction()
+bool ArticulatedToolManager::stopSecondaryAction()
 {
-    msg_warning() << "stopSecondaryAction()";
-    return 0;
+    //msg_warning() << "stopSecondaryAction()";
+    return true;
 }
 
 
@@ -407,8 +428,8 @@ void ArticulatedToolManager::filterCollision()
         sofa::core::CollisionModel* collMod1 = it->first.first;
         sofa::core::CollisionModel* collMod2 = it->first.second;
 
-        dmsg_warning() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
-        dmsg_warning() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
+        //dmsg_warning() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
+        //dmsg_warning() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
 
 
         // Get the number of contacts        
@@ -467,10 +488,10 @@ void ArticulatedToolManager::filterCollision()
             info->normal = c.normal;
             info->dist = c.value;
 
-            dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
-                << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
-                << " | normal: " << c.normal << " d: " << c.value
-                << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
+            //dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
+            //    << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
+            //    << " | normal: " << c.normal << " d: " << c.value
+            //    << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
 
             if (firstJaw)
                 l_jawModel1->addContact(info);

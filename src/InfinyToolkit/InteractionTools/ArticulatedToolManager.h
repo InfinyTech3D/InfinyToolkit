@@ -54,6 +54,9 @@ protected:
 
 public:
     virtual void init() override;
+
+    /// Sofa API init method of the component
+    void bwdInit() override;
     int testModels();
     
     const sofa::type::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
@@ -70,8 +73,8 @@ public:
     int performAction();
     bool stopAction();
 
-    int performSecondaryAction();
-    int stopSecondaryAction();
+    bool performSecondaryAction();
+    bool stopSecondaryAction();
 
     void closeTool();
     void openTool();
@@ -108,6 +111,8 @@ public:
 
     Data <type::vector<RigidCoord> > d_outputPositions;
     Data<bool> d_isCutter;
+    Data<int> d_cutMaxStep;
+    Data<int> d_cutMode;
     Data<bool> d_isControlled;
     Data<bool> d_drawContacts; ///< if true, draw the collision outputs
 
@@ -124,6 +129,7 @@ protected:
     BaseJawModel::SPtr m_jawModel2 = nullptr;
 
     bool m_performCut = false;
+    
     int m_cutCount = 0;
 };
 
