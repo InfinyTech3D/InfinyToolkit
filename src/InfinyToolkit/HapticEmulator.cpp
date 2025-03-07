@@ -64,9 +64,9 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
         m_driver->lockPosition.unlock();
 
        // msg_info(m_driver) << "computeForce start: ";
-        auto t1 = std::chrono::high_resolution_clock::now();
+        auto t1 = std::chrono::steady_clock::now();
         m_driver->m_forceFeedback->computeForce(pos_in_world[0],pos_in_world[1],pos_in_world[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
-        auto t2 = std::chrono::high_resolution_clock::now();        
+        auto t2 = std::chrono::steady_clock::now();
         duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
         for (int i = 0; i < 3; i++)
