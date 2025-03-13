@@ -88,7 +88,7 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
         m_outTopoModifier = to_tstm;
     }
 
-    typedef typename TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types> TriGeo3;
+    typedef typename sofa::component::topology::container::dynamic::TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types> TriGeo3;
     using Coord = TriGeo3::Coord;
 
     TriGeo3* coarseGeo = nullptr;
