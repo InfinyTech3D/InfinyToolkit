@@ -31,10 +31,11 @@
 namespace sofa::infinytoolkit
 {
 
-int CollisionDetectionDisplayClass = core::RegisterObject("Class to track the current position of the needle tip.")
-    .add< CollisionDetectionDisplay >()
-    ;
-
+void registerCollisionDetectionDisplay(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Controller to store current collision contacts and draw them.")
+        .add< CollisionDetectionDisplay >());
+}
 
 CollisionDetectionDisplay::CollisionDetectionDisplay()
     : d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))

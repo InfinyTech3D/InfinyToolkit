@@ -29,7 +29,7 @@ namespace sofa::component::topology::container::dynamic
 } // namespace sofa::component::topology::container::dynamic
 
 
-namespace sofa::component::topology::mapping
+namespace sofa::infinytoolkit
 {
 /**
 * This class, called Triangle2RefinedTriangleTopologicalMapping, is a specific implementation of the barycentric TopologicalMapping where :
@@ -44,7 +44,7 @@ namespace sofa::component::topology::mapping
 class SOFA_INFINYTOOLKIT_API Triangle2RefinedTriangleTopologicalMapping : public sofa::core::topology::TopologicalMapping
 {
 public:
-    SOFA_CLASS(Triangle2RefinedTriangleTopologicalMapping,sofa::core::topology::TopologicalMapping);
+    SOFA_CLASS(Triangle2RefinedTriangleTopologicalMapping, sofa::core::topology::TopologicalMapping);
 protected:
     /** \brief Constructor.
     *
@@ -87,9 +87,9 @@ protected:
 
 private:
     /// Pointer to the output topology modifier
-    container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier = nullptr;
+    sofa::component::topology::container::dynamic::TriangleSetTopologyModifier* m_outTopoModifier = nullptr;
 
     type::vector <debugData> m_barycenters;
 };
 
-} //namespace sofa::component::topology::mapping
+} //namespace sofa::infinytoolkit

@@ -41,9 +41,12 @@
 namespace sofa::infinytoolkit
 {
 
-int HapticCarvingManagerClass = core::RegisterObject("Manager handling carving operations between an haptic tool and an object.")
-.add< HapticCarvingManager >()
-;
+void registerHapticCarvingManager(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Manager handling carving operations between an haptic tool and an object.")
+        .add< HapticCarvingManager >());
+}
+
 
 HapticCarvingManager::HapticCarvingManager()
     : AdvancedCarvingManager()

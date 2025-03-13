@@ -36,9 +36,12 @@ namespace sofa::infinytoolkit
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
 
-const int NearestTexcoordsMapClass = core::RegisterObject("NearestTexcoordsMap test.")
-    .add< NearestTexcoordsMap >()
-;
+void registerNearestTexcoordsMap(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("NearestTexcoordsMap engine to create UV texcoords from one mesh to another.")
+        .add< NearestTexcoordsMap >());
+}
+
 
 NearestTexcoordsMap::NearestTexcoordsMap()
     : d_inputPositions(initData(&d_inputPositions, "inputPositions", "Indices of the points on the first model"))

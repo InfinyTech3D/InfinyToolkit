@@ -55,9 +55,11 @@ namespace sofa::infinytoolkit
 
 using namespace sofa::core::topology;
 
-int AdvancedCarvingManagerClass = core::RegisterObject("Manager handling carving operations between a tool and an object.")
-.add< AdvancedCarvingManager >()
-;
+void registerAdvancedCarvingManager(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Manager handling carving operations between a tool and an object.")
+        .add< AdvancedCarvingManager >());
+}
 
 
 AdvancedCarvingManager::AdvancedCarvingManager()

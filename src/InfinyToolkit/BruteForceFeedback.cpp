@@ -32,6 +32,12 @@ using namespace std;
 namespace sofa::infinytoolkit
 {
 
+void registerBruteForceFeedback(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Null force feedback for haptic feedback device")
+        .add< BruteForceFeedback >());
+}
+
 using namespace sofa::type;
 
 BruteForceFeedback::BruteForceFeedback()
@@ -79,8 +85,5 @@ void BruteForceFeedback::computeWrench(const sofa::defaulttype::SolidTypes<SReal
     W_tool_world.clear();
 };
 
-
-static int nullForceFeedbackClass = sofa::core::RegisterObject("Null force feedback for haptic feedback device")
-        .add< BruteForceFeedback >();
 
 } // namespace sofa::infinytoolkit

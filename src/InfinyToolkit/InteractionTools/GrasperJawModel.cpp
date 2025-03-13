@@ -27,8 +27,13 @@
 
 namespace sofa::infinytoolkit
 {
-int GrasperJawModelClass = core::RegisterObject("Handle grasper.")
-	.add< GrasperJawModel >();
+
+void registerGrasperJawModel(sofa::core::ObjectFactory* factory)
+{
+	factory->registerObjects(sofa::core::ObjectRegistrationData("Grasper jaw models to be used with ArticulatedToolManager")
+		.add< GrasperJawModel >());
+}
+
 
 //using namespace sofa::core::objectmodel;
 typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > mechaState;

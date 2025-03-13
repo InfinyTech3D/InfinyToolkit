@@ -51,8 +51,11 @@ using sofa::core::objectmodel::KeyreleasedEvent;
 using TetraID = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer::TetraID;
 
 
-int ArticulatedToolManagerClass = core::RegisterObject("Handle sleeve Pince.")
-        .add< ArticulatedToolManager >();
+void registerArticulatedToolManager(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Tool manager to control several jaw models")
+        .add< ArticulatedToolManager >());
+}
 
 
 ArticulatedToolManager::ArticulatedToolManager()

@@ -34,18 +34,21 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/helper/AdvancedTimer.h>
 
-namespace sofa::component::topology::mapping
+namespace sofa::infinytoolkit
 {
 
 using namespace sofa::defaulttype;
 
-using namespace sofa::component::topology::mapping;
 using namespace sofa::component::topology::container::dynamic;
 using namespace sofa::core::topology;
 
 // Register in the Factory
-const int Triangle2RefinedTriangleTopologicalMappingClass = core::RegisterObject("Special case of mapping where TriangleSetTopology is converted into a refined TriangleSetTopology")
-        .add< Triangle2RefinedTriangleTopologicalMapping >();
+void registerTriangle2RefinedTriangleTopologicalMapping(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Special case of mapping where TriangleSetTopology is converted into a refined TriangleSetTopology.")
+        .add< Triangle2RefinedTriangleTopologicalMapping >());
+}
+
 
 Triangle2RefinedTriangleTopologicalMapping::Triangle2RefinedTriangleTopologicalMapping()
     : sofa::core::topology::TopologicalMapping()
@@ -72,7 +75,7 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
         return; 
     }
 
-    container::dynamic::TriangleSetTopologyModifier* to_tstm;
+    TriangleSetTopologyModifier* to_tstm;
     toModel->getContext()->get(to_tstm);
     if (!to_tstm)
     {
@@ -85,7 +88,7 @@ void Triangle2RefinedTriangleTopologicalMapping::init()
         m_outTopoModifier = to_tstm;
     }
 
-    typedef typename container::dynamic::TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types> TriGeo3;
+    typedef typename TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types> TriGeo3;
     using Coord = TriGeo3::Coord;
 
     TriGeo3* coarseGeo = nullptr;
@@ -323,4 +326,4 @@ void Triangle2RefinedTriangleTopologicalMapping::draw(const core::visual::Visual
     vparams->drawTool()->drawLines(vertices, 1.0f, sofa::type::RGBAColor::green());
 }
 
-} //namespace sofa::component::topology::mapping
+} //namespace sofa::infinytoolkit
