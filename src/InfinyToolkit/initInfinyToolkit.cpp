@@ -75,7 +75,7 @@ extern "C" {
     SOFA_INFINYTOOLKIT_API const char* getModuleVersion();
     SOFA_INFINYTOOLKIT_API const char* getModuleLicense();
     SOFA_INFINYTOOLKIT_API const char* getModuleDescription();
-    SOFA_INFINYTOOLKIT_API const char* getModuleComponentList();
+    SOFA_INFINYTOOLKIT_API void registerObjects(sofa::core::ObjectFactory* factory);
 }
 
 void initInfinyToolkit()
