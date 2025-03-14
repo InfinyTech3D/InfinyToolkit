@@ -37,8 +37,11 @@ namespace sofa::infinytoolkit
 using namespace defaulttype;
 using namespace sofa::core::topology;
 
-const int PliersPositionsMapperClass = core::RegisterObject("Handle sleeve key positions.")
-        .add< PliersPositionsMapper >();
+void registerPliersPositionsMapper(sofa::core::ObjectFactory* factory)
+{
+	factory->registerObjects(sofa::core::ObjectRegistrationData("Handle sleeve key positions.")
+		.add< PliersPositionsMapper >());
+}
 
 
 PliersPositionsMapper::PliersPositionsMapper()

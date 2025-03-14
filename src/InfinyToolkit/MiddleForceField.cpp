@@ -32,10 +32,12 @@ namespace sofa::infinytoolkit
 
 using namespace sofa::defaulttype;
 
-int MiddleForceFieldClass = core::RegisterObject("Middle interpolated force applied to given degrees of freedom")
-        .add< MiddleForceField<Vec3Types> >()
+void registerMiddleForceField(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Middle interpolated force applied to given degrees of freedom.")
+        .add< MiddleForceField<Vec3Types> >());
+}
 
-        ;
 template class SOFA_INFINYTOOLKIT_API MiddleForceField<Vec3Types>;
 
 } // namespace sofa::infinytoolkit

@@ -39,6 +39,13 @@
 namespace sofa::infinytoolkit
 {
 
+void registerHapticEmulator(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Emulate a fake Driver to mimic Geomagic haptic device motion.")
+        .add< HapticEmulator >());
+}
+
+
 using namespace sofa::type;
 using namespace sofa::helper::system::thread;
 
@@ -467,11 +474,5 @@ void HapticEmulator::draw(const sofa::core::visual::VisualParams* vparams)
     vparams->drawTool()->drawSphere(m_toolPosition, 0.1f, sofa::type::RGBAColor(1.0, 1.0, 1.0, 1.0));
     vparams->drawTool()->drawLine(m_toolPosition, m_toolPosition + m_toolForceFeedBack, sofa::type::RGBAColor(1.0, 0.0, 0.0f, 1.0));
 }
-
-
-
-int HapticEmulatorClass = core::RegisterObject("Driver allowing interfacing with Geomagic haptic devices.")
-.add< HapticEmulator >()
-;
 
 } // sofa::infinytoolkit

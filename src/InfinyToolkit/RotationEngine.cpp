@@ -32,9 +32,12 @@
 namespace sofa::infinytoolkit
 {
 
-int RotationEngineClass = core::RegisterObject("RotationEngine test.")
-.add< RotationEngine >()
-;
+void registerRotationEngine(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("RotationEngine test.")
+        .add< RotationEngine >());
+}
+
 
 RotationEngine::RotationEngine()
 {

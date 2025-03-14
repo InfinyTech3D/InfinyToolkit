@@ -31,10 +31,11 @@
 namespace sofa::infinytoolkit
 {
 
-int NeedleTrackerClass = core::RegisterObject("Class to track the current position of the needle tip.")
-    .add< NeedleTracker >()
-    ;
-
+void registerNeedleTracker(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("Class to track the current position of the needle tip.")
+        .add< NeedleTracker >());
+}
 
 NeedleTracker::NeedleTracker()
     : d_drawDebug(initData(&d_drawDebug, true, "drawBB", "if true, will draw slices BB, ray and intersected triangles"))

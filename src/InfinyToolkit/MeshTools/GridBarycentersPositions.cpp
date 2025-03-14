@@ -36,9 +36,12 @@ namespace sofa::infinytoolkit
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
 
-const int GridBaryCentersPositionsClass = core::RegisterObject("GridBaryCentersPositions test.")
-    .add< GridBaryCentersPositions >()
-;
+void registerGridBaryCentersPositions(sofa::core::ObjectFactory* factory)
+{
+    factory->registerObjects(sofa::core::ObjectRegistrationData("GridBaryCentersPositions engine test.")
+        .add< GridBaryCentersPositions >());
+}
+
 
 GridBaryCentersPositions::GridBaryCentersPositions()
     : d_inputPositions(initData(&d_inputPositions, "positions", "Indices of the points on the first model"))
