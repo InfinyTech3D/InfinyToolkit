@@ -135,7 +135,7 @@ void SurfaceCarvingPerformer::doMoveCarve1()
     //SReal carveFactor = 0.1f; // d_carvingSpeed.getValue();
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(sofa::core::vec_id::write_access::position);
 
     std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
     std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
@@ -200,8 +200,8 @@ void SurfaceCarvingPerformer::doMoveCarve2()
     SReal carveFactor = 1.0f; // d_carvingSpeed.getValue();
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
-    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > restVertices = meca->write(core::VecCoordId::resetPosition());
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(sofa::core::vec_id::write_access::position);
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > restVertices = meca->write(sofa::core::vec_id::write_access::restPosition);
 
     std::map <BaseMeshTopology::PointID, Vec3> tmpVertices;
     std::map <BaseMeshTopology::PointID, unsigned int> coefVertices;
