@@ -43,7 +43,7 @@
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Rigid3d" position="5 12 5 0 0 0 1" />
         <UniformMass name="Mass" totalMass="10.0" template="Rigid3d"/>
-        <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+        <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool" contactStiffness="10"/>
         <Node name="VisuTool" >
             <MeshOBJLoader name="meshLoader_1" filename="./mesh/sphere.obj" scale3d="0.1 0.1 0.1"/>
             <OglModel name="InstrumentVisualModel" src="@meshLoader_1" color="0.0 1.0 0.0 1.0" />
@@ -51,17 +51,19 @@
         </Node>        
     </Node>
 
-    <Node name="Hexa2Tetra" >
+    <Node name="Hexa2Tetra">
         <RegularGridTopology name="HexaTop" n="11 11 11" min="0 0 0" max="10 10 10" />
-        <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
-        <TetrahedronSetTopologyModifier name="Modifier"/>
-        <Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />
+        <Node name="TetraMesh">
+            <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
+            <TetrahedronSetTopologyModifier name="Modifier"/>
+            <Hexa2TetraTopologicalMapping input="@../HexaTop" output="@Container" swapping="false" />
+        </Node>
     </Node>
 
     <Node name="Cube">
-        <MechanicalObject position="@../Hexa2Tetra/Container.position" name="Volume" />
+        <MechanicalObject position="@../Hexa2Tetra/TetraMesh/Container.position" name="Volume" />
 
-        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/Container" />
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/TetraMesh/Container" />
         <TetrahedronSetTopologyModifier name="Modifier" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
 
@@ -78,8 +80,8 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="triangleCol" />
-            <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
+            <TriangleCollisionModel name="triangleCol" contactStiffness="10"/>
+            <PointCollisionModel name="pointCol" contactStiffness="10" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
                 <OglModel name="Visual" texcoords="@../../../ACarving.texcoords" texturename="textures/colorMap.png" />
