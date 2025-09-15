@@ -37,7 +37,8 @@ namespace sofa::infinytoolkit
 class GrabContactInfo
 {
 public:
-	sofa::Index idTool; // in global mesh
+	sofa::Index idTool = sofa::InvalidID; // in global mesh
+	sofa::Index idvModel = sofa::InvalidID;
 	sofa::core::topology::BaseMeshTopology::Triangle idsModel; // in global mesh
 	//Vec3 pointA;
 	//Vec3 pointB;
@@ -53,7 +54,7 @@ public:
 	using Vec3 = sofa::type::Vec3;
 
 	BaseJawModel();
-	virtual void init();
+	virtual void init() override;
 	virtual ~BaseJawModel() = default;
 	
 	int getModelId() { return m_modelId; }
@@ -67,6 +68,11 @@ public:
 	/// Main API public method to stop the action of the Jaw
 	virtual void stopAction() {}
 
+	/// Main API public method to launch the action of the Jaw
+	virtual void performSecondaryAction() {}
+	/// Main API public method to stop the action of the Jaw
+	virtual void stopSecondaryAction() {}
+
 
 	/// Method to compute tool axis. Will fill @sa m_matP, @sa m_origin, @sa m_xAxis, @sa m_yAxis, @sa m_zAxis
 	void computeAxis();
@@ -78,7 +84,8 @@ public:
 
 	virtual void addContact(GrabContactInfo* grabInfo);
 	virtual void clearContacts();
-	const sofa::type::vector<GrabContactInfo*>& getContacts() { return m_contactInfos; }
+	const sofa::type::vector<GrabContactInfo*>& getContacts() const { return m_contactInfos; }
+	const sofa::type::vector<int>& getRawContactModelIds() const { return m_rawIds; }
 
 	void setTargetModel(sofa::core::behavior::BaseMechanicalState* model) { m_target = model; }
 	virtual void drawImpl(const core::visual::VisualParams* vparams);
@@ -121,6 +128,8 @@ protected:
 
 	/// List of contacts filter during collision 
 	sofa::type::vector<GrabContactInfo*> m_contactInfos;
+
+	type::vector<int> m_rawIds;
 };
 
 } // namespace sofa::infinytoolkit

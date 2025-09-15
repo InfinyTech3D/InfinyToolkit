@@ -27,13 +27,16 @@
 #include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
 #include <InfinyToolkit/InteractionTools/ScissorJawModel.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
+#include <sofa/core/topology/TopologyData.h>
 
 namespace sofa::infinytoolkit
 {
 
 
 /** 
-*
+* This class is a SOFA component, it will handle 2 different @sa BaseJawModel, one for the up jaw and another fot the bottom jaw in order
+* to simulate grasper or scisors or any other tool defined by the jaws. 
+* This component will handle the motion, closing opening and activation of the tool. As well as collision detection in some cases.
 */
 class SOFA_INFINYTOOLKIT_API ArticulatedToolManager : public core::objectmodel::BaseObject
 {
@@ -44,6 +47,9 @@ public:
     using RigidCoord = sofa::defaulttype::RigidTypes::Coord;
     using ContactVector = type::vector<core::collision::DetectionOutput>;
 
+    using TexCoord = sofa::type::Vec<2, float>;
+    using VecTexCoord = type::vector<TexCoord>;
+
 protected:
     ArticulatedToolManager();
 
@@ -51,6 +57,9 @@ protected:
 
 public:
     virtual void init() override;
+
+    /// Sofa API init method of the component
+    void bwdInit() override;
     int testModels();
     
     const sofa::type::vector< int >& vertexIdsInBroadPhase() { return m_idBroadPhase; }
@@ -67,6 +76,9 @@ public:
     int performAction();
     bool stopAction();
 
+    bool performSecondaryAction();
+    bool stopSecondaryAction();
+
     void closeTool();
     void openTool();
 
@@ -80,6 +92,8 @@ protected:
     void clearContacts();
 
     void filterCollision();
+
+    void performCut();
 
 public:
     // Path to the different JawModel
@@ -99,7 +113,14 @@ public:
     Data <RigidCoord> d_inputPosition;
 
     Data <type::vector<RigidCoord> > d_outputPositions;
+    Data<bool> d_isCutter;
+    Data<int> d_cutMaxStep;
+    Data<int> d_cutMode;
+    Data<bool> d_isControlled;
     Data<bool> d_drawContacts; ///< if true, draw the collision outputs
+
+    Data<bool> d_manageBurning; ///< if true, draw the collision outputs
+    core::topology::PointData< VecTexCoord > m_vtexcoords; ///< coordinates of the texture
 
 protected:
     // Buffer of points ids 
@@ -110,6 +131,9 @@ protected:
     BaseJawModel::SPtr m_jawModel1 = nullptr;
     BaseJawModel::SPtr m_jawModel2 = nullptr;
 
+    bool m_performCut = false;
+    
+    int m_cutCount = 0;
 };
 
 

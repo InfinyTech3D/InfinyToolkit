@@ -29,9 +29,11 @@
 
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
+#include <sofa/simulation/AnimateEndEvent.h>
 
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
+#include <sofa/core/topology/TopologyData.inl>
 
 #include <sofa/component/collision/geometry/SphereModel.h>
 
@@ -65,8 +67,14 @@ ArticulatedToolManager::ArticulatedToolManager()
     , l_targetModel(initLink("targetModel", "link to the second jaw model component, if not set will search through graph and take second one encountered."))
     , d_handleFactor(initData(&d_handleFactor, SReal(1.0), "handleFactor", "jaw speed factor."))
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "jaw positions."))
+    , d_isCutter(initData(&d_isCutter, false, "isCutter", "if true, will draw slices BB, ray and intersected triangles"))
+    , d_cutMaxStep(initData(&d_cutMaxStep, int(10), "cutMaxStep", "number of step before really cutting"))
+    , d_cutMode(initData(&d_cutMode, int(0), "cutMode", "mode of cut (debug)"))
+    , d_isControlled(initData(&d_isControlled, false, "isControlled", "if true, will draw slices BB, ray and intersected triangles"))
     , d_drawContacts(initData(&d_drawContacts, false, "drawContacts", "if true, will draw slices BB, ray and intersected triangles"))
-{
+    , d_manageBurning(initData(&d_manageBurning, false, "manageBurning", "if true, will draw slices BB, ray and intersected triangles"))
+    , m_vtexcoords(initData(&m_vtexcoords, "texcoords", "coordinates of the texture"))
+{    
     this->f_listening.setValue(true);
     m_idgrabed.clear();
 }
@@ -138,7 +146,25 @@ void ArticulatedToolManager::init()
     l_jawModel1->setTargetModel(l_targetModel.get());
     l_jawModel2->setTargetModel(l_targetModel.get());
 
+
+    m_cutCount = 0;
+
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+}
+
+
+void ArticulatedToolManager::bwdInit()
+{
+    if (d_manageBurning.getValue())
+    {
+        TetrahedronSetTopologyContainer* tetraCon;
+        l_targetModel->getContext()->get(tetraCon);
+
+        m_vtexcoords.createTopologyHandler(tetraCon);
+    
+        helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+        texcoords.resize(tetraCon->getNbPoints());
+    }
 }
 
 
@@ -218,6 +244,131 @@ bool ArticulatedToolManager::stopAction()
 }
 
 
+bool ArticulatedToolManager::performSecondaryAction()
+{
+    m_performCut = true;
+    return true;
+}
+
+
+ void ArticulatedToolManager::performCut()
+{
+    //msg_warning() << "performSecondaryAction()";
+    if (!d_isCutter.getValue())
+        return;
+
+    sofa::type::vector<int> idVGrab1 = l_jawModel1.get()->getRawContactModelIds();
+    sofa::type::vector<int> idVGrab2 = l_jawModel2.get()->getRawContactModelIds();
+
+    // Detect all tetra on the cut path
+    TetrahedronSetTopologyContainer* tetraCon;
+    l_targetModel->getContext()->get(tetraCon);
+    if (tetraCon == nullptr) {
+        msg_info() << "Error: NO tetraCon";
+        return;
+    }
+
+    std::set<int> idVGrab;
+    for (auto id : idVGrab1)
+    {
+        idVGrab.insert(id);
+    }
+
+    for (auto id : idVGrab2)
+    {
+        idVGrab.insert(id);
+    }
+
+    const int cutMax = d_cutMaxStep.getValue();
+    float invC = 1.0 / float(cutMax);
+    if (m_cutCount < cutMax)
+    {
+
+        helper::WriteAccessor< Data<VecTexCoord> > texcoords = m_vtexcoords;
+        float coef = float(m_cutCount) * invC;
+        for (auto id : idVGrab)
+        {
+            texcoords[id][0] = coef;
+            texcoords[id][1] = coef;
+        }
+    }
+
+    if (m_cutCount < cutMax * 2) {
+        m_cutCount++;
+        return;
+    }
+
+    m_cutCount = 0;
+    
+    
+
+    TetrahedronSetTopologyModifier* tetraModif;
+    tetraCon->getContext()->get(tetraModif);
+
+    if (tetraModif == nullptr) {
+        msg_info() << "Error: NO tetraModif";
+        return;
+    }
+
+    // First get all tetra that are on the first side
+    sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> tetraIds;
+    std::map< sofa::core::topology::Topology::TetrahedronID, int> tetraCounter;
+    for (auto id : idVGrab)
+    {
+        const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
+        for (sofa::Index j = 0; j < tetraAV.size(); ++j)
+        {
+            int tetraId = tetraAV[j];
+
+            auto elem = tetraCounter.find(tetraId);
+            if (elem == tetraCounter.end()) // first time
+            {
+                tetraCounter[tetraId] = 1;
+            }
+            else
+            {
+                tetraCounter[tetraId] = elem->second + 1;
+            }
+        }
+    }
+
+    if (d_cutMode.getValue() == 0)
+    {
+        for (auto elem : tetraCounter)
+        {
+            if (elem.second > 0)
+            {
+                tetraIds.push_back(elem.first);
+            }
+        }
+    }
+    else
+    {
+        for (auto elem : tetraCounter)
+        {
+            if (elem.second > 1)
+            {
+                tetraIds.push_back(elem.first);
+            }
+        }
+    }
+    
+    std::cout << "tetra2Rmove: " << tetraIds << std::endl;
+
+    // remove springs first
+    stopAction();
+    tetraModif->removeTetrahedra(tetraIds);
+   
+
+    return;
+}
+
+bool ArticulatedToolManager::stopSecondaryAction()
+{
+    //msg_warning() << "stopSecondaryAction()";
+    return true;
+}
+
 
 void ArticulatedToolManager::openTool()
 {
@@ -275,12 +426,14 @@ void ArticulatedToolManager::filterCollision()
     const ContactVector* contacts = nullptr;
     for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
     {
-        sofa::core::CollisionModel* collMod1 = it->first.first;
-        sofa::core::CollisionModel* collMod2 = it->first.second;
+        if (this->f_printLog.getValue())
+        {
+            sofa::core::CollisionModel* collMod1 = it->first.first;
+            sofa::core::CollisionModel* collMod2 = it->first.second;
 
-        dmsg_info() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
-        dmsg_info() << "collMod1: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
-
+            msg_info() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
+            msg_info() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
+        }
 
         // Get the number of contacts        
         contacts = dynamic_cast<const ContactVector*>(it->second);
@@ -295,35 +448,53 @@ void ArticulatedToolManager::filterCollision()
         {
             // update the triangle id if a mapping is present
             GrabContactInfo* info = new GrabContactInfo();
+            const ContactVector::value_type& c = (*contacts)[j];
             bool firstJaw = false;
 
-            const ContactVector::value_type& c = (*contacts)[j];
-            if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is target model
+            if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.first.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // first model is a jaw
+            {
+                info->idTool = c.elem.first.getIndex(); // id of the tool collision model
+                if (c.elem.second.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
+                {
+                    sofa::Index idTri = c.elem.second.getIndex();
+                    info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                }
+                else
+                {
+                    info->idvModel = c.elem.second.getIndex();
+                }
+                
+                if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
+                    firstJaw = true;
+            }
+            else if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.second.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // second model is a jaw
             {
                 info->idTool = c.elem.second.getIndex();
-                sofa::Index idTri = c.elem.first.getIndex();
-                info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
+                {
+                    sofa::Index idTri = c.elem.first.getIndex();
+                    info->idsModel = c.elem.first.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
+                }
+                else
+                {
+                    info->idvModel = c.elem.first.getIndex();
+                }
 
                 if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
                     firstJaw = true;
             }
-            else
+            else // not related to this tool
             {
-                info->idTool = c.elem.first.getIndex();
-                sofa::Index idTri = c.elem.second.getIndex();
-                info->idsModel = c.elem.second.getCollisionModel()->getCollisionTopology()->getTriangle(idTri);
-
-                if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get())
-                    firstJaw = true;
+                continue;
             }
 
             info->normal = c.normal;
             info->dist = c.value;
 
-            dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
-                << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
-                << " | normal: " << c.normal << " d: " << c.value
-                << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
+            //dmsg_info() << j << " contact: " << c.elem.first.getIndex() << " | " << c.elem.second.getIndex()
+            //    << " -> " << " pA: " << c.point[0] << " pB: " << c.point[1]
+            //    << " | normal: " << c.normal << " d: " << c.value
+            //    << " | cDir: " << (c.point[1] - c.point[0]).normalized() << " d: " << (c.point[1] - c.point[0]).norm();
 
             if (firstJaw)
                 l_jawModel1->addContact(info);
@@ -336,8 +507,18 @@ void ArticulatedToolManager::filterCollision()
 
 void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 {
+    if (m_performCut && sofa::simulation::AnimateEndEvent::checkEventType(event))
+    {
+        performCut();
+        m_performCut = false;
+    }
+
+
     if (KeypressedEvent::checkEventType(event))
     {
+        if (!d_isControlled.getValue())
+            return;
+
         KeypressedEvent *ev = static_cast<KeypressedEvent *>(event);
 
         switch (ev->getKey())
@@ -350,16 +531,25 @@ void ArticulatedToolManager::handleEvent(sofa::core::objectmodel::Event* event)
 
             //closeTool();
 
-            filterCollision();
+            //filterCollision();
 
             performAction();
+            deActivateTool();
            
             break;
         }
         case 'G':
         case 'g':
         {
-            openTool();
+            stopAction();
+            activateTool();
+
+            break;
+        }
+        case 'U':
+        case 'u':
+        {
+            performSecondaryAction();
             break;
         }
         case '0':
@@ -455,9 +645,9 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
         return;
 
 
-    auto m_model = l_targetModel.get();
-    auto m_jaw1 = l_jawModel1.get()->l_jawDofs;
-    auto m_jaw2 = l_jawModel2.get()->l_jawDofs;
+    //auto m_model = l_targetModel.get();
+    //auto m_jaw1 = l_jawModel1.get()->l_jawDofs;
+    //auto m_jaw2 = l_jawModel2.get()->l_jawDofs;
 
     if (d_drawContacts.getValue())
     {
