@@ -27,6 +27,7 @@
 #include <InfinyToolkit/InteractionTools/GrasperJawModel.h>
 #include <InfinyToolkit/InteractionTools/ScissorJawModel.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
+#include <sofa/core/topology/TopologyData.h>
 
 namespace sofa::infinytoolkit
 {
