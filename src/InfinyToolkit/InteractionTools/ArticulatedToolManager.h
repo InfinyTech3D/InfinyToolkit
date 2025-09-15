@@ -33,7 +33,9 @@ namespace sofa::infinytoolkit
 
 
 /** 
-*
+* This class is a SOFA component, it will handle 2 different @sa BaseJawModel, one for the up jaw and another fot the bottom jaw in order
+* to simulate grasper or scisors or any other tool defined by the jaws. 
+* This component will handle the motion, closing opening and activation of the tool. As well as collision detection in some cases.
 */
 class SOFA_INFINYTOOLKIT_API ArticulatedToolManager : public core::objectmodel::BaseObject
 {
