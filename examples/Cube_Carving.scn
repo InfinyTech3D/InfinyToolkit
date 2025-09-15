@@ -39,20 +39,22 @@
     <Node name="carvingElement">
         <MechanicalObject name="Particles" template="Vec3d" position="5 15 5" velocity="0 0 0"/>
         <UniformMass name="Mass" totalMass="10.0" />
-        <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
+        <SphereCollisionModel name="tool" radius="0.1" contactStiffness="10" tags="CarvingTool"/>
     </Node>
 
-    <Node name="Hexa2Tetra" >
+    <Node name="Hexa2Tetra">
         <RegularGridTopology name="HexaTop" n="11 11 11" min="0 0 0" max="10 10 10" />
-        <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
-        <TetrahedronSetTopologyModifier name="Modifier"/>
-        <Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />
+        <Node name="TetraMesh">
+            <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
+            <TetrahedronSetTopologyModifier name="Modifier"/>
+            <Hexa2TetraTopologicalMapping input="@../HexaTop" output="@Container" swapping="false" />
+        </Node>
     </Node>
 
     <Node name="Cube">
-        <MechanicalObject position="@../Hexa2Tetra/Container.position" name="Volume" />
+        <MechanicalObject position="@../Hexa2Tetra/TetraMesh/Container.position" name="Volume" />
 
-        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/Container" />
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/TetraMesh/Container" />
         <TetrahedronSetTopologyModifier name="Modifier" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
 
@@ -69,8 +71,8 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="triangleCol" tags="CarvingSurface"/>
-            <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
+            <TriangleCollisionModel name="triangleCol" contactStiffness="10" tags="CarvingSurface"/>
+            <PointCollisionModel name="pointCol" contactStiffness="10" tags="CarvingSurface"/>
 
             <Node name="liver-Visual">
                 <OglModel name="Visual" color="green" />
