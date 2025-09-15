@@ -84,8 +84,8 @@ public:
 
 	virtual void addContact(GrabContactInfo* grabInfo);
 	virtual void clearContacts();
-	const sofa::type::vector<GrabContactInfo*>& getContacts() { return m_contactInfos; } const
-	const sofa::type::vector<int>& getRawContactModelIds() { return m_rawIds; } const 
+	const sofa::type::vector<GrabContactInfo*>& getContacts() const { return m_contactInfos; }
+	const sofa::type::vector<int>& getRawContactModelIds() const { return m_rawIds; }
 
 	void setTargetModel(sofa::core::behavior::BaseMechanicalState* model) { m_target = model; }
 	virtual void drawImpl(const core::visual::VisualParams* vparams);

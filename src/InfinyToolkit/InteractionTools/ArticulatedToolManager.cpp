@@ -315,7 +315,7 @@ bool ArticulatedToolManager::performSecondaryAction()
     for (auto id : idVGrab)
     {
         const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(id);
-        for (int j = 0; j < tetraAV.size(); ++j)
+        for (sofa::Index j = 0; j < tetraAV.size(); ++j)
         {
             int tetraId = tetraAV[j];
 
@@ -425,12 +425,14 @@ void ArticulatedToolManager::filterCollision()
     const ContactVector* contacts = nullptr;
     for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
     {
-        sofa::core::CollisionModel* collMod1 = it->first.first;
-        sofa::core::CollisionModel* collMod2 = it->first.second;
+        if (this->f_printLog.getValue())
+        {
+            sofa::core::CollisionModel* collMod1 = it->first.first;
+            sofa::core::CollisionModel* collMod2 = it->first.second;
 
-        //dmsg_warning() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
-        //dmsg_warning() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
-
+            msg_info() << "collMod1: " << collMod1->getTypeName() << " -> " << collMod1->getContext()->getName();
+            msg_info() << "collMod2: " << collMod2->getTypeName() << " -> " << collMod2->getContext()->getName();
+        }
 
         // Get the number of contacts        
         contacts = dynamic_cast<const ContactVector*>(it->second);
@@ -642,9 +644,9 @@ void ArticulatedToolManager::draw(const core::visual::VisualParams* vparams)
         return;
 
 
-    auto m_model = l_targetModel.get();
-    auto m_jaw1 = l_jawModel1.get()->l_jawDofs;
-    auto m_jaw2 = l_jawModel2.get()->l_jawDofs;
+    //auto m_model = l_targetModel.get();
+    //auto m_jaw1 = l_jawModel1.get()->l_jawDofs;
+    //auto m_jaw2 = l_jawModel2.get()->l_jawDofs;
 
     if (d_drawContacts.getValue())
     {
