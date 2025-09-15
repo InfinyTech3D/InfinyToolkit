@@ -45,7 +45,7 @@ int ScissorJawModel::cutFromTetra(float minX, float maxX, bool cut)
     // Classify right/left points of the plier
     sofa::type::vector<int> idsLeft;
     sofa::type::vector<int> idsRight;
-    for (int i = 0; i < m_idBroadPhase.size(); i++)
+    for (sofa::Index i = 0; i < m_idBroadPhase.size(); i++)
     {
         Vec3 vert = Vec3(m_jaw->getPX(m_idBroadPhase[i]), m_jaw->getPY(m_idBroadPhase[i]), m_jaw->getPZ(m_idBroadPhase[i]));
         vert = m_matP * (vert - m_origin);
@@ -92,8 +92,8 @@ int ScissorJawModel::cutFromTetra(float minX, float maxX, bool cut)
     }
 
     // First get all tetra that are on the first side
-    sofa::type::vector<unsigned int> tetraIds;
-    for (int i = 0; i < idsLeft.size(); ++i)
+    sofa::type::vector<sofa::Index> tetraIds;
+    for (sofa::Index i = 0; i < idsLeft.size(); ++i)
     {
         const BaseMeshTopology::TetrahedraAroundVertex& tetraAV = tetraCon->getTetrahedraAroundVertex(idsLeft[i]);
         for (int j = 0; j < tetraAV.size(); ++j)
@@ -118,7 +118,7 @@ int ScissorJawModel::cutFromTetra(float minX, float maxX, bool cut)
     // Then test for each tetra if one of the vertex is on the other side. If yes put on but path
     tetraIdsOnCut.clear();
     std::set< unsigned int > items;
-    for (int i = 0; i < tetraIds.size(); ++i)
+    for (sofa::Index i = 0; i < tetraIds.size(); ++i)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
         for (unsigned int j = 0; j < 4; ++j)
@@ -158,7 +158,7 @@ int ScissorJawModel::cutFromTetra(float minX, float maxX, bool cut)
         vitems.reserve(items.size());
         vitems.insert(vitems.end(), items.rbegin(), items.rend());
 
-        for (int i = 0; i < vitems.size(); i++)
+        for (sofa::Index i = 0; i < vitems.size(); i++)
         {
             sofa::type::vector<sofa::core::topology::Topology::TetrahedronID> its;
             its.push_back(vitems[i]);
@@ -195,7 +195,7 @@ int ScissorJawModel::pathCutFromTetra(float minX, float maxX)
         return -40;
     }
 
-    for (int i = 0; i < tetraIds.size(); i++)
+    for (sofa::Index i = 0; i < tetraIds.size(); i++)
     {
         const BaseMeshTopology::Tetra& tetra = tetraCon->getTetra(tetraIds[i]);
         for (int j = 0; j < 4; j++)
@@ -226,7 +226,7 @@ void ScissorJawModel::cutFromTriangles()
     // Classify right/left points of the plier
     sofa::type::vector<int> idsLeft;
     sofa::type::vector<int> idsRight;
-    for (int i = 0; i < m_idgrabed.size(); i++)
+    for (sofa::Index i = 0; i < m_idgrabed.size(); i++)
     {
         Vec3 vert = Vec3(m_model->getPX(m_idgrabed[i]), m_model->getPY(m_idgrabed[i]), m_model->getPZ(m_idgrabed[i]));
         vert = m_matP * (vert - m_origin);
@@ -253,7 +253,7 @@ void ScissorJawModel::cutFromTriangles()
     }
 
     const sofa::type::vector<BaseMeshTopology::Triangle>& allTri = triCons[1]->getTriangleArray();
-    for (int i = 0; i < allTri.size(); ++i)
+    for (sofa::Index i = 0; i < allTri.size(); ++i)
     {
         const BaseMeshTopology::Triangle& tri = allTri[i];
         bool foundLeft = false;

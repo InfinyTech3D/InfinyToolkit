@@ -57,7 +57,7 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-	void handleTopologyChange();
+	void handleTopologyChange() override;
 
     /// Pre-construction check method called by ObjectFactory.
     /// Check that DataTypes matches the MeshTopology.

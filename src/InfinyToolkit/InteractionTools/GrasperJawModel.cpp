@@ -116,7 +116,6 @@ void GrasperJawModel::stopSecondaryAction()
 int GrasperJawModel::createStiffSpringFF()
 {
 	std::cout << this->getName() << " + createStiffSpringFF()" << std::endl;
-	SReal stiffness = d_stiffness.getValue();
 
 	m_forcefield = sofa::core::objectmodel::New<SpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
 	SpringFF* stiffspringforcefield = static_cast<SpringFF*>(m_forcefield.get());

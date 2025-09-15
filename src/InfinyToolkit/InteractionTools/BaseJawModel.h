@@ -54,7 +54,7 @@ public:
 	using Vec3 = sofa::type::Vec3;
 
 	BaseJawModel();
-	virtual void init();
+	virtual void init() override;
 	virtual ~BaseJawModel() = default;
 	
 	int getModelId() { return m_modelId; }
