@@ -54,16 +54,15 @@ public:
 	void performSecondaryAction() override;
 	/// Main API public method to stop the action of the Jaw
 	void stopSecondaryAction() override;
-
+	
 	Data<SReal> d_stiffness;
+	SingleLink<GrasperJawModel, SpringFF, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_springFF;
 
 protected:
 	bool initImpl() override;
 	int createStiffSpringFF();
 	void addJawSprings();
 
-private:
-	SpringFF::SPtr m_forcefield = nullptr;
 };
 					
 } // namespace sofa::infinytoolkit
