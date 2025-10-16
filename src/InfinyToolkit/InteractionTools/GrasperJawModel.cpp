@@ -42,6 +42,7 @@ typedef sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3Types > me
 GrasperJawModel::GrasperJawModel()
 	: BaseJawModel()
 	, d_stiffness(initData(&d_stiffness, SReal(100.0), "stiffness", "jaw speed factor."))
+	, l_springFF(initLink("springFF", "link to the spring forcefield used to mimic grasping interaction."))
 {
 }
 
@@ -87,7 +88,9 @@ void GrasperJawModel::performAction()
 void GrasperJawModel::stopAction()
 {
 	// clean springs
-	m_forcefield->clear();
+	if (l_springFF.get())
+		l_springFF.get()->clear();
+
 	m_rawIds.clear();
 	//activateImpl();
 }
@@ -115,12 +118,25 @@ void GrasperJawModel::stopSecondaryAction()
 
 int GrasperJawModel::createStiffSpringFF()
 {
-	std::cout << this->getName() << " + createStiffSpringFF()" << std::endl;
+	if (m_jaw == nullptr)
+	{
+		msg_error() << " Error createStiffSpringFF, no jaw model";
+		return 0;
+	}
 
-	m_forcefield = sofa::core::objectmodel::New<SpringFF>(dynamic_cast<mechaState*>(m_jaw), dynamic_cast<mechaState*>(m_target));
-	SpringFF* stiffspringforcefield = static_cast<SpringFF*>(m_forcefield.get());
-	stiffspringforcefield->setName(this->getName() + "_SpringFF");
-	m_target->getContext()->addObject(stiffspringforcefield);
+	if (m_target == nullptr)
+	{
+		msg_error() << " Error createStiffSpringFF, no valid m_target";
+		return 0;
+	}
+
+	SpringFF* stiffspringforcefield = l_springFF.get();
+	if (stiffspringforcefield == nullptr)
+	{
+		msg_error() << " Error createStiffSpringFF, no valid spring force field";
+		return 0;
+	}
+
 
 	return 1;
 }
@@ -128,7 +144,13 @@ int GrasperJawModel::createStiffSpringFF()
 
 void GrasperJawModel::addJawSprings()
 {
-	SpringFF* stiffspringforcefield = static_cast<SpringFF*>(m_forcefield.get());
+	SpringFF* stiffspringforcefield = l_springFF.get();
+	if (stiffspringforcefield == nullptr)
+	{
+		msg_error() << " Error addJawSprings, no valid spring force field";
+		return;
+	}
+
 	SReal stiffness = d_stiffness.getValue();
 
 	for (GrabContactInfo* cInfo : m_contactInfos)
