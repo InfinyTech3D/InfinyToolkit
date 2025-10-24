@@ -150,7 +150,7 @@ void RefineCarvingPerformer::simpleCarving()
 {
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
-    helper::ReadAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->read(core::VecCoordId::position());
+    helper::ReadAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->read(sofa::core::vec_id::write_access::position);
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
 
     // check all tetra dist from carving element
@@ -179,7 +179,7 @@ void RefineCarvingPerformer::surfaceCarving()
 {
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(sofa::core::vec_id::write_access::position);
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
 
     // check all point to be considered
@@ -222,7 +222,7 @@ void RefineCarvingPerformer::surfaceCarving2()
 
     component::statecontainer::MechanicalObject< sofa::defaulttype::Vec3Types>* meca = nullptr;
     m_topologyCon->getContext()->get(meca);
-    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(core::VecCoordId::position());
+    helper::WriteAccessor< Data<sofa::defaulttype::Vec3Types::VecCoord> > vertices = meca->write(sofa::core::vec_id::write_access::position);
 
     sofa::component::topology::container::dynamic::TetrahedronSetGeometryAlgorithms< sofa::defaulttype::Vec3Types>* tetraGeo = nullptr;
     m_topologyCon->getContext()->get(tetraGeo);
