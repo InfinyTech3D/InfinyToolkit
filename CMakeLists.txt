@@ -35,6 +35,8 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.h
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.inl
+    ${INFINYTOOLKIT_SRC_DIR}/CenterLineForceField.h
+    ${INFINYTOOLKIT_SRC_DIR}/CenterLineForceField.inl
     ${INFINYTOOLKIT_SRC_DIR}/Triangle2RefinedTriangleTopologicalMapping.h
 
     ## Carving tools sections
@@ -67,6 +69,7 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/HapticEmulator.cpp
     ${INFINYTOOLKIT_SRC_DIR}/NeedleTracker.cpp
     ${INFINYTOOLKIT_SRC_DIR}/MiddleForceField.cpp
+    ${INFINYTOOLKIT_SRC_DIR}/CenterLineForceField.cpp
     ${INFINYTOOLKIT_SRC_DIR}/Triangle2RefinedTriangleTopologicalMapping.cpp
     
     ## Carving tools sections
