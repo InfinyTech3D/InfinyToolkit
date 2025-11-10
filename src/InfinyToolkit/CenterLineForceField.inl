@@ -30,6 +30,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/topology/TopologySubsetData.inl>
 #include <sofa/core/MechanicalParams.h>
+#include <sofa/simulation/AnimateBeginEvent.h>
 
 namespace sofa::infinytoolkit
 {
@@ -58,6 +59,7 @@ CenterLineForceField<DataTypes>::CenterLineForceField()
     addInput(&d_centers);
 
     addOutput(&d_outputPositions);
+	this->f_listening.setValue(true);
 }
 
 
@@ -113,6 +115,18 @@ void CenterLineForceField<DataTypes>::computeDistribution()
 {
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
+	//m_centersOrdered.resize(_centers.size());
+	m_centersOrdered = _centers;
+	std::sort(m_centersOrdered.begin(), m_centersOrdered.end(),
+		[](const Coord& a, const Coord& b) {
+            return a[1] > b[1];
+		});
+
+    for (size_t i = 0; i < _centers.size(); ++i)
+    {
+		std::cout << i << ": " << _centers[i] << " | " << m_centersOrdered[i] << std::endl;
+    }
+
 
     m_distribution.resize(_x.size());
 
@@ -125,8 +139,8 @@ void CenterLineForceField<DataTypes>::computeDistribution()
     for (size_t i = 0; i < _x.size(); ++i)
     {
         pt2 = _x[i];
-        auto it = std::min_element(_centers.begin(), _centers.end(), cmp);
-        m_distribution[i] = std::distance(_centers.begin(), it);
+        auto it = std::min_element(m_centersOrdered.begin(), m_centersOrdered.end(), cmp);
+        m_distribution[i] = std::distance(m_centersOrdered.begin(), it);
 	}
 }
 
@@ -160,55 +174,77 @@ void CenterLineForceField<DataTypes>::doUpdate()
     }
 
     // we apply a force proportional to the pace rate. 0 Force at start of pace, 0 at end, F at half pace
-    pacePercent = std::fmod(time, 2*pace) / (pace);
-    std::cout << "std::fmod(time, pace): " << std::fmod(time, pace) << std::endl;
-    std::cout << "std::fmod(time, pace)/2*pace: " << std::fmod(time, pace)/(2*pace) << std::endl;
-    std::cout << "pacePercent: " << pacePercent << std::endl;
+    pacePercent = std::fmod(time, pace) / pace;
+    //std::cout << "std::fmod(time, pace): " << std::fmod(time, pace) << std::endl;
+    //std::cout << "std::fmod(time, pace)/2*pace: " << std::fmod(time, pace)/(2*pace) << std::endl;
+    //std::cout << "pacePercent: " << pacePercent << std::endl;
 
 
 
-    Real factorForce = (pacePercent >= 0.5) ? 1 - pacePercent : pacePercent;
+    //Real factorForce = (pacePercent >= 0.5) ? 1 - pacePercent : pacePercent;
 
-    msg_info() << "Time: " << time << " -> pacePercent: " << pacePercent << " -> " << factorForce;
+    //msg_info() << "Time: " << time << " -> pacePercent: " << pacePercent << " -> " << factorForce;
 
 
 
-    const Real force = d_force.getValue() * factorForce;
-    const bool uniformF = d_uniformForce.getValue();
+   // const Real force = d_force.getValue() * factorForce;
+    //const bool uniformF = d_uniformForce.getValue();
 
     // G ---- X -- X0
 
+    const Real amplitude = 1.0;
+	const Real frequency = pace;    
+
+	
+	
+    //std::cout << "oscillation: " << oscillation << std::endl;
 
     for (size_t i = 0; i < inX.size(); ++i)
     {
-		const Coord& center = _centers[m_distribution[i]];
+        int centerId = m_distribution[i];
+
+		const Coord& center = m_centersOrdered[centerId];
         const Coord& p0 = inX[i];
         Coord dir = center - p0;
-		outX[i] = p0 + dir * factorForce;
+
+        Real omega = centerId * i;//2.0 * M_PI * frequency;
+		omega = omega/ m_distribution.size();
+        Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI + omega);
+        oscillation = 1.0_sreal - (oscillation + 1.0_sreal) / 2.0_sreal; // normalize between 0 and 1
+
+        outX[i] = p0 + dir * oscillation;
     }
-    
+	
+}
+
+template<class DataTypes>
+void CenterLineForceField<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
+{
+    //std::cout << "event" << std::endl;
+    if (simulation::AnimateBeginEvent::checkEventType(event))
+    {
+        d_positions.setDirtyOutputs();
+    }
 }
 
 
 template<class DataTypes>
 void CenterLineForceField<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
-    //if (!vparams->displayFlags().getShowForceFields() || !p_showForce.getValue()) {
-    //    return;
-    //}
+    if (/*!vparams->displayFlags().getShowForceFields() || */!p_showForce.getValue()) {
+        return;
+    }
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
     
-	d_positions.getValue();
-    sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x0 = d_positions;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_outputPositions;
-    sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
-    d_outputPositions.getValue();
+    //sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
+
     size_t nbPoints = _x.size();
     std::vector<sofa::type::Vec3> vertices;
     for (size_t i = 0; i < nbPoints; ++i)
     {
         vertices.emplace_back(_x[i]);
-        vertices.emplace_back(_centers[m_distribution[i]]);
+        vertices.emplace_back(m_centersOrdered[m_distribution[i]]);
     }
     vparams->drawTool()->drawLines(vertices, 1, sofa::type::RGBAColor(0, 1, 0, 1));
 }

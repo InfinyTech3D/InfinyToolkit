@@ -53,7 +53,7 @@ public:
     void init() override;
 
     void doUpdate() override;
-
+    void handleEvent(sofa::core::objectmodel::Event* event) override;
 
     // ForceField methods
 //    void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
@@ -74,6 +74,7 @@ public:
 
     /// List of coordinates points
     Data<VecCoord> d_centers;
+	VecCoord m_centersOrdered;
 
     /// Applied force to all points to simulate maximum compression.
     Data<Real> d_force;
@@ -110,6 +111,8 @@ private :
     std::chrono::time_point<std::chrono::system_clock> m_startTime;
 
 	std::vector<int> m_distribution;
+
+    Real m_startTimeWave = 1.0;
 
 }; // definition of the CenterLineForceField class
 
