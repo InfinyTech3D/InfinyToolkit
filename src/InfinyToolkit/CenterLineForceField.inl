@@ -90,6 +90,7 @@ void CenterLineForceField<DataTypes>::init()
 
     m_startTime = std::chrono::system_clock::now();
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
+	nextStart = d_pace.getValue() / length;
 }
 
 
@@ -177,44 +178,79 @@ void CenterLineForceField<DataTypes>::doUpdate()
     pacePercent = std::fmod(time, pace) / pace;
     //std::cout << "std::fmod(time, pace): " << std::fmod(time, pace) << std::endl;
     //std::cout << "std::fmod(time, pace)/2*pace: " << std::fmod(time, pace)/(2*pace) << std::endl;
-    //std::cout << "pacePercent: " << pacePercent << std::endl;
+	//std::cout << "time: " << time << " | pace: " << pace << " | pacePercent: " << pacePercent << std::endl;
 
+	if (time >= nextStart) // at every pace/2 we start moving a new center and stop previous one
+    {
+        centerStart++;
+        centerDone++;
 
-
-    //Real factorForce = (pacePercent >= 0.5) ? 1 - pacePercent : pacePercent;
-
-    //msg_info() << "Time: " << time << " -> pacePercent: " << pacePercent << " -> " << factorForce;
-
-
-
-   // const Real force = d_force.getValue() * factorForce;
-    //const bool uniformF = d_uniformForce.getValue();
+        //if (centerCurrent == 4)
+        {
+		/*	centerDone++;
+			centerCurrent = 0;*/
+            std::cout << "Center " << centerDone << " done at time " << time << std::endl;
+        }
+        
+        //centerDone++;
+        std::cout << "Center " << centerStart << " started at time " << time << std::endl;
+        
+		nextStart += pace / length;
+    }
 
     // G ---- X -- X0
 
-    const Real amplitude = 1.0;
+    const Real amplitude = 0.8;
 	const Real frequency = pace;    
 
-	
-	
     //std::cout << "oscillation: " << oscillation << std::endl;
-
+	//std::cout << "centerStart: " << centerStart << " | " << centerDone << " / " << _centers.size() << " centers done." << std::endl;
     for (size_t i = 0; i < inX.size(); ++i)
     {
         int centerId = m_distribution[i];
+
+        
+        if (centerId > centerStart || centerId <= centerDone )
+        {
+			outX[i] = inX[i];
+			continue;
+        }
 
 		const Coord& center = m_centersOrdered[centerId];
         const Coord& p0 = inX[i];
         Coord dir = center - p0;
 
-        Real omega = centerId * i;//2.0 * M_PI * frequency;
-		omega = omega/ m_distribution.size();
-        Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI + omega);
-        oscillation = 1.0_sreal - (oscillation + 1.0_sreal) / 2.0_sreal; // normalize between 0 and 1
+        //Real omega = centerId * i;//2.0 * M_PI * frequency;
+        //Real omega = Real(centerId) / Real(_centers.size()) * M_PI * 12;
+        Real omega = centerId * 2.0 * M_PI / length;
+		Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI - omega);
+        oscillation = amplitude - (oscillation + amplitude) / 2.0_sreal; // normalize between 0 and 0.9
+
+        // cos: [-1; 1]  1  -1  1
+        // [0; 2]   2   0   2
+		// [0; 1]   1   0   1
+		// [1; 0]   0   1   0
+        
+		// 0.9   -0.9   0.9
+		// 1.8    0      1.8
+		// 0.9    0      0.9
+		// 0     0.9    0
 
         outX[i] = p0 + dir * oscillation;
     }
 	
+
+
+    if (centerDone >= int(m_centersOrdered.size()) && pacePercent >= 0.99)
+    {
+        std::cout << "centerDone " << centerDone << " | " << m_centersOrdered.size() << std::endl;
+    
+        centerDone = -4;
+        centerStart = 0;
+        nextStart = time + pace / length;
+    }
+
+
 }
 
 template<class DataTypes>

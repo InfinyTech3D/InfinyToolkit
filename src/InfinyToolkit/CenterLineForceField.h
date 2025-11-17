@@ -113,6 +113,13 @@ private :
 	std::vector<int> m_distribution;
 
     Real m_startTimeWave = 1.0;
+    int centerDone = -4;
+    int centerStart = 0;
+    int centerCurrent = 0;
+    Real nextStart = 0.0;
+
+	Real length = 4.0_sreal;
+    //Real current
 
 }; // definition of the CenterLineForceField class
 
