@@ -23,7 +23,7 @@
  ****************************************************************************/
 #pragma once
 
-#include <InfinyToolkit/CenterLineForceField.h>
+#include <InfinyToolkit/ProximityOscillatorConstraint.h>
 #include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
@@ -36,25 +36,15 @@ namespace sofa::infinytoolkit
 {
 
 template<class DataTypes>
-CenterLineForceField<DataTypes>::CenterLineForceField()
+ProximityOscillatorConstraint<DataTypes>::ProximityOscillatorConstraint()
     : d_positions(initData(&d_positions, "position", "List of coordinates points"))
-    , d_restPositions(initData(&d_restPositions, "restPositions", "List of rest coordinates points"))
-	, d_outputPositions(initData(&d_outputPositions, "outputPositions", "List of output coordinates points"))
+    , d_outputPositions(initData(&d_outputPositions, "outputPositions", "List of output coordinates points"))
     , d_centers(initData(&d_centers, "centers", "List of center coordinates points"))
-    , d_force(initData(&d_force, 1.0_sreal, "force", "Applied force to all points to simulate maximum compression."))
-    , d_uniformForce(initData(&d_uniformForce, bool(false), "uniformForce", "If true, will apply the same force at each vertex otherwise will apply force proportional to the distance to the barycenter"))
     , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
-    
-    , d_stiffness(initData(&d_stiffness, 1000.0_sreal, "stiffness", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
-
-    
-    , d_refreshBaryRate(initData(&d_refreshBaryRate, (unsigned int)(0), "refreshBaryRate", "To recompute barycenter every X pace. 0 by default == no refresh"))
-    , p_showForce(initData(&p_showForce, bool(false), "showForce", "Parameter to display the force direction"))
-    , d_syncRealTime(initData(&d_syncRealTime, false, "syncRealTime", "Synchronize with the real time instead of simulation time."))
-    , d_frequency(initData(&d_frequency, 1.0_sreal, "frequency", "Frequency at which the full deflate+inflate is done, in Hz, i.e x/sec. Used if pace is not set."))
+	, d_amplitude(initData(&d_amplitude, 0.8_sreal, "amplitude", "Amplitude of the oscillation"))
+    , p_showMotion(initData(&p_showMotion, bool(false), "showMotion", "Parameter to display the force direction"))
     , m_startTime()
 { 
-    addInput(&d_restPositions);
     addInput(&d_positions);
     addInput(&d_centers);
 
@@ -64,7 +54,7 @@ CenterLineForceField<DataTypes>::CenterLineForceField()
 
 
 template<class DataTypes>
-void CenterLineForceField<DataTypes>::init()
+void ProximityOscillatorConstraint<DataTypes>::init()
 {
     size_t nbPoints = d_positions.getValue().size();
     if (nbPoints == 0)
@@ -74,16 +64,11 @@ void CenterLineForceField<DataTypes>::init()
         return;
     }
 
-    if (!d_pace.isSet() && !d_frequency.isSet())
+    if (!d_pace.isSet())
     {
-        msg_error() << "Neither Pace nor frequency are set. Won't be able to compute pace.";
+        msg_error() << "Pace is not set. Won't be able to compute pace.";
         sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
         return;
-    }
-
-    if (d_pace.isSet() && d_frequency.isSet())
-    {
-        msg_warning() << "Pace and frequency are both set. Will take into account the frequency value.";
     }
 
     computeDistribution();
@@ -95,39 +80,24 @@ void CenterLineForceField<DataTypes>::init()
 
 
 template<class DataTypes>
-void CenterLineForceField<DataTypes>::computeBarycenter()
-{
-    sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
-    
-    m_bary = Coord(0.0, 0.0, 0.0);
-    size_t nbPoints = _x.size();
-    for (size_t i = 0; i < nbPoints; ++i)
-    {
-        m_bary += _x[i];        
-    }
-
-    m_bary /= nbPoints;
-}
-
-
-
-template<class DataTypes>
-void CenterLineForceField<DataTypes>::computeDistribution()
+void ProximityOscillatorConstraint<DataTypes>::computeDistribution()
 {
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
-	//m_centersOrdered.resize(_centers.size());
+	
 	m_centersOrdered = _centers;
 	std::sort(m_centersOrdered.begin(), m_centersOrdered.end(),
 		[](const Coord& a, const Coord& b) {
             return a[1] > b[1];
 		});
 
-    for (size_t i = 0; i < _centers.size(); ++i)
+    if (f_printLog.getValue())
     {
-		std::cout << i << ": " << _centers[i] << " | " << m_centersOrdered[i] << std::endl;
+        for (size_t i = 0; i < _centers.size(); ++i)
+        {
+            std::cout << i << ": " << _centers[i] << " | " << m_centersOrdered[i] << std::endl;
+        }
     }
-
 
     m_distribution.resize(_x.size());
 
@@ -147,7 +117,7 @@ void CenterLineForceField<DataTypes>::computeDistribution()
 
 
 template<class DataTypes>
-void CenterLineForceField<DataTypes>::doUpdate()
+void ProximityOscillatorConstraint<DataTypes>::doUpdate()
 {
     if (sofa::core::objectmodel::BaseObject::d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
@@ -157,59 +127,28 @@ void CenterLineForceField<DataTypes>::doUpdate()
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
 
     outX.resize(inX.size());
-    Real pacePercent = 1.0_sreal;
-    Real time = 1.0_sreal;
+    Real time = this->getContext()->getTime();
 
-    const Real pace = (!d_frequency.isSet()) ? d_pace.getValue() : Real(1.0 / d_frequency.getValue());
-
-    if (d_syncRealTime.getValue())
-    {
-        using namespace std::chrono;
-
-        std::chrono::duration<Real> duration = system_clock::now() - m_startTime;
-        time = duration.count();
-    }
-    else
-    {
-        time = this->getContext()->getTime();
-    }
+    const Real pace = d_pace.getValue();
 
     // we apply a force proportional to the pace rate. 0 Force at start of pace, 0 at end, F at half pace
-    pacePercent = std::fmod(time, pace) / pace;
-    //std::cout << "std::fmod(time, pace): " << std::fmod(time, pace) << std::endl;
-    //std::cout << "std::fmod(time, pace)/2*pace: " << std::fmod(time, pace)/(2*pace) << std::endl;
-	//std::cout << "time: " << time << " | pace: " << pace << " | pacePercent: " << pacePercent << std::endl;
-
+    const Real pacePercent = std::fmod(time, pace) / pace;
+ 
 	if (time >= nextStart) // at every pace/2 we start moving a new center and stop previous one
     {
         centerStart++;
         centerDone++;
-
-        //if (centerCurrent == 4)
-        {
-		/*	centerDone++;
-			centerCurrent = 0;*/
-            std::cout << "Center " << centerDone << " done at time " << time << std::endl;
-        }
-        
-        //centerDone++;
-        std::cout << "Center " << centerStart << " started at time " << time << std::endl;
-        
 		nextStart += pace / length;
     }
 
     // G ---- X -- X0
 
-    const Real amplitude = 0.8;
+    const Real amplitude = d_amplitude.getValue();
 	const Real frequency = pace;    
 
-    //std::cout << "oscillation: " << oscillation << std::endl;
-	//std::cout << "centerStart: " << centerStart << " | " << centerDone << " / " << _centers.size() << " centers done." << std::endl;
     for (size_t i = 0; i < inX.size(); ++i)
     {
         int centerId = m_distribution[i];
-
-        
         if (centerId > centerStart || centerId <= centerDone )
         {
 			outX[i] = inX[i];
@@ -226,35 +165,22 @@ void CenterLineForceField<DataTypes>::doUpdate()
 		Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI - omega);
         oscillation = amplitude - (oscillation + amplitude) / 2.0_sreal; // normalize between 0 and 0.9
 
-        // cos: [-1; 1]  1  -1  1
-        // [0; 2]   2   0   2
-		// [0; 1]   1   0   1
-		// [1; 0]   0   1   0
-        
-		// 0.9   -0.9   0.9
-		// 1.8    0      1.8
-		// 0.9    0      0.9
-		// 0     0.9    0
-
         outX[i] = p0 + dir * oscillation;
     }
-	
-
 
     if (centerDone >= int(m_centersOrdered.size()) && pacePercent >= 0.99)
     {
-        std::cout << "centerDone " << centerDone << " | " << m_centersOrdered.size() << std::endl;
+		if (f_printLog.getValue())
+            std::cout << "centerDone " << centerDone << " | " << m_centersOrdered.size() << std::endl;
     
         centerDone = -4;
         centerStart = 0;
         nextStart = time + pace / length;
     }
-
-
 }
 
 template<class DataTypes>
-void CenterLineForceField<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
+void ProximityOscillatorConstraint<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
 {
     //std::cout << "event" << std::endl;
     if (simulation::AnimateBeginEvent::checkEventType(event))
@@ -265,9 +191,9 @@ void CenterLineForceField<DataTypes>::handleEvent(sofa::core::objectmodel::Event
 
 
 template<class DataTypes>
-void CenterLineForceField<DataTypes>::draw(const core::visual::VisualParams* vparams)
+void ProximityOscillatorConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
-    if (/*!vparams->displayFlags().getShowForceFields() || */!p_showForce.getValue()) {
+    if (!p_showMotion.getValue()) {
         return;
     }
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();

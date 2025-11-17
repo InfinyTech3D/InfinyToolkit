@@ -35,10 +35,10 @@ namespace sofa::infinytoolkit
 /** Apply forces changing to given degres of freedom. Some keyTimes are given
 * and the force to be applied is linearly interpolated between keyTimes. */
 template<class DataTypes>
-class CenterLineForceField : public DataEngine
+class ProximityOscillatorConstraint : public DataEngine
 {
 public:
-    SOFA_CLASS(SOFA_TEMPLATE(CenterLineForceField, DataTypes), core::DataEngine);
+    SOFA_CLASS(SOFA_TEMPLATE(ProximityOscillatorConstraint, DataTypes), core::DataEngine);
 
     using VecCoord = typename DataTypes::VecCoord;
     using VecDeriv = typename DataTypes::VecDeriv;
@@ -48,15 +48,12 @@ public:
     using DataVecCoord = core::objectmodel::Data<VecCoord>;
     using DataVecDeriv = core::objectmodel::Data<VecDeriv>;
     
-    CenterLineForceField();
+    ProximityOscillatorConstraint();
 
     void init() override;
 
     void doUpdate() override;
     void handleEvent(sofa::core::objectmodel::Event* event) override;
-
-    // ForceField methods
-//    void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
 
     void draw(const core::visual::VisualParams* vparams) override;
 
@@ -69,44 +66,21 @@ protected:
 public:
     /// List of coordinates points
     Data<VecCoord> d_positions;
-    Data<VecCoord> d_restPositions;
     Data<VecCoord> d_outputPositions;
 
     /// List of coordinates points
     Data<VecCoord> d_centers;
 	VecCoord m_centersOrdered;
 
-    /// Applied force to all points to simulate maximum compression.
-    Data<Real> d_force;
-
-    /// If true, will apply the same force at each vertex otherwise will apply force proportional to the distance to the barycenter
-    Data<bool> d_uniformForce;
-
     /// Time to perform a full Pace (deflate + inflate). Same scale as the simulation time.
     Data<Real> d_pace;
 
-    /// To recompute barycenter every X pace. 0 by default == no refresh
-    Data<unsigned int> d_refreshBaryRate;
-
-    Data<Real> d_stiffness;
-
+    Data<Real> d_amplitude;
 
     /// Parameter to display the force direction
-    Data<bool> p_showForce;
-
-    // Synchronize with real time (instead of simulation time)
-    Data<bool> d_syncRealTime;
-
-    // Frequency at which a full deflate+inflate is done
-    Data<Real> d_frequency;
+    Data<bool> p_showMotion;
     
 private :
-    /// Computed barycenter of the given positions @sa d_positions
-    Coord m_bary;
-
-    /// counter to the last pace the barycenter has been refreshed. To be used with @sa d_refreshBaryRate
-    unsigned int m_lastBaryRefresh = 0;
-
     // keep trace of the latest time we measured
     std::chrono::time_point<std::chrono::system_clock> m_startTime;
 
@@ -121,12 +95,12 @@ private :
 	Real length = 4.0_sreal;
     //Real current
 
-}; // definition of the CenterLineForceField class
+}; // definition of the ProximityOscillatorConstraint class
 
 
 
-#if !defined(SOFA_COMPONENT_FORCEFIELD_CenterLineForceField_CPP)
-extern template class SOFA_INFINYTOOLKIT_API CenterLineForceField<sofa::defaulttype::Vec3Types>;
-#endif //  !defined(SOFA_COMPONENT_FORCEFIELD_CenterLineForceField_CPP)
+#if !defined(SOFA_COMPONENT_FORCEFIELD_ProximityOscillatorConstraint_CPP)
+extern template class SOFA_INFINYTOOLKIT_API ProximityOscillatorConstraint<sofa::defaulttype::Vec3Types>;
+#endif //  !defined(SOFA_COMPONENT_FORCEFIELD_ProximityOscillatorConstraint_CPP)
 
 } // namespace sofa::infinytoolkit

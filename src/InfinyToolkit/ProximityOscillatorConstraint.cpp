@@ -22,22 +22,22 @@
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
 
-#define SOFA_COMPONENT_FORCEFIELD_CenterLineForceField_CPP
+#define SOFA_COMPONENT_FORCEFIELD_ProximityOscillatorConstraint_CPP
 
 #include <sofa/core/ObjectFactory.h>
-#include <InfinyToolkit/CenterLineForceField.inl>
+#include <InfinyToolkit/ProximityOscillatorConstraint.inl>
 
 namespace sofa::infinytoolkit
 {
 
 using namespace sofa::defaulttype;
 
-void registerCenterLineForceField(sofa::core::ObjectFactory* factory)
+void registerProximityOscillatorConstraint(sofa::core::ObjectFactory* factory)
 {
     factory->registerObjects(sofa::core::ObjectRegistrationData("Middle interpolated force applied to given degrees of freedom.")
-        .add< CenterLineForceField<Vec3Types> >());
+        .add< ProximityOscillatorConstraint<Vec3Types> >());
 }
 
-template class SOFA_INFINYTOOLKIT_API CenterLineForceField<Vec3Types>;
+template class SOFA_INFINYTOOLKIT_API ProximityOscillatorConstraint<Vec3Types>;
 
 } // namespace sofa::infinytoolkit
