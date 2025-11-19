@@ -41,15 +41,15 @@ ProximityOscillatorConstraint<DataTypes>::ProximityOscillatorConstraint()
     , d_outputPositions(initData(&d_outputPositions, "outputPositions", "List of output coordinates points"))
     , d_centers(initData(&d_centers, "centers", "List of center coordinates points"))
     , d_pace(initData(&d_pace, 1.0_sreal, "pace", "Time to perform a full Pace (deflate + inflate). Same scale as the simulation time."))
-	, d_amplitude(initData(&d_amplitude, 0.8_sreal, "amplitude", "Amplitude of the oscillation"))
+    , d_amplitude(initData(&d_amplitude, 0.8_sreal, "amplitude", "Amplitude of the oscillation"))
     , p_showMotion(initData(&p_showMotion, bool(false), "showMotion", "Parameter to display the force direction"))
     , m_startTime()
-{ 
+{
     addInput(&d_positions);
     addInput(&d_centers);
 
     addOutput(&d_outputPositions);
-	this->f_listening.setValue(true);
+    this->f_listening.setValue(true);
 }
 
 
@@ -75,7 +75,7 @@ void ProximityOscillatorConstraint<DataTypes>::init()
 
     m_startTime = std::chrono::system_clock::now();
     sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
-	nextStart = d_pace.getValue() / length;
+    nextStart = d_pace.getValue() / length;
 }
 
 
@@ -84,12 +84,12 @@ void ProximityOscillatorConstraint<DataTypes>::computeDistribution()
 {
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_positions;
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
-	
-	m_centersOrdered = _centers;
-	std::sort(m_centersOrdered.begin(), m_centersOrdered.end(),
-		[](const Coord& a, const Coord& b) {
+
+    m_centersOrdered = _centers;
+    std::sort(m_centersOrdered.begin(), m_centersOrdered.end(),
+        [](const Coord& a, const Coord& b) {
             return a[1] > b[1];
-		});
+        });
 
     if (f_printLog.getValue())
     {
@@ -105,14 +105,14 @@ void ProximityOscillatorConstraint<DataTypes>::computeDistribution()
     auto dist = [](const Coord& a, const Coord& b) { return (b - a).norm(); };
     auto cmp = [&pt2, &dist](const Coord& a, const Coord& b) {
         return dist(a, pt2) < dist(b, pt2);
-    };
+        };
 
     for (size_t i = 0; i < _x.size(); ++i)
     {
         pt2 = _x[i];
         auto it = std::min_element(m_centersOrdered.begin(), m_centersOrdered.end(), cmp);
         m_distribution[i] = std::distance(m_centersOrdered.begin(), it);
-	}
+    }
 }
 
 
@@ -133,36 +133,36 @@ void ProximityOscillatorConstraint<DataTypes>::doUpdate()
 
     // we apply a force proportional to the pace rate. 0 Force at start of pace, 0 at end, F at half pace
     const Real pacePercent = std::fmod(time, pace) / pace;
- 
-	if (time >= nextStart) // at every pace/2 we start moving a new center and stop previous one
+
+    if (time >= nextStart) // at every pace/2 we start moving a new center and stop previous one
     {
         centerStart++;
         centerDone++;
-		nextStart += pace / length;
+        nextStart += pace / length;
     }
 
     // G ---- X -- X0
 
     const Real amplitude = d_amplitude.getValue();
-	const Real frequency = pace;    
+    const Real frequency = pace;
 
     for (size_t i = 0; i < inX.size(); ++i)
     {
         int centerId = m_distribution[i];
-        if (centerId > centerStart || centerId <= centerDone )
+        if (centerId > centerStart || centerId <= centerDone)
         {
-			outX[i] = inX[i];
-			continue;
+            outX[i] = inX[i];
+            continue;
         }
 
-		const Coord& center = m_centersOrdered[centerId];
+        const Coord& center = m_centersOrdered[centerId];
         const Coord& p0 = inX[i];
         Coord dir = center - p0;
 
         //Real omega = centerId * i;//2.0 * M_PI * frequency;
         //Real omega = Real(centerId) / Real(_centers.size()) * M_PI * 12;
         Real omega = centerId * 2.0 * M_PI / length;
-		Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI - omega);
+        Real oscillation = amplitude * std::cos(pacePercent * 2.0 * M_PI - omega);
         oscillation = amplitude - (oscillation + amplitude) / 2.0_sreal; // normalize between 0 and 0.9
 
         outX[i] = p0 + dir * oscillation;
@@ -170,9 +170,9 @@ void ProximityOscillatorConstraint<DataTypes>::doUpdate()
 
     if (centerDone >= int(m_centersOrdered.size()) && pacePercent >= 0.99)
     {
-		if (f_printLog.getValue())
+        if (f_printLog.getValue())
             std::cout << "centerDone " << centerDone << " | " << m_centersOrdered.size() << std::endl;
-    
+
         centerDone = -4;
         centerStart = 0;
         nextStart = time + pace / length;
@@ -197,7 +197,7 @@ void ProximityOscillatorConstraint<DataTypes>::draw(const core::visual::VisualPa
         return;
     }
     const auto stateLifeCycle = vparams->drawTool()->makeStateLifeCycle();
-    
+
     sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _x = d_outputPositions;
     //sofa::helper::ReadAccessor< core::objectmodel::Data< VecCoord > > _centers = d_centers;
 
