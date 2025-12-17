@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-14, windows-2022]
-        sofa_branch: [v25.06]
+        sofa_branch: [master]
 
     steps:
       - name: Setup SOFA and environment
@@ -68,6 +68,7 @@ jobs:
           echo "artifact_name=$artifact_name" >> $env:GITHUB_OUTPUT
           
       - name: Create artifact
+        id: create-artifact
         uses: actions/upload-artifact@v4.4.0
         with:
           name: ${{ steps.sanitize.outputs.artifact_name }}
@@ -101,6 +102,7 @@ jobs:
           fi
 
       - name: Fetch, install and run Regression_test
+        id: regression-test
         if: always()
         shell: bash
         run: |
@@ -115,6 +117,7 @@ jobs:
             # Setup mandatory env vars
             export REGRESSION_SCENES_DIR="${WORKSPACE_SRC_PATH}/examples"
             export REGRESSION_REFERENCES_DIR="${WORKSPACE_SRC_PATH}/regression/references"
+            export PYTHONPATH=$SOFA_ROOT/plugins/SofaPython3/lib/python3/site-packages
             # Run regression test bench
             ${SOFA_ROOT}/bin/Regression_test${{ steps.sofa.outputs.exe }}
           else
@@ -145,7 +148,8 @@ jobs:
         with:
           name: ${{ github.ref_name }}
           tag_name: release-${{ github.ref_name }}
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
+          target_commitish: ${{ github.sha }}
           files: |
             artifacts/InfinyToolkit_*_Linux.zip
             artifacts/InfinyToolkit_*_Windows.zip
