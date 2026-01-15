@@ -48,6 +48,7 @@ extern void registerGridBaryCentersPositions(sofa::core::ObjectFactory* factory)
 
 // FF
 extern void registerMiddleForceField(sofa::core::ObjectFactory* factory);
+extern void registerProximityOscillatorConstraint(sofa::core::ObjectFactory* factory);
 
 // Topology
 extern void registerTriangle2RefinedTriangleTopologicalMapping(sofa::core::ObjectFactory* factory);
@@ -135,6 +136,7 @@ void registerObjects(sofa::core::ObjectFactory* factory)
 
     // FF
     registerMiddleForceField(factory);
+    registerProximityOscillatorConstraint(factory);
 
     // Topology
     registerTriangle2RefinedTriangleTopologicalMapping(factory);
