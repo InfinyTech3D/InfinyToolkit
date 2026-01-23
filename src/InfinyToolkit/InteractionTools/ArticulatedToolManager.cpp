@@ -453,6 +453,9 @@ void ArticulatedToolManager::filterCollision()
 
             if (c.elem.first.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.first.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // first model is a jaw
             {
+    			if (!c.elem.second.getCollisionModel()->getTags().includes(this->getTags()))
+					continue;
+
                 info->idTool = c.elem.first.getIndex(); // id of the tool collision model
                 if (c.elem.second.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
                 {
@@ -469,6 +472,9 @@ void ArticulatedToolManager::filterCollision()
             }
             else if (c.elem.second.getCollisionModel() == l_jawModel1.get()->l_jawCollision.get() || c.elem.second.getCollisionModel() == l_jawModel2.get()->l_jawCollision.get()) // second model is a jaw
             {
+                if (!c.elem.first.getCollisionModel()->getTags().includes(this->getTags()))
+                    continue;
+
                 info->idTool = c.elem.second.getIndex();
                 if (c.elem.first.getCollisionModel()->getEnumType() == sofa::core::CollisionModel::TRIANGLE_TYPE) // first model is triangle model
                 {
