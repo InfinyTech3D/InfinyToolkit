@@ -58,6 +58,13 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
+
+    ## Replay motion controller
+    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.h
+    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.inl
+
+
+    
 )
 
 set(SOURCE_FILES
@@ -91,6 +98,11 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
+
+    ## Replay motion controller
+    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.cpp
+
+
 )
 
 # Add component for carving using refinement mesh
