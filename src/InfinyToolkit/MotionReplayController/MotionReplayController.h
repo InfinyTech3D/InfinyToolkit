@@ -47,22 +47,30 @@ public:
         SOFA_TEMPLATE(sofa::component::controller::MechanicalStateController, DataTypes)
     );
 
-    //using Inherit = sofa::component::controller::MechanicalStateController<DataTypes>;
+    using Inherit = sofa::component::controller::MechanicalStateController<DataTypes>;
+    using Coord    = typename DataTypes::Coord;
+    using VecCoord = typename DataTypes::VecCoord;
+    using Real     = typename DataTypes::Real;
 
     MotionReplayController();
     ~MotionReplayController() override = default;
 
-    void init() override;
-    void handleEvent(sofa::core::objectmodel::Event* event) override;
+   void init() override;
+   void handleEvent(sofa::core::objectmodel::Event* event) override;
 
 private:
     sofa::core::objectmodel::Data<std::string> d_motionFile;
     sofa::core::objectmodel::Data<double> d_dt;
 
-    //std::vector<std::vector<Coord>> frames;
+    std::vector<VecCoord> frames;
     size_t currentIndex;
 
     void loadMotion();
 };
+
+#if !defined(SOFA_COMPONENT_MOTIONREPLAYCONTROLLER_CPP)
+extern template class SOFA_INFINYTOOLKIT_API MotionReplayController<sofa::defaulttype::Vec3Types>;
+#endif 
+
 
 } // namespace sofa::infinytoolkit

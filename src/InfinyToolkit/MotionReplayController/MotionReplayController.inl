@@ -49,122 +49,123 @@ MotionReplayController<DataTypes>::MotionReplayController()
 template <class DataTypes>
 void MotionReplayController<DataTypes>::init()
     {
-       //this->Inherit::init();
-        //loadMotion();
+        this->Inherit::init();
+        loadMotion();
     }
 
  
 template <class DataTypes>
 void MotionReplayController<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
+   {
+       if (!sofa::simulation::AnimateBeginEvent::checkEventType(event))
+           return;
+
+       if (frames.empty())
+           return;
+
+       auto* mstate = this->getMechanicalState();
+       if (!mstate)
+       {
+           msg_error() << "[MotionReplay] MechanicalState is null!";
+           return;
+       }
+
+       // Always loop like Python version
+       if (currentIndex >= frames.size())
+           currentIndex = 0;
+
+       auto positions = mstate->writePositions();
+
+       if (positions.size() != frames[currentIndex].size())
+       {
+           msg_error() << "[MotionReplay] Frame size mismatch: "
+               << "MO points = " << positions.size()
+               << ", frame points = " << frames[currentIndex].size();
+           return;
+       }
+
+       for (size_t i = 0; i < positions.size(); ++i)
+       {
+           positions[i] = Coord(
+               static_cast<Real>(frames[currentIndex][i][0]),
+               static_cast<Real>(frames[currentIndex][i][1]),
+               static_cast<Real>(frames[currentIndex][i][2])
+           );
+       }
+
+       ++currentIndex;
+   }
+
+template <class DataTypes>
+ void MotionReplayController<DataTypes>::loadMotion()
     {
-    //    if (!sofa::simulation::AnimateBeginEvent::checkEventType(event))
-    //        return;
+        frames.clear();
+        currentIndex = 0;
 
-    //    if (frames.empty())
-    //        return;
+        std::string filename = d_motionFile.getValue();
+        
+        if (filename.empty())
+        {
+            msg_error() << "[MotionReplay] motionFile not specified!";
+            return;
+        }
 
-    //    auto* mstate = this->getMechanicalState();
-    //    if (!mstate)
-    //    {
-    //        msg_error() << "[MotionReplay] MechanicalState is null!";
-    //        return;
-    //    }
+        std::ifstream file(filename);
+        if (!file.is_open())
+        {
+            msg_error() << "[MotionReplay] Cannot open file: " << filename;
+            return;
+        }
 
-    //    // Always loop like Python version
-    //    if (currentIndex >= frames.size())
-    //        currentIndex = 0;
+        auto* mstate = this->getMechanicalState();
+        if (!mstate)
+        {
+            msg_error() << "[MotionReplay] MechanicalState is null!";
+            return;
+        }
 
-    //    auto positions = mstate->writePositions();
+        size_t numPoints = mstate->getSize();
 
-    //    if (positions.size() != frames[currentIndex].size())
-    //    {
-    //        msg_error() << "[MotionReplay] Frame size mismatch: "
-    //            << "MO points = " << positions.size()
-    //            << ", frame points = " << frames[currentIndex].size();
-    //        return;
-    //    }
+        std::string line;
+        size_t lineNumber = 0;
+        while (std::getline(file, line))
+        {
+            ++lineNumber;
+            std::stringstream ss(line);
+            std::string value;
 
-    //    for (size_t i = 0; i < positions.size(); ++i)
-    //    {
-    //        positions[i] = sofa::defaulttype::Vec3Types::Coord(
-    //            static_cast<Real>(frames[currentIndex][i][0]),
-    //            static_cast<Real>(frames[currentIndex][i][1]),
-    //            static_cast<Real>(frames[currentIndex][i][2])
-    //        );
-    //    }
+            std::vector<double> values;
+            while (std::getline(ss, value, ','))
+            {
+                values.push_back(std::stod(value));
+            }
 
-    //    ++currentIndex;
-    //}
+            if (values.size() != numPoints * 3)
+            {
+                msg_error() << "[MotionReplay] Line " << lineNumber
+                    << ": expected " << numPoints * 3
+                    << " values, got " << values.size();
+                frames.clear();
+                return;
+            }
 
-    //void MotionReplayController::loadMotion()
-    //{
-    //    frames.clear();
-    //    currentIndex = 0;
+            VecCoord frame;
+            frame.reserve(numPoints);
 
-    //    std::string filename = d_motionFile.getValue();
-    //    
-    //    if (filename.empty())
-    //    {
-    //        msg_error() << "[MotionReplay] motionFile not specified!";
-    //        return;
-    //    }
+            for (size_t i = 0; i < numPoints; ++i)
+            {
+                Coord c;
+                c[0] = static_cast<DataTypes::Real>(values[3 * i + 0]);
+                c[1] = static_cast<DataTypes::Real>(values[3 * i + 1]);
+                c[2] = static_cast<DataTypes::Real>(values[3 * i + 2]);
+                frame.push_back(c);
+            }
 
-    //    std::ifstream file(filename);
-    //    if (!file.is_open())
-    //    {
-    //        msg_error() << "[MotionReplay] Cannot open file: " << filename;
-    //        return;
-    //    }
+            frames.push_back(std::move(frame));
+        }
 
-    //    auto* mstate = this->getMechanicalState();
-    //    if (!mstate)
-    //    {
-    //        msg_error() << "[MotionReplay] MechanicalState is null!";
-    //        return;
-    //    }
-
-    //    size_t numPoints = mstate->getSize();
-
-    //    std::string line;
-    //    size_t lineNumber = 0;
-    //    while (std::getline(file, line))
-    //    {
-    //        ++lineNumber;
-    //        std::stringstream ss(line);
-    //        std::string value;
-
-    //        std::vector<double> values;
-    //        while (std::getline(ss, value, ','))
-    //        {
-    //            values.push_back(std::stod(value));
-    //        }
-
-    //        if (values.size() != numPoints * 3)
-    //        {
-    //            msg_error() << "[MotionReplay] Line " << lineNumber
-    //                << ": expected " << numPoints * 3
-    //                << " values, got " << values.size();
-    //            frames.clear();
-    //            return;
-    //        }
-
-    //        std::vector<Coord> frame;
-    //        frame.reserve(numPoints);
-
-    //        for (size_t i = 0; i < numPoints; ++i)
-    //        {
-    //            Coord c;
-    //            c[0] = static_cast<DataTypes::Real>(values[3 * i + 0]);
-    //            c[1] = static_cast<DataTypes::Real>(values[3 * i + 1]);
-    //            c[2] = static_cast<DataTypes::Real>(values[3 * i + 2]);
-    //            frame.push_back(c);
-    //        }
-
-    //        frames.push_back(std::move(frame));
-    //    }
-
-    //    msg_info() << "[MotionReplay] Loaded " << frames.size()
-    //        << " frames from " << filename;
+        msg_info() << "[MotionReplay] Loaded " << frames.size()
+            << " frames from " << filename;
     }
 
 } // namespace sofa::infinytoolkit
