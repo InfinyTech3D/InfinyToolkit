@@ -58,6 +58,8 @@ extern void registerNeedleTracker(sofa::core::ObjectFactory* factory);
 extern void registerPliersPositionsMapper(sofa::core::ObjectFactory* factory);
 extern void registerRotationEngine(sofa::core::ObjectFactory* factory);
 
+// Heart Motion Replayer
+extern void registerMotionReplayController(sofa::core::ObjectFactory* factory);
 
 
 
