@@ -25,6 +25,8 @@
 #define SOFA_COMPONENT_MOTIONREPLAYCONTROLLER_CPP
 
 #include <sofa/core/ObjectFactory.h>
+
+#include <InfinyToolkit/MotionReplayController/MotionReplayController.h>
 #include <InfinyToolkit/MotionReplayController/MotionReplayController.inl>
 
 namespace sofa::infinytoolkit
@@ -36,10 +38,9 @@ void registerMotionReplayController(sofa::core::ObjectFactory* factory)
 {
     factory->registerObjects(
         sofa::core::ObjectRegistrationData("Motion replay controller to induce the heart motion.")
-            .add< MotionReplayController<Vec3Types> >()
+            .add< MotionReplayController >()
     );
 }
 
-template class SOFA_INFINYTOOLKIT_API MotionReplayController<Vec3Types>;
 
 } // namespace sofa::infinytoolkit

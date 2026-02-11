@@ -25,7 +25,8 @@
 
 #include <InfinyToolkit/config.h>
 
-#include <sofa/component/controller/MechanicalStateController.h>
+#include <sofa/component/controller/Controller.h>
+#include <sofa/type/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/objectmodel/Data.h>
 #include <sofa/core/objectmodel/Event.h>
@@ -36,41 +37,39 @@
 namespace sofa::infinytoolkit
 {
 
-
-template<class DataTypes>
 class MotionReplayController
-    : public sofa::component::controller::MechanicalStateController<DataTypes>
+    : public sofa::component::controller::Controller
 {
 public:
-    SOFA_CLASS(
-        SOFA_TEMPLATE(MotionReplayController, DataTypes),
-        SOFA_TEMPLATE(sofa::component::controller::MechanicalStateController, DataTypes)
-    );
-
-    using Inherit = sofa::component::controller::MechanicalStateController<DataTypes>;
-    using Coord    = typename DataTypes::Coord;
-    using VecCoord = typename DataTypes::VecCoord;
-    using Real     = typename DataTypes::Real;
-
+   
+    SOFA_CLASS(MotionReplayController,
+                sofa::component::controller::Controller);
+    
     MotionReplayController();
     ~MotionReplayController() override = default;
 
+
+   using Coord = sofa::type::Vec3d;
+   using VecCoord = std::vector<Coord>;
+
+
+   
    void init() override;
    void handleEvent(sofa::core::objectmodel::Event* event) override;
 
 private:
-    sofa::core::objectmodel::Data<std::string> d_motionFile;
-    sofa::core::objectmodel::Data<double> d_dt;
+    
+    sofa::core::objectmodel::Data<std::string> d_motionFile; /// CSV file containing the frames
+    sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
 
+    sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>* mGridState{nullptr}; ///Controlled grid
+    
     std::vector<VecCoord> frames;
-    size_t currentIndex;
+    
+    size_t currentIndex{0};
 
     void loadMotion();
 };
-
-#if !defined(SOFA_COMPONENT_MOTIONREPLAYCONTROLLER_CPP)
-extern template class SOFA_INFINYTOOLKIT_API MotionReplayController<sofa::defaulttype::Vec3Types>;
-#endif 
 
 
 } // namespace sofa::infinytoolkit

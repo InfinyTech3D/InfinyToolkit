@@ -24,6 +24,9 @@
 #pragma once
 
 #include <InfinyToolkit/MotionReplayController/MotionReplayController.h>
+#include <sofa/core/behavior/MechanicalState.h>
+#include <sofa/component/statecontainer/MechanicalObject.h>
+
 
 #include <sofa/core/objectmodel/Context.h>
 #include <sofa/helper/logging/Messaging.h>
@@ -36,26 +39,31 @@
 namespace sofa::infinytoolkit
 {
 
+MotionReplayController::MotionReplayController()
+    : d_motionFile(initData(&d_motionFile, "", "motionFile",
+        "Path to CSV motion file, where each row contains one frame."))
+    , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
+    {
+    }
+
+void MotionReplayController::init()
+    {
     
-template <class DataTypes>
-MotionReplayController<DataTypes>::MotionReplayController()
-        : d_motionFile(initData(&d_motionFile, "", "motionFile", "Path to CSV motion file, where each row contains one frame."))
-        , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
-        , currentIndex(0)
+
+    mGridState = this->getContext()->get<sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>>();
+
+    if (!mGridState)
     {
+        msg_error() << "[MotionReplay] MechanicalState is null!";
+        return;
+    }
+
+    loadMotion();
+        
     }
 
  
-template <class DataTypes>
-void MotionReplayController<DataTypes>::init()
-    {
-        this->Inherit::init();
-        loadMotion();
-    }
-
- 
-template <class DataTypes>
-void MotionReplayController<DataTypes>::handleEvent(sofa::core::objectmodel::Event* event)
+void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
    {
        if (!sofa::simulation::AnimateBeginEvent::checkEventType(event))
            return;
@@ -63,18 +71,12 @@ void MotionReplayController<DataTypes>::handleEvent(sofa::core::objectmodel::Eve
        if (frames.empty())
            return;
 
-       auto* mstate = this->getMechanicalState();
-       if (!mstate)
-       {
-           msg_error() << "[MotionReplay] MechanicalState is null!";
-           return;
-       }
 
        // Always loop like Python version
        if (currentIndex >= frames.size())
            currentIndex = 0;
 
-       auto positions = mstate->writePositions();
+       auto positions =  mGridState->writePositions();
 
        if (positions.size() != frames[currentIndex].size())
        {
@@ -87,17 +89,16 @@ void MotionReplayController<DataTypes>::handleEvent(sofa::core::objectmodel::Eve
        for (size_t i = 0; i < positions.size(); ++i)
        {
            positions[i] = Coord(
-               static_cast<Real>(frames[currentIndex][i][0]),
-               static_cast<Real>(frames[currentIndex][i][1]),
-               static_cast<Real>(frames[currentIndex][i][2])
-           );
+               frames[currentIndex][i][0],
+               frames[currentIndex][i][1],
+               frames[currentIndex][i][2]);           
        }
 
        ++currentIndex;
    }
 
-template <class DataTypes>
- void MotionReplayController<DataTypes>::loadMotion()
+
+ void MotionReplayController::loadMotion()
     {
         frames.clear();
         currentIndex = 0;
@@ -117,14 +118,7 @@ template <class DataTypes>
             return;
         }
 
-        auto* mstate = this->getMechanicalState();
-        if (!mstate)
-        {
-            msg_error() << "[MotionReplay] MechanicalState is null!";
-            return;
-        }
-
-        size_t numPoints = mstate->getSize();
+        size_t numPoints = mGridState->getSize();
 
         std::string line;
         size_t lineNumber = 0;
@@ -150,15 +144,15 @@ template <class DataTypes>
             }
 
             VecCoord frame;
-            frame.reserve(numPoints);
+            frame.reserve(numPoints); // have to be checked
 
             for (size_t i = 0; i < numPoints; ++i)
             {
                 Coord c;
-                c[0] = static_cast<DataTypes::Real>(values[3 * i + 0]);
-                c[1] = static_cast<DataTypes::Real>(values[3 * i + 1]);
-                c[2] = static_cast<DataTypes::Real>(values[3 * i + 2]);
-                frame.push_back(c);
+               c[0] = values[3 * i + 0];
+               c[1] = values[3 * i + 1];
+               c[2] = values[3 * i + 2];
+               frame.push_back(c);
             }
 
             frames.push_back(std::move(frame));
@@ -167,5 +161,7 @@ template <class DataTypes>
         msg_info() << "[MotionReplay] Loaded " << frames.size()
             << " frames from " << filename;
     }
+
+
 
 } // namespace sofa::infinytoolkit
