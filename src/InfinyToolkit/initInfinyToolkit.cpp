@@ -147,6 +147,9 @@ void registerObjects(sofa::core::ObjectFactory* factory)
     registerNeedleTracker(factory);
     registerPliersPositionsMapper(factory);
     registerRotationEngine(factory);
+
+    // Heart Motion Replayer
+    registerMotionReplayController(factory);
 }
 
 } // namespace sofa::component
