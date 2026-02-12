@@ -30,6 +30,7 @@
 
 #include <sofa/core/objectmodel/Context.h>
 #include <sofa/helper/logging/Messaging.h>
+#include <sofa/helper/system/FileRepository.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 
 #include <fstream>
@@ -40,7 +41,7 @@ namespace sofa::infinytoolkit
 {
 
 MotionReplayController::MotionReplayController()
-    : d_motionFile(initData(&d_motionFile, "", "motionFile",
+    : d_motionFile(initData(&d_motionFile, "motionFile",
         "Path to CSV motion file, where each row contains one frame."))
     , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
     {
@@ -48,15 +49,15 @@ MotionReplayController::MotionReplayController()
 
 void MotionReplayController::init()
     {
-    
-
-    mGridState = this->getContext()->get<sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>>();
+        mGridState = this->getContext()->get<sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>>();
 
     if (!mGridState)
     {
         msg_error() << "[MotionReplay] MechanicalState is null!";
         return;
     }
+
+    this->f_listening.setValue(true);
 
     loadMotion();
         
@@ -65,12 +66,12 @@ void MotionReplayController::init()
  
 void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
    {
+           
        if (!sofa::simulation::AnimateBeginEvent::checkEventType(event))
            return;
 
        if (frames.empty())
            return;
-
 
        // Always loop like Python version
        if (currentIndex >= frames.size())
@@ -97,21 +98,22 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
        ++currentIndex;
    }
 
-
  void MotionReplayController::loadMotion()
     {
         frames.clear();
         currentIndex = 0;
 
         std::string filename = d_motionFile.getValue();
-        
+
+
         if (filename.empty())
         {
             msg_error() << "[MotionReplay] motionFile not specified!";
             return;
         }
 
-        std::ifstream file(filename);
+        std::string fullpath = sofa::helper::system::DataRepository.getFile(filename);
+        std::ifstream file(fullpath);
         if (!file.is_open())
         {
             msg_error() << "[MotionReplay] Cannot open file: " << filename;
