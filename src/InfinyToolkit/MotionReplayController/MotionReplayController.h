@@ -26,10 +26,12 @@
 #include <InfinyToolkit/config.h>
 
 #include <sofa/component/controller/Controller.h>
+
 #include <sofa/type/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/objectmodel/Data.h>
 #include <sofa/core/objectmodel/Event.h>
+#include <sofa/core/objectmodel/DataFileName.h>
 
 #include <vector>
 #include <string>
@@ -59,7 +61,7 @@ public:
 
 private:
     
-    sofa::core::objectmodel::Data<std::string> d_motionFile; /// CSV file containing the frames
+    sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
     sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
 
     sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>* mGridState{nullptr}; ///Controlled grid
