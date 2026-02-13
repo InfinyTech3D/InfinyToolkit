@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<Node name="root" dt="0.02" gravity="0 0 0">
+    <!-- Required Plugins -->
+    <RequiredPlugin name="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->
+    <RequiredPlugin name="Sofa.Component.Topology.Container.Grid"/> <!-- Needed to use components [RegularGridTopology] -->
+    <RequiredPlugin name="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
+    <RequiredPlugin name="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
+    <RequiredPlugin name="Sofa.Component.Mapping.Linear"/> <!-- Needed to use components [IdentityMapping] -->
+    <RequiredPlugin name="InfinyToolkit"/> <!-- Needed to use MotionReplayController -->
+
+    <VisualStyle displayFlags="showVisual showWireframe" />
+
+
+    <!-- Animation and Visual Loops -->
+    <DefaultAnimationLoop/>
+    <DefaultVisualManagerLoop />
+
+
+    <!-- Patient Grid Node -->
+    <Node name="PatientGrid">
+
+        <!-- Regular Grid Topology -->
+        <RegularGridTopology
+            name="grid"
+            nx="10" ny="10" nz="10"
+            xmin="-8" xmax="12"
+            ymin="-6" ymax="14"
+            zmin="-10" zmax="10"
+        />
+
+        <!-- Mechanical Object linked to the grid -->
+        <MechanicalObject
+            name="mechanicalDofs"
+            template="Vec3d"
+            position="@grid.position"
+            listening="true"
+        />
+
+        <Node name="VisuGrid">
+            <OglModel color="green" src="@../mechanicalDofs" name="Visual" />
+            <IdentityMapping input="@../" output="@Visual"/>
+        </Node>
+
+        <!-- Motion Replay Controller -->
+        <MotionReplayController
+            name="motionReplay"
+            motionFile="grid_states.csv"
+            dt="0.02"
+        />
+
+    </Node>
+
+</Node>
