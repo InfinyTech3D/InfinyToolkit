@@ -29,8 +29,8 @@
 
 
 #include <sofa/core/objectmodel/Context.h>
+#include <sofa/core/objectmodel/DataFileName.cpp>
 #include <sofa/helper/logging/Messaging.h>
-#include <sofa/helper/system/FileRepository.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 
 #include <fstream>
@@ -103,8 +103,7 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
         frames.clear();
         currentIndex = 0;
 
-        std::string filename = d_motionFile.getValue();
-
+        const std::string filename = d_motionFile.getFullPath();
 
         if (filename.empty())
         {
@@ -112,12 +111,12 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
             return;
         }
 
-        std::string fullpath = sofa::helper::system::DataRepository.getFile(filename);
-        std::ifstream file(fullpath);
+       // Open file stream
+       std::ifstream file(filename);
         if (!file.is_open())
         {
-            msg_error() << "[MotionReplay] Cannot open file: " << filename;
-            return;
+           msg_error() << "[MotionReplay] Cannot open file: " << filename;
+           return;
         }
 
         size_t numPoints = mGridState->getSize();
@@ -146,7 +145,7 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
             }
 
             VecCoord frame;
-            frame.reserve(numPoints); // have to be checked
+            frame.reserve(numPoints); 
 
             for (size_t i = 0; i < numPoints; ++i)
             {
