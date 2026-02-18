@@ -83,10 +83,11 @@ jobs:
       
 
       - name: Launch test 
-        uses: bakpaul/sofa-test-action@wip_first_attempt
+        id: tests
+        uses: sofa-framework/sofa-test-action@v1.0
         with:
           sofa_root: ${{ github.workspace }}/sofa
-          sofa_version: master
+          sofa_version: ${{ steps.sofa.outputs.sofa_version }}
           src_dir: ${{ env.WORKSPACE_SRC_PATH }}
           build_dir: ${{ env.WORKSPACE_BUILD_PATH }}
           python_exe: ${{ steps.sofa.outputs.python_exe }}
