@@ -67,6 +67,8 @@ jobs:
           $originalName = "InfinyToolkit_${{ steps.sofa.outputs.run_branch }}_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${{ runner.os }}"
           $artifact_name = $originalName -replace '[":;<>|*?\r\n\\/]', '' -replace ' ', '_'
           echo "artifact_name=$artifact_name" >> $env:GITHUB_OUTPUT
+          echo "WORKSPACE_INSTALL_PATH: ${{ env.WORKSPACE_INSTALL_PATH }}"
+          echo "WORKSPACE_INSTALL_PATH: ${{ env.WORKSPACE_INSTALL_PATH }}"
           
       - name: Create artifact
         id: create-artifact
