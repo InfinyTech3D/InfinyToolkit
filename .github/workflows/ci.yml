@@ -123,8 +123,11 @@ jobs:
           if [[ "$RUNNER_OS" != "macOS" ]]; then
             # Get regression from github releases
             mkdir -p "${{ runner.temp }}/regression_tmp/install"
-            curl --output "${{ runner.temp }}/regression_tmp/${RUNNER_OS}.zip" -L https://github.com/sofa-framework/regression/releases/download/release-master/Regression_test_master_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${RUNNER_OS}.zip
+            export REGRESSION_URL="https://github.com/sofa-framework/regression/releases/download/release-${{ steps.sofa.outputs.run_branch }}/Regression_test_${{ steps.sofa.outputs.run_branch }}_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${RUNNER_OS}.zip"
+            curl --output "${{ runner.temp }}/regression_tmp/${RUNNER_OS}.zip" -L ${REGRESSION_URL}
+            echo ${REGRESSION_URL}
             unzip -qq "${{ runner.temp }}/regression_tmp/${RUNNER_OS}.zip" -d "${{ runner.temp }}/regression_tmp/install"
+            echo "${{ runner.temp }}/regression_tmp/${RUNNER_OS}.zip"
             # Install it in the SOFA bin directory
             $SUDO mv "${{ runner.temp }}"/regression_tmp/install/Regression_*/bin/* "${SOFA_ROOT}/bin"
             chmod +x ${SOFA_ROOT}/bin/Regression_test${{ steps.sofa.outputs.exe }}
@@ -133,6 +136,7 @@ jobs:
             export REGRESSION_REFERENCES_DIR="${WORKSPACE_SRC_PATH}/regression/references"
             export PYTHONPATH=$SOFA_ROOT/plugins/SofaPython3/lib/python3/site-packages
             # Run regression test bench
+            echo "${SOFA_ROOT}/bin/Regression_test${{ steps.sofa.outputs.exe }}"
             ${SOFA_ROOT}/bin/Regression_test${{ steps.sofa.outputs.exe }}
           else
             echo "Regression tests are not supported on the CI for macOS yet (TODO)"
