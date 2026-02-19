@@ -26,12 +26,15 @@
 #include <InfinyToolkit/config.h>
 
 #include <sofa/component/controller/Controller.h>
+#include <sofa/component/engine/select/BoxROI.h>
+
 
 #include <sofa/type/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/objectmodel/Data.h>
 #include <sofa/core/objectmodel/Event.h>
 #include <sofa/core/objectmodel/DataFileName.h>
+
 
 #include <vector>
 #include <string>
@@ -64,11 +67,20 @@ private:
     sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
     sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
 
-    sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>* mGridState{nullptr}; ///Controlled grid
+    sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>* mGridState{nullptr}; /// Controlled grid
+
+    // Pointer to the ROI component
+    sofa::component::engine::select::BoxROI<
+        sofa::defaulttype::Vec3Types>* m_topROI {nullptr};
+
+    // Store fixed indices those won't move while breathing
+    sofa::type::vector<unsigned int> m_fixedIndices;
     
     std::vector<VecCoord> frames;
     
     size_t currentIndex{0};
+
+    sofa::core::objectmodel::Data<bool> d_breathing;   /// Enable/disable breathing
 
     void loadMotion();
 };

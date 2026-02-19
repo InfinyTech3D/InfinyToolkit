@@ -30,6 +30,9 @@
 
 #include <sofa/core/objectmodel/Context.h>
 #include <sofa/core/objectmodel/DataFileName.cpp>
+#include <sofa/core/topology/Topology.h>
+#include <sofa/component/engine/select/BoxROI.h>
+
 #include <sofa/helper/logging/Messaging.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 
@@ -40,27 +43,55 @@
 namespace sofa::infinytoolkit
 {
 
-MotionReplayController::MotionReplayController()
-    : d_motionFile(initData(&d_motionFile, "motionFile",
-        "Path to CSV motion file, where each row contains one frame."))
-    , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
+    MotionReplayController::MotionReplayController()
+        : d_motionFile(initData(&d_motionFile, "motionFile",
+            "Path to CSV motion file, where each row contains one frame."))
+        , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
+        , d_breathing(initData(&d_breathing, false, "breathing", "Enable breathing motion"))
+
     {
+
     }
 
 void MotionReplayController::init()
     {
+        // Get MechanicalState
         mGridState = this->getContext()->get<sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>>();
 
-    if (!mGridState)
-    {
-        msg_error() << "[MotionReplay] MechanicalState is null!";
-        return;
-    }
+        if (!mGridState)
+        {
+             msg_error() << "[MotionReplay] MechanicalState is null!";
+             return;
+        }
 
-    this->f_listening.setValue(true);
+        // Get the node context
+        auto node = this->getContext(); // returns a Node*
 
-    loadMotion();
-        
+        // Get ClassInfo for the templated BoxROI
+        const auto& roiClassInfo = sofa::core::objectmodel::classidT<
+            sofa::component::engine::select::BoxROI<sofa::defaulttype::Vec3Types>>();
+
+        // Get the object pointer from the current node
+        void* roiPtr = this->getContext()->getObject(roiClassInfo, "TopROI");
+      
+        // Cast to the correct type
+        m_topROI = static_cast<sofa::component::engine::select::BoxROI<
+            sofa::defaulttype::Vec3Types>*>(roiPtr);
+
+        if (!m_topROI)
+        {
+            msg_error() << "[MotionReplay] TopROI not found!";
+            return;
+        }
+
+        // Update ROI and copy indices
+        m_topROI->update();
+        m_fixedIndices = m_topROI->d_indices.getValue();
+
+        this->f_listening.setValue(true);
+
+        loadMotion();
+ 
     }
 
  
@@ -85,15 +116,34 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
                << "MO points = " << positions.size()
                << ", frame points = " << frames[currentIndex].size();
            return;
-       }
+        }
 
-       for (size_t i = 0; i < positions.size(); ++i)
-       {
-           positions[i] = Coord(
-               frames[currentIndex][i][0],
-               frames[currentIndex][i][1],
-               frames[currentIndex][i][2]);           
-       }
+        double offset=0.0;
+        if (d_breathing.getValue())
+         {
+             double amplitude = 1.0;   // vertical motion amplitude
+             double frequency = 0.1;  // Hz
+             double t = this->getContext()->getTime();
+             offset = amplitude * sin(2.0 * M_PI * frequency * t);
+         }
+
+            
+    
+
+        for (size_t i = 0; i < positions.size(); ++i)
+        {
+            // Copy the motion frame positions
+            positions[i][0] = frames[currentIndex][i][0];
+            positions[i][1] = frames[currentIndex][i][1];
+            positions[i][2] = frames[currentIndex][i][2];
+
+            // Apply offset (breathing) only if NOT in the fixed indices
+            bool isFixed = std::find(m_fixedIndices.begin(), m_fixedIndices.end(), i) != m_fixedIndices.end();
+            if (!isFixed)
+            {
+                positions[i][1] += offset;   // Y-axis offset
+            }
+        }
 
        ++currentIndex;
    }
