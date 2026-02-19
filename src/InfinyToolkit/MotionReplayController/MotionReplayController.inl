@@ -44,7 +44,9 @@ namespace sofa::infinytoolkit
 {
 
     MotionReplayController::MotionReplayController()
-        : d_motionFile(initData(&d_motionFile, "motionFile",
+        :l_gridState(initLink("gridState","Link to the grid control."))
+        , l_topROI(initLink("topROI", "Link to the BoxROI defining fixed indices"))
+        , d_motionFile(initData(&d_motionFile, "motionFile",
             "Path to CSV motion file, where each row contains one frame."))
         , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
         , d_breathing(initData(&d_breathing, false, "breathing", "Enable breathing motion"))
@@ -55,34 +57,36 @@ namespace sofa::infinytoolkit
 
 void MotionReplayController::init()
     {
-        // Get MechanicalState
-        mGridState = this->getContext()->get<sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>>();
+        // Resolve MechanicalState
+        if (l_gridState.get() == nullptr)
+          {
+            msg_error() << "Error no target grid found!";
+            this->d_componentState.setValue(
+                sofa::core::objectmodel::ComponentState::Invalid);
+            return;
+       
+          }
+
+        mGridState = dynamic_cast<sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3dTypes>*>(l_gridState.get());
 
         if (!mGridState)
         {
-             msg_error() << "[MotionReplay] MechanicalState is null!";
-             return;
-        }
-
-        // Get the node context
-        auto node = this->getContext(); // returns a Node*
-
-        // Get ClassInfo for the templated BoxROI
-        const auto& roiClassInfo = sofa::core::objectmodel::classidT<
-            sofa::component::engine::select::BoxROI<sofa::defaulttype::Vec3Types>>();
-
-        // Get the object pointer from the current node
-        void* roiPtr = this->getContext()->getObject(roiClassInfo, "TopROI");
-      
-        // Cast to the correct type
-        m_topROI = static_cast<sofa::component::engine::select::BoxROI<
-            sofa::defaulttype::Vec3Types>*>(roiPtr);
-
-        if (!m_topROI)
-        {
-            msg_error() << "[MotionReplay] TopROI not found!";
+            msg_error() << "Linked MechanicalState is not Vec3dTypes!";
+            this->d_componentState.setValue(
+                sofa::core::objectmodel::ComponentState::Invalid);
             return;
         }
+
+        
+        // Resolve BoxROI 
+        if (l_topROI.get() == nullptr)
+        {
+           msg_error() << "[MotionReplay] No BoxROI linked to topROI.";
+           this->d_componentState.setValue(
+            sofa::core::objectmodel::ComponentState::Invalid);
+           return;
+        }
+        m_topROI = l_topROI.get();
 
         // Update ROI and copy indices
         m_topROI->update();
