@@ -19,6 +19,8 @@ find_package(Sofa.Component.Collision.Geometry REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.GUI.Component REQUIRED)
+find_package(Sofa.Component.Engine.Select REQUIRED)
+
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -141,6 +143,7 @@ target_link_libraries(${PROJECT_NAME}
     Sofa.Component.Controller 
     Sofa.Component.Haptics
     Sofa.GUI.Component
+    Sofa.Component.Engine.Select
 )
 
 
