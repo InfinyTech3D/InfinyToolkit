@@ -1,10 +1,21 @@
 ##############################################################################
-#             Copyright (C) - InfinyTech3D - All Rights Reserved             #
+#                 - Copyright (C) 2020-Present InfinyTech3D -                #
 #                                                                            #
-#  Unauthorized copying of this file, via any medium is strictly prohibited  #
-#  Proprietary and confidential.                                             #
+#  This file is part of the InfinyToolkit plugin for the SOFA framework.     #
 #                                                                            #
-#  Written by Erik Pernod <erik.pernod@infinytech3d.com>, September 2019     #
+#  This file is dual-licensed:                                               #
+#                                                                            #
+#  1) Commercial License:                                                    #
+#       This file may be used under the terms of a valid commercial license  #
+#       agreement provided wih the software by InfinyTech3D.                 #
+#                                                                            #
+#  2) GNU General Public License (GPLv3) Usage                               #
+#       Alternatively, this file may be used under the terms of the          #
+#       GNU General Public License version 3 as published by the             #
+#       Free Software Foundation: https://www.gnu.org/licenses/gpl-3.0.html  #
+#                                                                            #
+#  Contact: contact@infinytech3d.com                                         #
+#  Further information: https://infinytech3d.com                             #
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.12)
