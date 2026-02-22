@@ -39,17 +39,20 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <unordered_set>
+
 
 namespace sofa::infinytoolkit
 {
 
     MotionReplayController::MotionReplayController()
         :l_gridState(initLink("gridState","Link to the grid control."))
-        , l_topROI(initLink("topROI", "Link to the BoxROI defining fixed indices"))
+        , d_fixedIndices(initData(&d_fixedIndices,"fixedIndices","Indices of the nodes that should be fixed."))
         , d_motionFile(initData(&d_motionFile, "motionFile",
             "Path to CSV motion file, where each row contains one frame."))
-        , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene"))
-        , d_breathing(initData(&d_breathing, false, "breathing", "Enable breathing motion"))
+        , d_dt(initData(&d_dt, 0.02, "dt", "Time step of the SOFA scene."))
+        , d_breathing(initData(&d_breathing, false, "breathing", "Enable breathing motion."))
+        , d_infinyLoop(initData(&d_infinyLoop, true, "motionLoop", "Replay motion infinitely."))
 
     {
 
@@ -67,30 +70,15 @@ void MotionReplayController::init()
        
           }
 
-        mGridState = dynamic_cast<sofa::core::behavior::MechanicalState< sofa::defaulttype::Vec3dTypes>*>(l_gridState.get());
+       
+        const auto& fixIndices = d_fixedIndices.getValue();
 
-        if (!mGridState)
+        if (fixIndices.empty())
         {
-            msg_error() << "Linked MechanicalState is not Vec3dTypes!";
-            this->d_componentState.setValue(
-                sofa::core::objectmodel::ComponentState::Invalid);
+            msg_warning() << "No fixed indices provided.";
             return;
         }
-
-        
-        // Resolve BoxROI 
-        if (l_topROI.get() == nullptr)
-        {
-           msg_error() << "[MotionReplay] No BoxROI linked to topROI.";
-           this->d_componentState.setValue(
-            sofa::core::objectmodel::ComponentState::Invalid);
-           return;
-        }
-        m_topROI = l_topROI.get();
-
-        // Update ROI and copy indices
-        m_topROI->update();
-        m_fixedIndices = m_topROI->d_indices.getValue();
+       
 
         this->f_listening.setValue(true);
 
@@ -108,11 +96,15 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
        if (frames.empty())
            return;
 
-       // Always loop like Python version
        if (currentIndex >= frames.size())
-           currentIndex = 0;
+       {
+           if (d_infinyLoop.getValue())
+               currentIndex = 0;
+           else
+               return;
+       }
 
-       auto positions =  mGridState->writePositions();
+       auto positions =  l_gridState->writePositions();
 
        if (positions.size() != frames[currentIndex].size())
        {
@@ -132,22 +124,25 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
          }
 
             
-    
+
+        const auto& fixedIndices = d_fixedIndices.getValue();
+        std::unordered_set<unsigned int> fixedSet(
+            fixedIndices.begin(),
+            fixedIndices.end()
+        );
 
         for (size_t i = 0; i < positions.size(); ++i)
         {
-            // Copy the motion frame positions
             positions[i][0] = frames[currentIndex][i][0];
             positions[i][1] = frames[currentIndex][i][1];
             positions[i][2] = frames[currentIndex][i][2];
 
-            // Apply offset (breathing) only if NOT in the fixed indices
-            bool isFixed = std::find(m_fixedIndices.begin(), m_fixedIndices.end(), i) != m_fixedIndices.end();
-            if (!isFixed)
+            if (fixedSet.find(static_cast<unsigned int>(i)) == fixedSet.end())
             {
-                positions[i][1] += offset;   // Y-axis offset
+                positions[i][1] += offset;
             }
         }
+
 
        ++currentIndex;
    }
@@ -173,7 +168,7 @@ void MotionReplayController::handleEvent(sofa::core::objectmodel::Event* event)
            return;
         }
 
-        size_t numPoints = mGridState->getSize();
+        size_t numPoints = l_gridState->getSize();
 
         std::string line;
         size_t lineNumber = 0;

@@ -57,34 +57,22 @@ public:
    using Coord = sofa::type::Vec3d;
    using VecCoord = std::vector<Coord>;
 
+   // Store fixed indices those won't move while breathing
+   sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
+   sofa::core::objectmodel::Data<bool> d_breathing;   /// Enable/disable breathing
+   sofa::core::objectmodel::Data<bool> d_infinyLoop;
+   sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
+   Data<sofa::type::vector<unsigned int>> d_fixedIndices;
 
-   
    void init() override;
    void handleEvent(sofa::core::objectmodel::Event* event) override;
 
 private:
     
-    sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
-    sofa::core::objectmodel::Data<bool> d_breathing;   /// Enable/disable breathing
-    sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
-
     // SingleLinks
     SingleLink<  MotionReplayController,
         sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>,
         BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_gridState;
-
-    SingleLink<MotionReplayController,
-               sofa::component::engine::select::BoxROI<sofa::defaulttype::Vec3dTypes>,
-               BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topROI;
-
-    
-    
-    // Cached raw pointer for faster access
-    sofa::core::behavior::MechanicalState<sofa::defaulttype::Vec3dTypes>* mGridState{nullptr};
-    sofa::component::engine::select::BoxROI<sofa::defaulttype::Vec3dTypes>* m_topROI{nullptr};
-   
-    // Store fixed indices those won't move while breathing
-    sofa::type::vector<unsigned int> m_fixedIndices;
 
     size_t currentIndex{0};
 
