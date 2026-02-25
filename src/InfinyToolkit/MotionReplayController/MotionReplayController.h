@@ -26,15 +26,11 @@
 #include <InfinyToolkit/config.h>
 
 #include <sofa/component/controller/Controller.h>
-#include <sofa/component/engine/select/BoxROI.h>
-
-
 #include <sofa/type/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/objectmodel/Data.h>
 #include <sofa/core/objectmodel/Event.h>
 #include <sofa/core/objectmodel/DataFileName.h>
-
 
 #include <vector>
 #include <string>
@@ -59,9 +55,10 @@ public:
 
    // Store fixed indices those won't move while breathing
    sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
-   sofa::core::objectmodel::Data<bool> d_breathing;   /// Enable/disable breathing
+   sofa::core::objectmodel::Data<double> d_dvfTimeStep; /// Time step used to record grid's deformation
+   sofa::core::objectmodel::Data<double> d_displacementAmplitude; ///Amplitude of the additional (periodic) motion
+   sofa::core::objectmodel::Data<int> d_displacementAxis; /// Axis for extra motion
    sofa::core::objectmodel::Data<bool> d_infinyLoop;
-   sofa::core::objectmodel::Data<double> d_dt; /// Simulation time-step
    Data<sofa::type::vector<unsigned int>> d_fixedIndices;
 
    void init() override;
