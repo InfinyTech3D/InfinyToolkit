@@ -55,10 +55,8 @@
         <MotionReplayController
             name="motionReplay"
             motionFile="grid_states.csv"
-            dt="0.02"
             gridState="@mechanicalDofs"
-            topROI = "@TopROI"
-            breathing = "True"
+            fixedIndices = "@TopROI.indices"
         />
 
     </Node>
