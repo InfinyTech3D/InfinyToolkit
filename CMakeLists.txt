@@ -63,7 +63,6 @@ set(HEADER_FILES
 
     ## Replay motion controller
     ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.h
-    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.inl
 
 
     
