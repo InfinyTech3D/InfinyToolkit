@@ -77,22 +77,12 @@ namespace sofa::infinytoolkit
 
         }
 
-
-        const auto& fixIndices = d_fixedIndices.getValue();
-
-        if (fixIndices.empty())
-        {
-            msg_warning() << "No fixed indices provided.";
-            return;
-        }
-
-
         int axis = d_displacementAxis.getValue();
 
         if (axis < 0 || axis > 2)
         {
             msg_warning() << "Invalid motion axis: ", axis, ". Valid values are 0=X, 1=Y, 2=Z.";
-            return; // or handle the error appropriately, e.g., skip motion update
+            return; 
         }
 
 
@@ -144,9 +134,14 @@ namespace sofa::infinytoolkit
             offset = amplitudeOffset * sin(2.0 * M_PI * frequency * t);
         }
 
-
-
         const auto& fixedIndices = d_fixedIndices.getValue();
+
+        if (fixedIndices.empty())
+        {
+            msg_warning() << "No fixed indices provided.";
+            return;
+        }
+
         std::unordered_set<unsigned int> fixedSet(
             fixedIndices.begin(),
             fixedIndices.end()
