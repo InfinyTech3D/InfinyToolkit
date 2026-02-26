@@ -85,6 +85,16 @@ namespace sofa::infinytoolkit
             return; 
         }
 
+        double sceneDt = this->getContext()->getDt();
+        double dvfDt = d_dvfTimeStep.getValue();
+
+        if (sceneDt != dvfDt)
+        {
+            msg_warning() << "[MotionReplay] Scene time step (" << sceneDt
+                << ") differs from DVF time step (" << dvfDt
+                << "). For accurate motion replay, set the scene time step equal to the DVF time step.";
+            return;
+        }
 
         this->f_listening.setValue(true);
 
@@ -102,13 +112,10 @@ namespace sofa::infinytoolkit
         if (frames.empty())
             return;
 
-        double currentTime = this->getContext()->getTime();
-        // Compute frame index based on the current time and DVF time step
-        size_t dvfIndex = static_cast<size_t>(currentTime / d_dvfTimeStep.getValue());
-        if (dvfIndex >= frames.size())
+        if (currentIndex >= frames.size())
         {
             if (d_infinyLoop.getValue())
-                dvfIndex = 0;
+                currentIndex = 0;
             else
                 return;
         }
@@ -116,11 +123,11 @@ namespace sofa::infinytoolkit
 
         auto positions = l_gridState->writePositions();
 
-        if (positions.size() != frames[dvfIndex].size())
+        if (positions.size() != frames[currentIndex].size())
         {
             msg_error() << "[MotionReplay] Frame size mismatch: "
                 << "MO points = " << positions.size()
-                << ", frame points = " << frames[dvfIndex].size();
+                << ", frame points = " << frames[currentIndex].size();
             return;
         }
 
@@ -149,9 +156,9 @@ namespace sofa::infinytoolkit
 
         for (size_t i = 0; i < positions.size(); ++i)
         {
-            positions[i][0] = frames[dvfIndex][i][0];
-            positions[i][1] = frames[dvfIndex][i][1];
-            positions[i][2] = frames[dvfIndex][i][2];
+            positions[i][0] = frames[currentIndex][i][0];
+            positions[i][1] = frames[currentIndex][i][1];
+            positions[i][2] = frames[currentIndex][i][2];
 
             if (fixedSet.find(static_cast<unsigned int>(i)) == fixedSet.end())
             {
@@ -160,7 +167,7 @@ namespace sofa::infinytoolkit
             }
         }
 
-        currentIndex = dvfIndex + 1;
+     ++currentIndex;
     }
 
     void MotionReplayController::loadMotion()
