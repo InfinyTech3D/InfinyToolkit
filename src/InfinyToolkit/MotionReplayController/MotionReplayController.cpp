@@ -57,7 +57,7 @@ namespace sofa::infinytoolkit
             "Path to CSV motion file, where each row contains one frame."))
         , d_dvfTimeStep(initData(&d_dvfTimeStep, 0.02,
             "dvfTimeStep", " Time step used to record the DVF."))
-        , d_displacementAmplitude(initData(&d_displacementAmplitude, 1.0, " displacementAmplitude", "Amplitude for extra motion."))
+        , d_displacementAmplitude(initData(&d_displacementAmplitude, 1.0, "displacementAmplitude", "Amplitude for extra motion."))
         , d_displacementAxis(initData(&d_displacementAxis, 1, "displacementAxis", " Axis along which the extra motion is applied: 0=X, 1=Y, 2=Z."))
         , d_infinyLoop(initData(&d_infinyLoop, true, "motionLoop", "Replay motion infinitely."))
 
