@@ -143,12 +143,7 @@ namespace sofa::infinytoolkit
 
         const auto& fixedIndices = d_fixedIndices.getValue();
 
-        if (fixedIndices.empty())
-        {
-            msg_warning() << "No fixed indices provided.";
-            return;
-        }
-
+       
         std::unordered_set<unsigned int> fixedSet(
             fixedIndices.begin(),
             fixedIndices.end()
