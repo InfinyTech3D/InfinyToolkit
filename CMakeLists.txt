@@ -10,6 +10,8 @@
 cmake_minimum_required(VERSION 3.12)
 project(InfinyToolkit VERSION 0.1)
 
+include(cmake/environment.cmake)
+
 find_package(Sofa.Component.StateContainer REQUIRED)
 find_package(Sofa.Component.MechanicalLoad REQUIRED)
 find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
