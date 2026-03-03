@@ -142,9 +142,9 @@ namespace sofa::infinytoolkit
         }
 
         const auto& fixedIndices = d_fixedIndices.getValue();
-        for (size_t i = 0; i < positions.size(); ++i)
+        for (sofa::Index i = 0; i < positions.size(); ++i)
         {
-            auto it = std::find(fixedIndices.begin(), fixedIndices.end(), static_cast<unsigned int>(i));
+            auto it = std::find(fixedIndices.begin(), fixedIndices.end(), i);
             if (it != fixedIndices.end())
                 continue;
 
