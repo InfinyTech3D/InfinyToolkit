@@ -55,11 +55,11 @@ public:
 
    // Store fixed indices those won't move while breathing
    sofa::core::objectmodel::DataFileName d_motionFile; /// CSV file containing the frames
-   sofa::core::objectmodel::Data<double> d_dvfTimeStep; /// Time step used to record grid's deformation
-   sofa::core::objectmodel::Data<double> d_displacementAmplitude; ///Amplitude of the additional (periodic) motion
-   sofa::core::objectmodel::Data<int> d_displacementAxis; /// Axis for extra motion
-   sofa::core::objectmodel::Data<bool> d_infinyLoop;
-   Data<sofa::type::vector<unsigned int>> d_fixedIndices;
+   Data<double> d_dvfTimeStep; /// Time step used to record grid's deformation
+   Data<double> d_displacementAmplitude; ///Amplitude of the additional (periodic) motion
+   Data<int> d_displacementAxis; /// Axis for extra motion
+   Data<bool> d_infinyLoop;
+   Data<sofa::type::vector<sofa::Index>> d_fixedIndices;
 
    void init() override;
    void handleEvent(sofa::core::objectmodel::Event* event) override;

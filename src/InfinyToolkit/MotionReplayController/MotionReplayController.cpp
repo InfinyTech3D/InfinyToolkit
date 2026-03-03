@@ -142,26 +142,6 @@ namespace sofa::infinytoolkit
         }
 
         const auto& fixedIndices = d_fixedIndices.getValue();
-
-       
-        //std::unordered_set<unsigned int> fixedSet(
-        //    fixedIndices.begin(),
-        //    fixedIndices.end()
-        //);
-
-        //for (size_t i = 0; i < positions.size(); ++i)
-        //{
-        //    positions[i][0] = frames[currentIndex][i][0];
-        //    positions[i][1] = frames[currentIndex][i][1];
-        //    positions[i][2] = frames[currentIndex][i][2];
-
-        //    if (fixedSet.find(static_cast<unsigned int>(i)) == fixedSet.end())
-        //    {
-        //        int axis = d_displacementAxis.getValue();  // 0=X, 1=Y, 2=Z
-        //        positions[i][1] += offset;
-        //    }
-        //}
-
         for (size_t i = 0; i < positions.size(); ++i)
         {
             auto it = std::find(fixedIndices.begin(), fixedIndices.end(), static_cast<unsigned int>(i));
