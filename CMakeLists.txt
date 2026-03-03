@@ -30,6 +30,8 @@ find_package(Sofa.Component.Collision.Geometry REQUIRED)
 find_package(Sofa.Component.Controller REQUIRED)
 find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.GUI.Component REQUIRED)
+find_package(Sofa.Component.Engine.Select REQUIRED)
+
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -69,6 +71,12 @@ set(HEADER_FILES
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.h
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.h
+
+    ## Replay motion controller
+    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.h
+
+
+    
 )
 
 set(SOURCE_FILES
@@ -102,6 +110,11 @@ set(SOURCE_FILES
     ${INFINYTOOLKIT_SRC_DIR}/MeshTools/GridBarycentersPositions.cpp
 
     ${INFINYTOOLKIT_SRC_DIR}/BruteForceFeedback.cpp
+
+    ## Replay motion controller
+    ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.cpp
+
+
 )
 
 # Add component for carving using refinement mesh
@@ -140,6 +153,7 @@ target_link_libraries(${PROJECT_NAME}
     Sofa.Component.Controller 
     Sofa.Component.Haptics
     Sofa.GUI.Component
+    Sofa.Component.Engine.Select
 )
 
 
