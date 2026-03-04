@@ -27,7 +27,7 @@
 #include <sofa/component/statecontainer/MechanicalObject.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/objectmodel/Context.h>
-#include <sofa/core/objectmodel/DataFileName.cpp>
+#include <sofa/core/objectmodel/DataFileName.h>
 #include <sofa/helper/logging/Messaging.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 
