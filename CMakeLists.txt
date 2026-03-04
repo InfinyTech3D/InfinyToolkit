@@ -21,6 +21,8 @@
 cmake_minimum_required(VERSION 3.12)
 project(InfinyToolkit VERSION 0.1)
 
+include(cmake/environment.cmake)
+
 find_package(Sofa.Component.StateContainer REQUIRED)
 find_package(Sofa.Component.MechanicalLoad REQUIRED)
 find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
@@ -173,6 +175,7 @@ sofa_create_package_with_targets(
     TARGETS ${PROJECT_NAME} AUTO_SET_TARGET_PROPERTIES
     INCLUDE_SOURCE_DIR "src"
     INCLUDE_INSTALL_DIR ${PROJECT_NAME}
+    EXAMPLE_INSTALL_DIR "examples"
     RELOCATABLE "plugins"
     )
     
