@@ -56,6 +56,9 @@ extern void registerRotationEngine(sofa::core::ObjectFactory* factory);
 // Heart Motion Replayer
 extern void registerMotionReplayController(sofa::core::ObjectFactory* factory);
 
+// Intravascular Ultrasound  
+extern void registerIVUSController(sofa::core::ObjectFactory* factory);
+
 
 
 } // namespace sofa::infinytoolkit
@@ -145,6 +148,9 @@ void registerObjects(sofa::core::ObjectFactory* factory)
 
     // Heart Motion Replayer
     registerMotionReplayController(factory);
+
+    // Intravascular Ultrasound 
+    registerIVUSController(factory);
 }
 
 } // namespace sofa::component
