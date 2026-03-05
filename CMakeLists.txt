@@ -34,6 +34,10 @@ find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.GUI.Component REQUIRED)
 find_package(Sofa.Component.Engine.Select REQUIRED)
 
+# Tell CMake where OpenCV is
+set(OpenCV_DIR "C:/softwares/opencv-4.12.0/opencv/build")  # Adjust if your path is different
+find_package(OpenCV REQUIRED)
+
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
 
@@ -77,6 +81,9 @@ set(HEADER_FILES
     ## Replay motion controller
     ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.h
 
+    ## IVUS controller
+    ${INFINYTOOLKIT_SRC_DIR}/IVUSController/IVUSController.h
+
 
     
 )
@@ -115,6 +122,9 @@ set(SOURCE_FILES
 
     ## Replay motion controller
     ${INFINYTOOLKIT_SRC_DIR}/MotionReplayController/MotionReplayController.cpp
+
+    ## IVUS controller
+    ${INFINYTOOLKIT_SRC_DIR}/IVUSController/IVUSController.cpp
 
 
 )
@@ -156,6 +166,10 @@ target_link_libraries(${PROJECT_NAME}
     Sofa.Component.Haptics
     Sofa.GUI.Component
     Sofa.Component.Engine.Select
+    
+    # <-- Add OpenCV here
+    ${OpenCV_LIBS}
+    
 )
 
 
