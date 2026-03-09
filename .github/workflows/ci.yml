@@ -102,6 +102,7 @@ jobs:
         run: |
           echo "Repository root:"
           ls -la .
+          ls -la ${{ env.WORKSPACE_SRC_PATH }}
 
           if [ -z "$SOFA_ROOT" ]; then
               echo "SOFA_ROOT is not set"
@@ -127,8 +128,8 @@ jobs:
         run: |
           cd regression
           python SofaRegressionProgram.py \
-              --input ${{ github.workspace }}/examples/ \
-              --output ${{ github.workspace }}/references/
+              --input ${{ env.WORKSPACE_SRC_PATH }}/examples/ \
+              --output ${{ env.WORKSPACE_SRC_PATH }}/references/
 
   deploy:
     name: Deploy artifacts
