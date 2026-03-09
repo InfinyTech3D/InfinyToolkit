@@ -97,6 +97,34 @@ jobs:
           output_dir: ${{ github.workspace }}/tests-results_dir
           nb_parallel_threads: '4'
 
+      - name: Inspect repository tree
+        shell: bash
+        run: |
+          echo "Repository root:"
+          ls -la ${{ github.workspace }}
+
+          if [ -z "$SOFA_ROOT" ]; then
+              echo "SOFA_ROOT is not set"
+          else
+              echo "SOFA_ROOT=$SOFA_ROOT"
+          fi
+
+          if [ -z "$REGRESSION_DIR" ]; then
+              echo "REGRESSION_DIR is not set"
+          else
+              echo "REGRESSION_DIR=$REGRESSION_DIR"
+          fi
+          
+      - name: New regression tests
+        shell: bash
+        env:
+          SOFA_ROOT: ${{ github.workspace }}/build
+        run: |
+          cd regression
+          python SofaRegressionProgram.py \
+              --input ${{ github.workspace }}/examples/ \
+              --output ${{ github.workspace }}/references/
+
   deploy:
     name: Deploy artifacts
     if: always() && startsWith(github.ref, 'refs/heads/main') # we are on a branch (not a PR)
