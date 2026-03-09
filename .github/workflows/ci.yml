@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           echo "Repository root:"
-          ls -la ${{ github.workspace }}
+          ls -la .
 
           if [ -z "$SOFA_ROOT" ]; then
               echo "SOFA_ROOT is not set"
