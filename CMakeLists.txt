@@ -35,8 +35,23 @@ find_package(Sofa.GUI.Component REQUIRED)
 find_package(Sofa.Component.Engine.Select REQUIRED)
 
 # Tell CMake where OpenCV is
-set(OpenCV_DIR "C:/softwares/opencv-4.12.0/opencv/build")  # Adjust if your path is different
+#set(OpenCV_DIR "C:/softwares/opencv-4.12.0/opencv/build")  # Adjust if your path is different
+#find_package(OpenCV REQUIRED)
+# -------------------------------
+# Find OpenCV (branch-independent)
+# -------------------------------
+# Prefer environment variable OPENCV_DIR if set; fallback to default path
+if(NOT DEFINED OpenCV_DIR)
+    set(OpenCV_DIR "$ENV{OPENCV_DIR}" CACHE PATH "Path to OpenCVConfig.cmake")
+endif()
+
+if(NOT OpenCV_DIR)
+    message(FATAL_ERROR "OpenCV_DIR is not set. Please set the environment variable OPENCV_DIR or edit CMakeLists.")
+endif()
+
 find_package(OpenCV REQUIRED)
+message(STATUS "Found OpenCV version ${OpenCV_VERSION} at ${OpenCV_DIR}")
+
 
 
 set(USE_INFINYTOOLKIT_PLUGIN true CACHE BOOL "Use Interaction Tools plugin")
