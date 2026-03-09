@@ -22,7 +22,6 @@
  * Further information: https://infinytech3d.com                             *
  ****************************************************************************/
 #pragma once
-
 #include <InfinyToolkit/config.h>
 
 #include <sofa/component/controller/Controller.h>
