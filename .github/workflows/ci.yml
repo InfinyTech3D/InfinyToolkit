@@ -114,7 +114,12 @@ jobs:
           else
               echo "REGRESSION_DIR=$REGRESSION_DIR"
           fi
-          
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install tqdm
+
       - name: New regression tests
         shell: bash
         env:
