@@ -51,7 +51,10 @@ namespace sofa::infinytoolkit
     }
 
     IVUSController::IVUSController()
-        : d_N_rays(initData(&d_N_rays, (unsigned int)128, "N_rays", "Number of angular rays"))
+        :l_CatheterState(initLink("catheterState", "Link to the mechanical object of the catheter."))
+        , l_triangleGeo(initLink("triangleGeo", "Link to the collision model of the vessel."))
+        , l_vesselNode(initLink("vesselNode", "Link to the vessel node."))
+        , d_N_rays(initData(&d_N_rays, (unsigned int)128, "N_rays", "Number of angular rays"))
         , d_N_depth(initData(&d_N_depth, (unsigned int)256, "N_depth", "Number of radial depth samples"))
         , d_maxDepth(initData(&d_maxDepth, 10.0, "maxDepth", "Maximum probe depth"))
         , d_alpha(initData(&d_alpha, 0.15, "alpha", "Attenuation coefficient"))
@@ -75,12 +78,26 @@ namespace sofa::infinytoolkit
 
         }
         
-        if (l_triangleGeo.empty())
+        if (l_triangleGeo.get() == nullptr)
         {
             msg_info() << "No TriangleSetGeometryAlgorithms link set. "
                 << "Trying to find first one in current context...";
-            //l_triangleGeo.set(this->getContext()->getNodeObject<TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>>()); //will back to it
+            d_componentState.setValue(
+                sofa::core::objectmodel::ComponentState::Invalid);
+            return;
         }
+
+        //vesselNode = this->getRoot()->getChild("VesselNode");
+
+       ///* msg_info() << "Catheter DOFs: " << cath->getSize();
+       // msg_info() << "Triangles: " << geo->getTopology()->getNbTriangles();*/
+
+        if (l_vesselNode.get() == nullptr)
+        {
+            msg_error() << "Vessel node link not set!";
+            return;
+        }
+
 
         this->f_listening.setValue(true);
         
@@ -105,6 +122,12 @@ namespace sofa::infinytoolkit
         for (unsigned int k = 0; k < K; ++k)
         {
             const Coord& rigid = positions[positions.size() - 1 - k];
+            auto center = rigid.getCenter();
+            std::cout << "Probe " << k << " center: "
+                << center[0] << ", "
+                << center[1] << ", "
+                << center[2] << std::endl;
+
             probePositions.push_back(rigid.getCenter());
         }
 
@@ -119,36 +142,36 @@ namespace sofa::infinytoolkit
             accumulated += tempFrame;
         }
 
-        // Average over K points
-        accumulated /= static_cast<double>(K);
-        accumulated.convertTo(currentFrame, CV_8UC1);
+        //// Average over K points
+        //accumulated /= static_cast<double>(K);
+        //accumulated.convertTo(currentFrame, CV_8UC1);
 
-        // Add Gaussian noise
-        cv::Mat noise(currentFrame.size(), CV_8UC1);
-        cv::randn(noise, 0, d_noiseSigma.getValue());
-        currentFrame += noise;
+        //// Add Gaussian noise
+        //cv::Mat noise(currentFrame.size(), CV_8UC1);
+        //cv::randn(noise, 0, d_noiseSigma.getValue());
+        //currentFrame += noise;
 
-        // Store frame
-        ivusFrames.push_back(currentFrame.clone());
-        if (ivusFrames.size() > d_maxStoredFrames.getValue())
-            ivusFrames.erase(ivusFrames.begin());
+        //// Store frame
+        //ivusFrames.push_back(currentFrame.clone());
+        //if (ivusFrames.size() > d_maxStoredFrames.getValue())
+        //    ivusFrames.erase(ivusFrames.begin());
 
-        // Build longitudinal image (side view)
-        longitudinalImage = cv::Mat::zeros(d_N_depth.getValue(), ivusFrames.size(), CV_8UC1);
-        unsigned int selectedAngle = d_N_rays.getValue() / 2;  // central radial slice
-        for (size_t t = 0; t < ivusFrames.size(); ++t)
-        {
-            for (unsigned int d = 0; d < d_N_depth.getValue(); ++d)
-            {
-                longitudinalImage.at<uint8_t>(d, t) =
-                    ivusFrames[t].at<uint8_t>(d, selectedAngle);
-            }
-        }
+        //// Build longitudinal image (side view)
+        //longitudinalImage = cv::Mat::zeros(d_N_depth.getValue(), ivusFrames.size(), CV_8UC1);
+        //unsigned int selectedAngle = d_N_rays.getValue() / 2;  // central radial slice
+        //for (size_t t = 0; t < ivusFrames.size(); ++t)
+        //{
+        //    for (unsigned int d = 0; d < d_N_depth.getValue(); ++d)
+        //    {
+        //        longitudinalImage.at<uint8_t>(d, t) =
+        //            ivusFrames[t].at<uint8_t>(d, selectedAngle);
+        //    }
+        //}
 
-        // Display images
-        cv::imshow("IVUS Cross Section", currentFrame);
-        cv::imshow("IVUS Longitudinal", longitudinalImage);
-        cv::waitKey(1);
+        //// Display images
+        //cv::imshow("IVUS Cross Section", currentFrame);
+        //cv::imshow("IVUS Longitudinal", longitudinalImage);
+        //cv::waitKey(1);
     }
 
     cv::Mat IVUSController::computeSingleProbeFrame(const Vec3& probepos)
@@ -159,65 +182,65 @@ namespace sofa::infinytoolkit
         std::vector<unsigned int> roiTriangles;
         IVUSController::buildROI(probepos, roiTriangles);
     
-        auto* trimodel = vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
+        auto* trimodel = l_vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
 
         // Mechanical positions (Rigid3d coordinates)
         const auto& positions = trimodel->getX(); // VecCoord
         const auto& triangles = trimodel->getTriangles(); // SeqTriangles from topology
 
-        // Temporary storage required by computeIntersectionsLineTriangle
-        sofa::type::vector<sofa::Index> indices;
-        sofa::type::vector<double> vecBaryCoef;
-        sofa::type::vector<double> vecCoordKmin;
+        //// Temporary storage required by computeIntersectionsLineTriangle
+        //sofa::type::vector<sofa::Index> indices;
+        //sofa::type::vector<double> vecBaryCoef;
+        //sofa::type::vector<double> vecCoordKmin;
 
 
-        for (unsigned int i = 0; i < d_N_rays.getValue(); ++i)
-        {
-            double angle = 2.0 * std::numbers::pi * i / d_N_rays.getValue();
-            Vec3 dir(cos(angle), sin(angle), 0.0);
+        //for (unsigned int i = 0; i < d_N_rays.getValue(); ++i)
+        //{
+        //    double angle = 2.0 * std::numbers::pi * i / d_N_rays.getValue();
+        //    Vec3 dir(cos(angle), sin(angle), 0.0);
 
-            Vec3 p1 = probepos;
-            Vec3 p2 = probepos + dir * d_maxDepth.getValue();
+        //    Vec3 p1 = probepos;
+        //    Vec3 p2 = probepos + dir * d_maxDepth.getValue();
 
-            double nearestHit = d_maxDepth.getValue();
+        //    double nearestHit = d_maxDepth.getValue();
 
-            // Loop over triangles in ROI
-            for (auto triIndex : roiTriangles)
-            {
-                bool hit = l_triangleGeo->computeIntersectionsLineTriangle(
-                    false,                               // is_entered
-                    sofa::type::Vec<3, double>(p1[0], p1[1], p1[2]),
-                    sofa::type::Vec<3, double>(p2[0], p2[1], p2[2]),
-                    triIndex,
-                    indices,
-                    vecBaryCoef,
-                    vecCoordKmin
-                );
+        //    // Loop over triangles in ROI
+        //    for (auto triIndex : roiTriangles)
+        //    {
+        //        bool hit = l_triangleGeo->computeIntersectionsLineTriangle(
+        //            false,                               // is_entered
+        //            sofa::type::Vec<3, double>(p1[0], p1[1], p1[2]),
+        //            sofa::type::Vec<3, double>(p2[0], p2[1], p2[2]),
+        //            triIndex,
+        //            indices,
+        //            vecBaryCoef,
+        //            vecCoordKmin
+        //        );
 
-                if (hit && !vecCoordKmin.empty() && vecCoordKmin[0] < nearestHit)
-                {
-                    nearestHit = vecCoordKmin[0];
-                }
+        //        if (hit && !vecCoordKmin.empty() && vecCoordKmin[0] < nearestHit)
+        //        {
+        //            nearestHit = vecCoordKmin[0];
+        //        }
 
-                // Clear vectors for next triangle
-                indices.clear();
-                vecBaryCoef.clear();
-                vecCoordKmin.clear();
-            }
+        //        // Clear vectors for next triangle
+        //        indices.clear();
+        //        vecBaryCoef.clear();
+        //        vecCoordKmin.clear();
+        //    }
 
-            // Fill ultrasound frame
-            for (unsigned int j = 0; j < d_N_depth.getValue(); ++j)
-            {
-                double depth = d_maxDepth.getValue() * j / d_N_depth.getValue();
-                double attenuation = exp(-d_alpha.getValue() * depth);
-                double intensity = 40 * attenuation;
+        //    // Fill ultrasound frame
+        //    for (unsigned int j = 0; j < d_N_depth.getValue(); ++j)
+        //    {
+        //        double depth = d_maxDepth.getValue() * j / d_N_depth.getValue();
+        //        double attenuation = exp(-d_alpha.getValue() * depth);
+        //        double intensity = 40 * attenuation;
 
-                if (std::abs(depth - nearestHit) < (d_maxDepth.getValue() / d_N_depth.getValue()))
-                    intensity = 255 * d_reflectionCoeff.getValue() * attenuation;
+        //        if (std::abs(depth - nearestHit) < (d_maxDepth.getValue() / d_N_depth.getValue()))
+        //            intensity = 255 * d_reflectionCoeff.getValue() * attenuation;
 
-                frame.at<uint8_t>(j, i) = static_cast<uint8_t>(std::min(255.0, intensity));
-            }
-        }
+        //        frame.at<uint8_t>(j, i) = static_cast<uint8_t>(std::min(255.0, intensity));
+        //    }
+        //}
 
         return frame;
         
@@ -228,7 +251,7 @@ namespace sofa::infinytoolkit
         std::vector<unsigned int>& triangleIndices)
     {
         triangleIndices.clear();
-        auto* triModel = vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
+        auto* triModel = l_vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
         if (!triModel)
         {
             msg_error() << "No TriangleCollisionModel found in vesselNode!";
@@ -259,6 +282,32 @@ namespace sofa::infinytoolkit
 
       
     }
+
+  /*  void IVUSController::buildROI(
+        const Vec3& probepos,
+        std::vector<unsigned int>& triangleIndices)
+    {
+        triangleIndices.clear();
+
+        if (!l_triangleGeo)
+        {
+            msg_error() << "TriangleSetGeometryAlgorithms not initialized!";
+            return;
+        }
+
+        const sofa::Size nbTriangles = l_triangleGeo->getTopology()->getNbTriangles();
+        const auto maxDepth = d_maxDepth.getValue();
+
+        for (sofa::Index i = 0; i < nbTriangles; ++i)
+        {
+            Vec3 center = l_triangleGeo->computeTriangleCenter(i);
+
+            if ((center - probepos).norm() < maxDepth)
+            {
+                triangleIndices.push_back(i);
+            }
+        }
+    }*/
     
     
 

@@ -65,7 +65,8 @@ namespace sofa::infinytoolkit
 
         // Scene references , nor sure if I use them
         sofa::simulation::Node* catheterNode = nullptr;
-        sofa::simulation::Node* vesselNode = nullptr;
+        //sofa::simulation::Node* vesselNode = nullptr;
+
 
 
         // IVUS parameters
@@ -108,6 +109,10 @@ namespace sofa::infinytoolkit
             SingleLink<IVUSController,
                 TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3dTypes>,
                 BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_triangleGeo;
+
+            SingleLink<IVUSController,
+                sofa::simulation::Node,
+                BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_vesselNode;
 
            
         //    void computeIVUSFrame();
