@@ -34,11 +34,8 @@ find_package(Sofa.Component.Haptics REQUIRED)
 find_package(Sofa.GUI.Component REQUIRED)
 find_package(Sofa.Component.Engine.Select REQUIRED)
 
-# Tell CMake where OpenCV is
-#set(OpenCV_DIR "C:/softwares/opencv-4.12.0/opencv/build")  # Adjust if your path is different
-#find_package(OpenCV REQUIRED)
 # -------------------------------
-# Find OpenCV (branch-independent)
+# Find OpenCV
 # -------------------------------
 # Prefer environment variable OPENCV_DIR if set; fallback to default path
 if(NOT DEFINED OpenCV_DIR)
