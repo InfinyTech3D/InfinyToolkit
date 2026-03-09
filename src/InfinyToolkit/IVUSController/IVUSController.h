@@ -44,11 +44,15 @@ namespace sofa::infinytoolkit
 
     using namespace sofa::core::objectmodel;
     using namespace  sofa::component::topology::container::dynamic;
+    using sofa::core::objectmodel::Data;
 
     class IVUSController : public sofa::component::controller::Controller
     {
     public:
         SOFA_CLASS(IVUSController, sofa::component::controller::Controller);
+
+        IVUSController();
+        ~IVUSController() override = default;
 
         using DataTypes = sofa::defaulttype::Rigid3dTypes;
 
@@ -65,16 +69,26 @@ namespace sofa::infinytoolkit
 
 
         // IVUS parameters
-        unsigned int N_rays = 128;
-        unsigned int N_depth = 256;
-        double maxDepth = 10.0;
-        unsigned int K_points = 3;      // points near tip to simulate finite transducer length
+        //unsigned int N_rays = 128;
+        //unsigned int N_depth = 256;
+        //double maxDepth = 10.0;
+        //unsigned int K_points = 3;      // points near tip to simulate finite transducer length
 
-        double alpha = 0.15;            // attenuation coeicient
-        double reflectionCoeff = 1.5;   // reflection boost
-        double noiseSigma = 10.0;       // Gaussian noise sigma
+        //double alpha = 0.15;            // attenuation coeicient
+        //double reflectionCoeff = 1.5;   // reflection boost
+        //double noiseSigma = 10.0;       // Gaussian noise sigma
 
-        unsigned int maxStoredFrames = 400;
+        //unsigned int maxStoredFrames = 400;
+
+        Data<unsigned int> d_N_rays;
+        Data<unsigned int> d_N_depth;
+        Data<double> d_maxDepth;
+        Data<double> d_alpha;
+        Data<double> d_reflectionCoeff;
+        Data<double> d_noiseSigma;
+        Data<unsigned int> d_K_points;
+        Data<unsigned int> d_maxStoredFrames;
+
 
         // Images
         cv::Mat currentFrame;                   // cross-sectional frame
