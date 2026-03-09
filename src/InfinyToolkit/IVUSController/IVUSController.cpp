@@ -27,6 +27,19 @@ namespace sofa::infinytoolkit
             .add< IVUSController >()
         );
     }
+    IVUSController::IVUSController()
+        : d_N_rays(initData(&d_N_rays, (unsigned int)128, "N_rays", "Number of angular rays"))
+        , d_N_depth(initData(&d_N_depth, (unsigned int)256, "N_depth", "Number of radial depth samples"))
+        , d_maxDepth(initData(&d_maxDepth, 10.0, "maxDepth", "Maximum probe depth"))
+        , d_alpha(initData(&d_alpha, 0.15, "alpha", "Attenuation coefficient"))
+        , d_reflectionCoeff(initData(&d_reflectionCoeff, 1.5, "reflectionCoeff", "Reflection boost"))
+        , d_noiseSigma(initData(&d_noiseSigma, 10.0, "noiseSigma", "Gaussian noise sigma"))
+        , d_K_points(initData(&d_K_points, (unsigned int)3, "K_points", "Points near probe tip"))
+        , d_maxStoredFrames(initData(&d_maxStoredFrames, (unsigned int)400, "maxStoredFrames", "Number of stored IVUS frames"))
+    {
+    }
+    
+    
     void IVUSController::init()
     {
         // Resolve the MechanicalState of the catheter
@@ -45,8 +58,10 @@ namespace sofa::infinytoolkit
                 << "Trying to find first one in current context...";
             //l_triangleGeo.set(this->getContext()->getNodeObject<TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3Types>>()); //will back to it
         }
+
+        this->f_listening.setValue(true);
         
-        currentFrame = cv::Mat::zeros(N_depth, N_rays, CV_8UC1);
+        currentFrame = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_8UC1);
     }
 
     void IVUSController::handleEvent(sofa::core::objectmodel::Event* event)
@@ -60,7 +75,7 @@ namespace sofa::infinytoolkit
         std::vector<Vec3> probePositions;
 
         unsigned int K = std::min(
-            static_cast<unsigned int>(K_points), // should be passed by getValue
+            static_cast<unsigned int>(d_K_points.getValue()), 
             static_cast<unsigned int>(positions.size())
         );
         
@@ -72,7 +87,7 @@ namespace sofa::infinytoolkit
 
 
         // Accumulate frames for multi-point averaging
-        cv::Mat accumulated = cv::Mat::zeros(N_depth, N_rays, CV_64F);
+        cv::Mat accumulated = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_64F);
 
         for (auto& probePos : probePositions)
         {
@@ -87,20 +102,20 @@ namespace sofa::infinytoolkit
 
         // Add Gaussian noise
         cv::Mat noise(currentFrame.size(), CV_8UC1);
-        cv::randn(noise, 0, noiseSigma);
+        cv::randn(noise, 0, d_noiseSigma.getValue());
         currentFrame += noise;
 
         // Store frame
         ivusFrames.push_back(currentFrame.clone());
-        if (ivusFrames.size() > maxStoredFrames)
+        if (ivusFrames.size() > d_maxStoredFrames.getValue())
             ivusFrames.erase(ivusFrames.begin());
 
         // Build longitudinal image (side view)
-        longitudinalImage = cv::Mat::zeros(N_depth, ivusFrames.size(), CV_8UC1);
-        unsigned int selectedAngle = N_rays / 2;  // central radial slice
+        longitudinalImage = cv::Mat::zeros(d_N_depth.getValue(), ivusFrames.size(), CV_8UC1);
+        unsigned int selectedAngle = d_N_rays.getValue() / 2;  // central radial slice
         for (size_t t = 0; t < ivusFrames.size(); ++t)
         {
-            for (unsigned int d = 0; d < N_depth; ++d)
+            for (unsigned int d = 0; d < d_N_depth.getValue(); ++d)
             {
                 longitudinalImage.at<uint8_t>(d, t) =
                     ivusFrames[t].at<uint8_t>(d, selectedAngle);
@@ -115,7 +130,7 @@ namespace sofa::infinytoolkit
 
     cv::Mat IVUSController::computeSingleProbeFrame(const Vec3& probepos)
     {
-        cv::Mat frame = cv::Mat::zeros(N_depth, N_rays, CV_8UC1);
+        cv::Mat frame = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_8UC1);
     
         // build roi
         std::vector<unsigned int> roiTriangles;
@@ -133,15 +148,15 @@ namespace sofa::infinytoolkit
         sofa::type::vector<double> vecCoordKmin;
 
 
-        for (unsigned int i = 0; i < N_rays; ++i)
+        for (unsigned int i = 0; i < d_N_rays.getValue(); ++i)
         {
-            double angle = 2.0 * std::numbers::pi * i / N_rays;
+            double angle = 2.0 * std::numbers::pi * i / d_N_rays.getValue();
             Vec3 dir(cos(angle), sin(angle), 0.0);
 
             Vec3 p1 = probepos;
-            Vec3 p2 = probepos + dir * maxDepth;
+            Vec3 p2 = probepos + dir * d_maxDepth.getValue();
 
-            double nearestHit = maxDepth;
+            double nearestHit = d_maxDepth.getValue();
 
             // Loop over triangles in ROI
             for (auto triIndex : roiTriangles)
@@ -168,14 +183,14 @@ namespace sofa::infinytoolkit
             }
 
             // Fill ultrasound frame
-            for (unsigned int j = 0; j < N_depth; ++j)
+            for (unsigned int j = 0; j < d_N_depth.getValue(); ++j)
             {
-                double depth = maxDepth * j / N_depth;
-                double attenuation = exp(-alpha * depth);
+                double depth = d_maxDepth.getValue() * j / d_N_depth.getValue();
+                double attenuation = exp(-d_alpha.getValue() * depth);
                 double intensity = 40 * attenuation;
 
-                if (std::abs(depth - nearestHit) < (maxDepth / N_depth))
-                    intensity = 255 * reflectionCoeff * attenuation;
+                if (std::abs(depth - nearestHit) < (d_maxDepth.getValue() / d_N_depth.getValue()))
+                    intensity = 255 * d_reflectionCoeff.getValue() * attenuation;
 
                 frame.at<uint8_t>(j, i) = static_cast<uint8_t>(std::min(255.0, intensity));
             }
@@ -215,7 +230,7 @@ namespace sofa::infinytoolkit
             // Use the first vertex or the centroid to check distance
             Vec3 center = (v0 + v1 + v2) / 3.0;
 
-            if ((center - probepos).norm() < maxDepth)
+            if ((center - probepos).norm() < d_maxDepth.getValue())
                 triangleIndices.push_back(i);
         }
 
