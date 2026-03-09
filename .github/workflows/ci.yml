@@ -129,7 +129,7 @@ jobs:
           cd regression
           python SofaRegressionProgram.py \
               --input ${{ env.WORKSPACE_SRC_PATH }}/examples/ \
-              --output ${{ env.WORKSPACE_SRC_PATH }}/references/
+              --output ${{ env.WORKSPACE_SRC_PATH }}/regression/references/
 
   deploy:
     name: Deploy artifacts
