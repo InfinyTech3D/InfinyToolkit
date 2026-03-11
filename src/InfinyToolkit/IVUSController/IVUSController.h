@@ -108,7 +108,7 @@ namespace sofa::infinytoolkit
             
             SingleLink<IVUSController,
                 TriangleSetGeometryAlgorithms<sofa::defaulttype::Vec3dTypes>,
-                BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_triangleGeo;
+                BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_triangleGeo; // To be removed when the whole node is passed
 
             SingleLink<IVUSController,
                 sofa::simulation::Node,
