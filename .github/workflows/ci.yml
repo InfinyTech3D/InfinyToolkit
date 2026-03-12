@@ -115,6 +115,19 @@ jobs:
           else
               echo "REGRESSION_DIR=$REGRESSION_DIR"
           fi
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "$BUILD_DIR/lib" >> $GITHUB_PATH
+            echo "$BUILD_DIR/bin" >> $GITHUB_PATH
+            
+            pythonroot="$(dirname "${{ inputs.python_exe }}")"
+            pythonroot=$(echo "$pythonroot" | tr '\\' '/' | sed 's/^\([A-Za-z]\):/\/\L\1/')
+            echo "$pythonroot" >> $GITHUB_PATH
+            echo "$pythonroot/DLLs" >> $GITHUB_PATH
+            echo "$pythonroot/Lib" >> $GITHUB_PATH
+            
+            echo "$SOFA_ROOT/plugins/SofaPython3/bin" >> $GITHUB_PATH
+          fi
       - name: Install Python dependencies
         shell: bash
         run: |
