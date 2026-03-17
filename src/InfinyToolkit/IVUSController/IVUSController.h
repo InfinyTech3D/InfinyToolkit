@@ -36,6 +36,7 @@
 #include <sofa/component/collision/geometry/TriangleCollisionModel.h>
 #include <sofa/component/topology/container/dynamic/TriangleSetGeometryAlgorithms.h>
 #include <opencv2/opencv.hpp>
+#include <sofa/core/visual/VisualParams.h>
 #include <vector>
 
 
@@ -63,24 +64,10 @@ namespace sofa::infinytoolkit
 
 
 
-        // Scene references , nor sure if I use them
+        // Scene references , nor sure if I use it
         sofa::simulation::Node* catheterNode = nullptr;
-        //sofa::simulation::Node* vesselNode = nullptr;
 
-
-
-        // IVUS parameters
-        //unsigned int N_rays = 128;
-        //unsigned int N_depth = 256;
-        //double maxDepth = 10.0;
-        //unsigned int K_points = 3;      // points near tip to simulate finite transducer length
-
-        //double alpha = 0.15;            // attenuation coeicient
-        //double reflectionCoeff = 1.5;   // reflection boost
-        //double noiseSigma = 10.0;       // Gaussian noise sigma
-
-        //unsigned int maxStoredFrames = 400;
-
+        Data<double> r_catheter;
         Data<unsigned int> d_N_rays;
         Data<unsigned int> d_N_depth;
         Data<double> d_maxDepth;
@@ -92,12 +79,13 @@ namespace sofa::infinytoolkit
 
 
         // Images
-        cv::Mat currentFrame;                   // cross-sectional frame
+        std::vector<cv::Mat> currentFrames;                   // cross-sectional frame for each prob
         cv::Mat longitudinalImage;              // longitudinal side view
         std::vector<cv::Mat> ivusFrames;       // history buffer
 
         void init() override;
         void handleEvent(sofa::core::objectmodel::Event* event) override;
+        void draw(const sofa::core::visual::VisualParams* vparams) override;
 
         private:
 
@@ -120,6 +108,15 @@ namespace sofa::infinytoolkit
             void buildROI(
                 const Vec3& probePos,
                 std::vector<unsigned int>& triangleIndices);
+
+            // For debug
+            std::vector<std::vector<sofa::type::Vec3>> debug_roiTrianglesPerProbe;
+            std::vector<sofa::type::Vec3> debug_hitPoints;
+
+            std::vector<sofa::type::Vec3> debug_RayIntersections_hitPoints;
+
+            void debugcomputeIntersectionsLineTriangle(const Vec3& probePos);
+            void debugrayIntersection(const Vec3& probePos);
 
     };
 }
