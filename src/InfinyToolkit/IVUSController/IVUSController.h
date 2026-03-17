@@ -104,7 +104,7 @@ namespace sofa::infinytoolkit
 
            
         //    void computeIVUSFrame();
-            cv::Mat computeSingleProbeFrame(const Vec3& probePos);
+            cv::Mat computeSingleProbeFrame(const Vec3& probePos,const Vec3& probrTangent);
             void buildROI(
                 const Vec3& probePos,
                 std::vector<unsigned int>& triangleIndices);

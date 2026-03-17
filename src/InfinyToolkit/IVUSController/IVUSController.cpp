@@ -118,6 +118,7 @@ namespace sofa::infinytoolkit
 
             // Extract last K points near tip
             std::vector<Vec3> probePositions;
+            std::vector<Vec3> probeTangents;
 
             unsigned int K = std::min(
                 static_cast<unsigned int>(d_K_points.getValue()),
@@ -126,10 +127,47 @@ namespace sofa::infinytoolkit
 
             for (unsigned int k = 0; k < K; ++k)
             {
-                const Coord& rigid = positions[positions.size() - 1 - k];
+                // Index of this probe
+                unsigned int idx = positions.size() - 1 - k;
+                const Coord& rigid = positions[idx];
                 auto center = rigid.getCenter();
 
-                probePositions.push_back(rigid.getCenter());
+                probePositions.push_back(center);
+
+                // Compute tangent using neighbor points
+                Vec3 p_prev, p_next;
+
+                if (idx == 0)
+                {
+                    p_prev = positions[idx].getCenter();
+                    p_next = positions[idx + 1].getCenter();
+                }
+                else if (idx == positions.size() - 1)
+                {
+                    p_prev = positions[idx - 1].getCenter();
+                    p_next = positions[idx].getCenter();
+                }
+                else
+                {
+                    p_prev = positions[idx - 1].getCenter();
+                    p_next = positions[idx + 1].getCenter();
+                }
+
+                // Tangent with fallback for undeployed catheter
+                Vec3 diff = p_next - p_prev;
+                Vec3 tangent;
+
+                if (norm(diff) < 1e-8)
+                {
+                    tangent = Vec3(0, 0, 1);  // fallback axis (default deployment)
+                }
+                else
+                {
+                    tangent = diff.normalized();
+                }
+
+                probeTangents.push_back(tangent);
+
             }
 
 
@@ -153,7 +191,7 @@ namespace sofa::infinytoolkit
                 //debugrayIntersection(probePositions[k]);
 
 
-                cv::Mat tempFrame = computeSingleProbeFrame(probePositions[k]);
+                cv::Mat tempFrame = computeSingleProbeFrame(probePositions[k], probeTangents[k]);
 
                 //// Add Gaussian noise
                 //cv::Mat noise(tempFrame.size(), CV_8UC1);
@@ -209,7 +247,7 @@ namespace sofa::infinytoolkit
        
     }
 
-    cv::Mat IVUSController::computeSingleProbeFrame(const Vec3& probepos)
+    cv::Mat IVUSController::computeSingleProbeFrame(const Vec3& probepos, const Vec3& probeTangent)
     {
 
         cv::Mat frame = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_8UC1);
@@ -229,14 +267,21 @@ namespace sofa::infinytoolkit
 
 
         debug_hitPoints.clear();
+
+        // Build local plane
+        Vec3 tangent = probeTangent;
+        Vec3 arbitrary = (fabs(tangent[0]) < 0.9) ? Vec3(1, 0, 0) : Vec3(0, 1, 0);
+        Vec3 u = (cross(tangent, arbitrary)).normalized();
+        Vec3 v = cross(tangent, u);
         
+        //Shoot rays in the (u,v) plane
         for (unsigned int i = 0; i < d_N_rays.getValue(); ++i)
         {
             double angle = 2.0 * std::numbers::pi * i / d_N_rays.getValue();
-            Vec3 dir(cos(angle), sin(angle), 0.0);
 
+           
+            Vec3 direction = cos(angle) * u + sin(angle) * v;
             Vec3 origin = probepos;
-            Vec3 direction = dir;
             
             double nearestHit = d_maxDepth.getValue();
             Vec3 nearstHitPoint;
