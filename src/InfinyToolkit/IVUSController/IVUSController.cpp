@@ -56,7 +56,7 @@ namespace sofa::infinytoolkit
         :l_CatheterState(initLink("catheterState", "Link to the mechanical object of the catheter."))
         , l_triangleGeo(initLink("triangleGeo", "Link to the collision model of the vessel."))
         , l_vesselNode(initLink("vesselNode", "Link to the vessel node."))
-        , r_catheter(initData(&r_catheter,1.0,"device_radius","Device raduis where the prob located."))
+        , r_catheter(initData(&r_catheter, 1.0, "device_radius", "Device raduis where the prob located."))
         , d_N_rays(initData(&d_N_rays, (unsigned int)128, "N_rays", "Number of angular rays"))
         , d_N_depth(initData(&d_N_depth, (unsigned int)256, "N_depth", "Number of radial depth samples"))
         , d_maxDepth(initData(&d_maxDepth, 10.0, "maxDepth", "Maximum probe depth"))
@@ -65,6 +65,9 @@ namespace sofa::infinytoolkit
         , d_noiseSigma(initData(&d_noiseSigma, 10.0, "noiseSigma", "Gaussian noise sigma"))
         , d_K_points(initData(&d_K_points, (unsigned int)3, "K_points", "Points near probe tip"))
         , d_maxStoredFrames(initData(&d_maxStoredFrames, (unsigned int)400, "maxStoredFrames", "Number of stored IVUS frames"))
+        , d_useDebugRay(initData(&d_useDebugRay, false, "useDebugRay", "Enable debug ray intersection."))
+        , d_drawROI(initData(&d_drawROI, false, "drawROI", "Draw ROI triangles."))
+        , d_drawHitPoints(initData(&d_drawHitPoints, true, "drawHitPoints", "Draw debug hit points."))
     {
     }
     
@@ -90,11 +93,7 @@ namespace sofa::infinytoolkit
             return;
         }
 
-        //vesselNode = this->getRoot()->getChild("VesselNode");
-
-       ///* msg_info() << "Catheter DOFs: " << cath->getSize();
-       // msg_info() << "Triangles: " << geo->getTopology()->getNbTriangles();*/
-
+       
         if (l_vesselNode.get() == nullptr)
         {
             msg_error() << "Vessel node link not set!";
@@ -170,13 +169,31 @@ namespace sofa::infinytoolkit
 
             }
 
+            if (d_useDebugRay.getValue())
+            {
+                // DEBUG MODE
+                debug_RayIntersections_hitPoints.clear();
+
+                Vec3 tangent = probeTangents[0];  // tip tangent
+                Vec3 probePos = probePositions[0];
+
+                debugSingleRayIntersection(
+                    probePos,
+                    tangent,
+                    M_PI / 2.0,
+                    IntersectionMethod::RayTriangle,
+                    "HandleEventDebug"
+                );
+                return;
+            }
+
 
             // Accumulate frames for multi-point averaging
             currentFrames.clear();
 
             cv::Mat accumulated = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_64F);
 
-            debug_RayIntersections_hitPoints.clear();
+           
 
             for (unsigned int k = 0; k < probePositions.size(); ++k)
             {
@@ -185,10 +202,6 @@ namespace sofa::infinytoolkit
                /* std::cout << "Processing probe k=" << k
                     << " (catheter index = " << catheterIndex << ")"
                     << std::endl;*/
-
-                
-                // For debguing intersection:
-                //debugrayIntersection(probePositions[k]);
 
 
                 cv::Mat tempFrame = computeSingleProbeFrame(probePositions[k], probeTangents[k]);
@@ -249,8 +262,14 @@ namespace sofa::infinytoolkit
 
     cv::Mat IVUSController::computeSingleProbeFrame(const Vec3& probepos, const Vec3& probeTangent)
     {
+        //Precompute constants
+        const double maxDepth = d_maxDepth.getValue();
+        const unsigned int N_rays = d_N_rays.getValue();
+        const unsigned int N_depth = d_N_depth.getValue();
+        const double alpha = d_alpha.getValue();
+        const double reflectionCoeff = d_reflectionCoeff.getValue();
 
-        cv::Mat frame = cv::Mat::zeros(d_N_depth.getValue(), d_N_rays.getValue(), CV_8UC1);
+        cv::Mat frame = cv::Mat::zeros(N_depth, N_rays, CV_8UC1);
     
         // build roi
         std::vector<unsigned int> roiTriangles;
@@ -270,59 +289,40 @@ namespace sofa::infinytoolkit
 
         // Build local plane
         Vec3 tangent = probeTangent;
-        Vec3 arbitrary = (fabs(tangent[0]) < 0.9) ? Vec3(1, 0, 0) : Vec3(0, 1, 0);
-        Vec3 u = (cross(tangent, arbitrary)).normalized();
-        Vec3 v = cross(tangent, u);
+      
+        // Compute orthonormal plane perpendicular to tangent
+        Vec3 u, v;
+        computePerpendicularPlane(tangent, u, v);
+
+        
         
         //Shoot rays in the (u,v) plane
-        for (unsigned int i = 0; i < d_N_rays.getValue(); ++i)
+        for (unsigned int i = 0; i < N_rays; ++i)
         {
-            double angle = 2.0 * std::numbers::pi * i / d_N_rays.getValue();
+            double angle = 2.0 * std::numbers::pi * i / N_rays;
 
            
             Vec3 direction = cos(angle) * u + sin(angle) * v;
             Vec3 origin = probepos;
+
+            Vec3 hitPoint = computeRayHitPoint(origin, direction, roiTriangles);
+
+            double nearestHit = (hitPoint - origin).norm();
             
-            double nearestHit = d_maxDepth.getValue();
-            Vec3 nearstHitPoint;
-
-            // Loop over triangles in ROI
-            for (auto triIndex : roiTriangles)
+         
+            if (nearestHit < maxDepth)
             {
-
-                const auto& tri = triangles[triIndex];
-                Vec3 n0 = positions[tri[0]];
-                Vec3 n1 = positions[tri[1]];
-                Vec3 n2 = positions[tri[2]];
-
-                double t, u, v;
-
-                bool hit = sofa::geometry::Triangle::rayIntersection(n0, n1, n2, origin, direction, t, u, v);
-
-                if (hit && t < nearestHit)
-                {
-                    nearestHit = t;
-                }
-
-            }
-
-            //----------------------------------------------------
-            if (nearestHit < d_maxDepth.getValue())
-            {
-                Vec3 hitPoint = origin + direction * (nearestHit);
-
                 debug_hitPoints.push_back(hitPoint);
             }
-            //----------------------------------------------------
 
             // Fill ultrasound frame
-            for (unsigned int j = 0; j < d_N_depth.getValue(); ++j)
+            for (unsigned int j = 0; j < N_depth; ++j)
             {
-                double depth = d_maxDepth.getValue() * j / d_N_depth.getValue();
-                double attenuation = exp(-d_alpha.getValue() * depth);
+                double depth = maxDepth * j / N_depth;
+                double attenuation = exp(-alpha * depth);
                 double intensity = 40 * attenuation;
 
-                if (std::abs(depth - nearestHit) < (d_maxDepth.getValue() / d_N_depth.getValue()))
+                if (std::abs(depth - nearestHit) < (maxDepth / N_depth))
                     intensity = 255 * d_reflectionCoeff.getValue() * attenuation;
 
                 frame.at<uint8_t>(j, i) = static_cast<uint8_t>(std::min(255.0, intensity));
@@ -384,130 +384,19 @@ namespace sofa::infinytoolkit
                 
         }
 
-        // For Debug
-       /* if (!triangleIndices.empty())
-        {
-            std::cout << "Triangles found: " << triangleIndices.size() << std::endl;
-
-            for (const auto& idx : triangleIndices)
-            {
-                std::cout << "Triangle index: " << idx << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "triangleIndices vector is empty." << std::endl;
-        }*/
-
-      
-    }
-
-    void IVUSController::debugcomputeIntersectionsLineTriangle(const Vec3& probePos)
-    {
         
-             std::vector<unsigned int> roiTriangles;
-             IVUSController::buildROI(probePos, roiTriangles);
-
-            sofa::type::vector<sofa::Index> indices;
-            sofa::type::vector<double> vecBaryCoef;
-            sofa::type::vector<double> vecCoordKmin;
-
-            // ---- Define a specific angle ----
-            double angle = M_PI / 2.0; // 90 degrees, along +Y direction
-            Vec3 dir(cos(angle), sin(angle), 0.0); // ray direction in XY plane
-            Vec3 p1 = probePos ; // offset outside catheter
-            Vec3 p2 = probePos + dir * d_maxDepth.getValue();
-            
-            //Vec3 rayDir = dir.normalized();
-
-            double nearestHit = d_maxDepth.getValue();
-            Vec3 nearestHitPoint;
-
-            std::cout << "Debugging ray at angle pi/2 from probe position ("
-                << probePos[0] << "," << probePos[1] << "," << probePos[2] << ")\n";
-
-
-            for (auto triIndex : roiTriangles)
-            {
-                bool hit = l_triangleGeo->computeIntersectionsLineTriangle(
-                    false,                               // is_entered
-                    p1,
-                    p2,
-                    triIndex,
-                    indices,
-                    vecBaryCoef,
-                    vecCoordKmin
-                );
-
-                if (hit && !vecCoordKmin.empty() && vecCoordKmin[0] < nearestHit)
-                {
-                    nearestHit = vecCoordKmin[0];
-                }
-
-                // Clear vectors for next triangle
-                indices.clear();
-                vecBaryCoef.clear();
-                vecCoordKmin.clear();
-            }
-
-            //----------------------------------------------------
-            debug_RayIntersections_hitPoints.clear();
-
-            if (nearestHit < d_maxDepth.getValue())
-            {
-                Vec3 hitPoint = p1 + (p2 - p1) * (1.0-nearestHit);
-
-                std::cout << "p1: " << p1 << std::endl;
-                std::cout << "p2: " << p2 << std::endl;
-
-                std::cout << "coord_k: " << vecCoordKmin[0] << std::endl;
-                // ---- Print hit point ----
-                std::cout  << " HitPoint = ("
-                    << hitPoint[0] << ", "
-                    << hitPoint[1] << ", "
-                    << hitPoint[2] << ")"
-                    << std::endl;
-
-                debug_RayIntersections_hitPoints.push_back(hitPoint);
-                
-            }
-         
     }
 
-    void IVUSController::debugrayIntersection(const Vec3& probePos)
+   
+    IVUSController::Vec3 IVUSController::computeRayHitPoint(const Vec3& origin, const Vec3& rayDir, const std::vector<unsigned int>& roiTriangles)
     {
-
-        std::vector<unsigned int> roiTriangles;
-        IVUSController::buildROI(probePos, roiTriangles);
-
         auto* triModel = l_vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
-        if (!triModel)
-        {
-            msg_error() << "No TriangleCollisionModel found in vesselNode!";
-            return;
-        }
 
-        // Access mechanical object positions
-        const auto& positions = triModel->getX();  
-        // Access topology triangles
-        const auto& triangles = triModel->getTriangles(); 
+        const auto& positions = triModel->getX();
+        const auto& triangles = triModel->getTriangles();
 
-
-        
-        // ---- Define a specific angle ----
-        double angle = M_PI / 2.0; // 90 degrees, along +Y direction
-        Vec3 dir(cos(angle), sin(angle), 0.0); // ray direction in XY plane
-        Vec3 origin = probePos;
-        Vec3 direction = dir;
-
-
-        double nearestHit = d_maxDepth.getValue();
-        Vec3 nearestHitPoint;
-
-        std::cout << "Debugging ray at angle pi/2 from probe position ("
-            << probePos[0] << "," << probePos[1] << "," << probePos[2] << ")\n";
-
-        debug_RayIntersections_hitPoints.clear();
+        double nearestT = d_maxDepth.getValue();
+        Vec3 nearestHit = origin;
 
         for (auto triIndex : roiTriangles)
         {
@@ -516,72 +405,207 @@ namespace sofa::infinytoolkit
             Vec3 n1 = positions[tri[1]];
             Vec3 n2 = positions[tri[2]];
 
-            double t, u, v;
+            double t, u_coef, v_coef;
+            bool hit = sofa::geometry::Triangle::rayIntersection(n0, n1, n2, origin, rayDir, t, u_coef, v_coef);
 
-            bool hit = sofa::geometry::Triangle::rayIntersection(n0, n1, n2, origin, direction, t, u, v);
+            if (hit && t < nearestT)
+            {
+                nearestT = t;
+                nearestHit = origin + rayDir * t;
+            }
+        }
+
+        return nearestHit;
+    }
+
+    void IVUSController::debugSingleRayIntersection(
+        const Vec3& probePos,
+        const Vec3& tangent,
+        double angle,
+        IntersectionMethod method,
+        const std::string& debugName)
+    {
+        // ROI
+        std::vector<unsigned int> roiTriangles;
+        IVUSController::buildROI(probePos, roiTriangles);
+
+        // Triangle model (needed for RayTriangle)
+        auto* triModel = l_vesselNode->getNodeObject<TriangleCollisionModel<sofa::defaulttype::Vec3Types>>();
+
+        const auto& positions = triModel->getX();
+        const auto& triangles = triModel->getTriangles();
+
+        // Buffers (for LineTriangle)
+        sofa::type::vector<sofa::Index> indices;
+        sofa::type::vector<double> vecBaryCoef;
+        sofa::type::vector<double> vecCoordKmin;
+
+        // Ray definition
+        // Compute orthonormal plane perpendicular to tangent
+        Vec3 u, v;
+        computePerpendicularPlane(tangent, u, v);
+
+        // Ray direction in the plane
+        Vec3 dir = std::cos(angle) * u + std::sin(angle) * v;
+
+        Vec3 origin = probePos;
+        Vec3 p2 = origin + dir * d_maxDepth.getValue();
+
+        double nearestHit = d_maxDepth.getValue();
+        bool foundHit = false;
+
+        std::cout << "\n[DEBUG: " << debugName << "]\n";
+        std::cout << "Angle: " << angle << "\n";
+
+        //--------------------------------------------------
+        for (auto triIndex : roiTriangles)
+        {
+            bool hit = false;
+            double t = 0.0;
+
+            if (method == IntersectionMethod::LineTriangle)
+            {
+                hit = l_triangleGeo->computeIntersectionsLineTriangle(
+                    false,
+                    origin,
+                    p2,
+                    triIndex,
+                    indices,
+                    vecBaryCoef,
+                    vecCoordKmin
+                );
+
+                if (hit && !vecCoordKmin.empty())
+                {
+                    t = vecCoordKmin[0];
+                }
+
+                indices.clear();
+                vecBaryCoef.clear();
+                vecCoordKmin.clear();
+            }
+            else // RayTriangle
+            {
+                const auto& tri = triangles[triIndex];
+
+                Vec3 n0 = positions[tri[0]];
+                Vec3 n1 = positions[tri[1]];
+                Vec3 n2 = positions[tri[2]];
+
+                double u, v;
+                hit = sofa::geometry::Triangle::rayIntersection(
+                    n0, n1, n2,
+                    origin, dir,
+                    t, u, v
+                );
+            }
+
+            //--------------------------------------------------
 
             if (hit && t < nearestHit)
             {
                 nearestHit = t;
+                foundHit = true;
             }
-
-
-
-            //----------------------------------------------------
-
-
-            if (nearestHit < d_maxDepth.getValue())
-            {
-                Vec3 hitPoint = origin + direction * nearestHit;
-                //debug_hitPoints.push_back(hitPoint);
-
-
-                // ---- Print hit point ----
-                std::cout << " HitPoint = ("
-                    << hitPoint[0] << ", "
-                    << hitPoint[1] << ", "
-                    << hitPoint[2] << ")"
-                    << std::endl;
-
-                debug_RayIntersections_hitPoints.push_back(hitPoint);
-
-            }
-
         }
-        
-     }
 
+        //--------------------------------------------------
 
-
-
-   
-    void IVUSController::draw(const sofa::core::visual::VisualParams * vparams)
+        if (foundHit)
         {
-            sofa::type::RGBAColor color_1(0.f, 1.f, 0.f, 1.f);
+            Vec3 hitPoint;
 
-           /* for (const auto& probeTriangles : debug_roiTrianglesPerProbe)
+            if (method == IntersectionMethod::LineTriangle)
             {
-                   if (!probeTriangles.empty())
-                         vparams->drawTool()->drawTriangles(probeTriangles, color_1);
-            }*/
-
-            if (!debug_hitPoints.empty())
+                hitPoint = origin + (p2 - origin) * (1.0 - nearestHit);
+            }
+            else
             {
-                sofa::type::RGBAColor color(0.f, 0.f, 1.f, 1.f); // blue
-                vparams->drawTool()->drawPoints(debug_hitPoints, 5.0f, color);
+                hitPoint = origin + dir * nearestHit;
             }
 
-            //if (!debug_RayIntersections_hitPoints.empty())
-            //{
-            //    sofa::type::RGBAColor color(0.f, 0.f, 1.f, 1.f); // blue
-            //    vparams->drawTool()->drawPoints(debug_RayIntersections_hitPoints, 10.0f, color);
-            //}
-           
+            std::cout << "Nearest t: " << nearestHit << "\n";
+            std::cout << "HitPoint = ("
+                << hitPoint[0] << ", "
+                << hitPoint[1] << ", "
+                << hitPoint[2] << ")\n";
 
-
-           
-
+            debug_RayIntersections_hitPoints.push_back(hitPoint);
         }
+        else
+        {
+            std::cout << "No intersection found.\n";
+        }
+    }
+
+  
+
+
+
+    void IVUSController::computePerpendicularPlane(
+        const Vec3& tangent, // catheter tangent
+        Vec3& u,             // first perpendicular vector (output)
+        Vec3& v              // second perpendicular vector (output)
+    )
+    {
+        // Step 1: normalize tangent
+        Vec3 t = tangent.normalized();
+
+        // Step 2: pick a vector not parallel to tangent
+        Vec3 arbitrary;
+        if (std::abs(t[2]) < 0.9)        // not mostly along Z
+            arbitrary = Vec3(0, 0, 1);
+        else
+            arbitrary = Vec3(1, 0, 0);
+
+        // Step 3: compute first perpendicular vector
+        u = cross(t, arbitrary).normalized();
+
+        // Step 4: second perpendicular vector
+        v = cross(t, u).normalized();
+    }
+
+
+    void IVUSController::draw(const sofa::core::visual::VisualParams* vparams)
+    {
+        if (!vparams || !vparams->displayFlags().getShowVisualModels())
+            return;
+
+        auto* drawTool = vparams->drawTool();
+        if (!drawTool)
+            return;
+
+        //----------------------------------
+        // Colors (define once)
+        static const sofa::type::RGBAColor roiColor(0.f, 1.f, 0.f, 1.f);   // green
+        static const sofa::type::RGBAColor hitColor(0.f, 0.f, 1.f, 1.f);   // blue
+        static const sofa::type::RGBAColor rayColor(1.f, 0.f, 0.f, 1.f);   // red
+
+        //----------------------------------
+        // ROI TRIANGLES
+        if (d_drawROI.getValue())
+        {
+            for (const auto& probeTriangles : debug_roiTrianglesPerProbe)
+            {
+                if (!probeTriangles.empty())
+                    drawTool->drawTriangles(probeTriangles, roiColor);
+            }
+        }
+
+        //----------------------------------
+        // GENERAL HIT POINTS
+        if (d_drawHitPoints.getValue() && !debug_hitPoints.empty())
+        {
+            drawTool->drawPoints(debug_hitPoints, 5.0f, hitColor);
+        }
+
+        //----------------------------------
+        // RAY INTERSECTION POINTS
+        if (d_useDebugRay.getValue() && !debug_RayIntersections_hitPoints.empty())
+        {
+            drawTool->drawPoints(debug_RayIntersections_hitPoints, 8.0f, rayColor);
+        }
+    }
 
 
   

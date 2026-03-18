@@ -76,6 +76,10 @@ namespace sofa::infinytoolkit
         Data<double> d_noiseSigma;
         Data<unsigned int> d_K_points;
         Data<unsigned int> d_maxStoredFrames;
+        Data<bool> d_useDebugRay;
+        Data<bool> d_drawROI;
+        Data<bool> d_drawHitPoints;
+       
 
 
         // Images
@@ -88,6 +92,13 @@ namespace sofa::infinytoolkit
         void draw(const sofa::core::visual::VisualParams* vparams) override;
 
         private:
+
+            // 
+            enum class IntersectionMethod
+            {
+                LineTriangle,
+                RayTriangle
+            };
 
             SingleLink< IVUSController,
                 sofa::core::behavior::MechanicalState<sofa::defaulttype::Rigid3dTypes>,
@@ -115,9 +126,13 @@ namespace sofa::infinytoolkit
 
             std::vector<sofa::type::Vec3> debug_RayIntersections_hitPoints;
 
-            void debugcomputeIntersectionsLineTriangle(const Vec3& probePos);
-            void debugrayIntersection(const Vec3& probePos);
-
+            Vec3 computeRayHitPoint(
+                const Vec3& origin,
+                const Vec3& raydir,
+                const std::vector<unsigned int>& roitriangles);
+           
+            void debugSingleRayIntersection(const Vec3& probePos, const Vec3& tangent, double angle, IntersectionMethod method, const std::string& debugName);
+            void computePerpendicularPlane(const Vec3& tangent, Vec3& u, Vec3& v);
     };
 }
 
