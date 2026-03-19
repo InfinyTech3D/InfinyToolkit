@@ -68,6 +68,7 @@ namespace sofa::infinytoolkit
         , d_useDebugRay(initData(&d_useDebugRay, false, "useDebugRay", "Enable debug ray intersection."))
         , d_drawROI(initData(&d_drawROI, false, "drawROI", "Draw ROI triangles."))
         , d_drawHitPoints(initData(&d_drawHitPoints, true, "drawHitPoints", "Draw debug hit points."))
+        , d_imPolar(initData(&d_imPolar,true,"polarGrid", "Generate the image in the polar grid."))
     {
     }
     
@@ -217,8 +218,8 @@ namespace sofa::infinytoolkit
 
                 //accumulated += tempFrame64;
 
-                //// Store displayable version
-                //currentFrames.push_back(tempFrame.clone());
+                // Store displayable version
+                currentFrames.push_back(tempFrame.clone());
             }
 
             // Average over K points
@@ -247,11 +248,18 @@ namespace sofa::infinytoolkit
             // Display images
             //cv::namedWindow("currentFrame", cv::WINDOW_AUTOSIZE);
             //cv::imshow("IVUS Longitudinal", longitudinalImage);
-         /*   for (size_t k = 0; k < currentFrames.size(); ++k)
+            for (size_t k = 0; k < currentFrames.size(); ++k)
             {
                 std::string name = "Probe " + std::to_string(k);
+
+                int width = currentFrames[k].cols;
+                int height = currentFrames[k].rows;
+
+                // allow resizing
+                cv::namedWindow(name, cv::WINDOW_NORMAL);   
+                cv::resizeWindow(name, width, height);      
                 cv::imshow(name, currentFrames[k]);
-            }*/
+            }
 
             //cv::imshow("Averaged IVUS", averagedFrame);
 
@@ -268,6 +276,8 @@ namespace sofa::infinytoolkit
         const unsigned int N_depth = d_N_depth.getValue();
         const double alpha = d_alpha.getValue();
         const double reflectionCoeff = d_reflectionCoeff.getValue();
+        bool imPolar = d_imPolar.getValue();
+
 
         cv::Mat frame = cv::Mat::zeros(N_depth, N_rays, CV_8UC1);
     
@@ -294,7 +304,8 @@ namespace sofa::infinytoolkit
         Vec3 u, v;
         computePerpendicularPlane(tangent, u, v);
 
-        
+        // Compute nearestHit for all rays first
+        std::vector<double> nearestHits(N_rays, maxDepth); 
         
         //Shoot rays in the (u,v) plane
         for (unsigned int i = 0; i < N_rays; ++i)
@@ -309,24 +320,43 @@ namespace sofa::infinytoolkit
 
             double nearestHit = (hitPoint - origin).norm();
             
+            nearestHits[i] = std::min(nearestHit, maxDepth); // clamp to maxDepth
+
          
             if (nearestHit < maxDepth)
             {
                 debug_hitPoints.push_back(hitPoint);
             }
 
-            // Fill ultrasound frame
-            for (unsigned int j = 0; j < N_depth; ++j)
-            {
-                double depth = maxDepth * j / N_depth;
-                double attenuation = exp(-alpha * depth);
-                double intensity = 40 * attenuation;
+            
+            
+          
+        }
 
-                if (std::abs(depth - nearestHit) < (maxDepth / N_depth))
-                    intensity = 255 * d_reflectionCoeff.getValue() * attenuation;
-
-                frame.at<uint8_t>(j, i) = static_cast<uint8_t>(std::min(255.0, intensity));
-            }
+        // Fill ultrasound frame
+        if (imPolar)
+        {
+            frame = generatePolarImage(
+                N_depth,
+                N_rays,
+                maxDepth,
+                nearestHits,
+                alpha,
+                reflectionCoeff
+            );
+        }
+        else
+        {
+            frame = generateCartesianImage(
+                512,         // width
+                512,         // height
+                N_depth,
+                N_rays,
+                maxDepth,
+                nearestHits,
+                alpha,
+                reflectionCoeff
+            );
         }
 
         return frame;
@@ -417,6 +447,81 @@ namespace sofa::infinytoolkit
 
         return nearestHit;
     }
+
+    uint8_t IVUSController::computeIntensity(const double depth, double nearestHit,
+        const double alpha,const double reflectionCoeff,const double maxDepth, const unsigned int N_depth)
+    {
+
+        double attenuation = exp(-alpha * depth);
+        double intensity = 40 * attenuation;
+
+        if (std::abs(depth - nearestHit) < (maxDepth / N_depth))
+            intensity = 255 * reflectionCoeff * attenuation;
+
+        return static_cast<uint8_t>(std::min(255.0, intensity));
+    }
+
+    cv::Mat IVUSController::generatePolarImage(const unsigned int N_depth, const unsigned int N_rays
+        ,const double maxDepth, const std::vector<double>& nearestHits,const double alpha,const double reflectionCoeff)
+    {
+        cv::Mat frame(N_depth, N_rays, CV_8UC1, cv::Scalar(0));
+
+        for (int i = 0; i < N_rays; ++i)
+        {
+            double nearestHitForRay = nearestHits[i]; // nearst hit per ray
+            for (int j = 0; j < N_depth; ++j)
+            {
+                const double depth = maxDepth * j / N_depth;
+
+                frame.at<uint8_t>(j, i) =
+                    computeIntensity(depth, nearestHitForRay, alpha,
+                        reflectionCoeff, maxDepth, N_depth);
+            }
+        }
+
+        return frame;
+    }
+
+    cv::Mat IVUSController::generateCartesianImage(const unsigned int width, const unsigned int height, const unsigned int N_depth, const unsigned int N_rays,
+        const double maxDepth, const std::vector<double>& nearestHits
+        , const double alpha, const double reflectionCoeff)
+    {
+        cv::Mat img(height, width, CV_8UC1, cv::Scalar(0));
+
+        double cx = width / 2.0;
+        double cy = height / 2.0;
+
+        for (int y = 0; y < height; ++y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                double dx = x - cx;
+                double dy = y - cy;
+
+                double depth = sqrt(dx * dx + dy * dy);
+                if (depth > maxDepth)
+                    continue;
+
+                double theta = atan2(dy, dx);
+                if (theta < 0) theta += 2 * M_PI;
+
+                int j = static_cast<int>(depth / maxDepth * N_depth);
+                int i = static_cast<int>(theta / (2 * M_PI) * N_rays);
+
+                if (j >= N_depth || i >= N_rays)
+                    continue;
+
+                double nearestHitForRay = nearestHits[i]; // per-angle nearestHit
+
+                img.at<uint8_t>(y, x) =
+                    computeIntensity(depth, nearestHitForRay, alpha,
+                        reflectionCoeff, maxDepth, N_depth);
+            }
+        }
+
+        return img;
+    }
+
 
     void IVUSController::debugSingleRayIntersection(
         const Vec3& probePos,

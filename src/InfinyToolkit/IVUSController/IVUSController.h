@@ -79,6 +79,7 @@ namespace sofa::infinytoolkit
         Data<bool> d_useDebugRay;
         Data<bool> d_drawROI;
         Data<bool> d_drawHitPoints;
+        Data<bool> d_imPolar;
        
 
 
@@ -130,9 +131,28 @@ namespace sofa::infinytoolkit
                 const Vec3& origin,
                 const Vec3& raydir,
                 const std::vector<unsigned int>& roitriangles);
+
+            uint8_t computeIntensity(const double depth, double nearestHit,
+                const double alpha, const double reflectionCoeff, const double maxDepth,
+                const unsigned int N_depth);
+           
+
+
+            cv::Mat generatePolarImage(const unsigned int N_depth,
+                const unsigned int N_rays, const double maxDepth,
+                const std::vector<double>& nearstHits, const double alpha, const double reflectionCoeff);
+
+            cv::Mat generateCartesianImage(const unsigned int
+                width, const unsigned int height,
+                const unsigned int N_depth, const unsigned int N_rays ,
+         const double maxDepth,
+                const std::vector<double>& nearstHits,
+         const double alpha,
+         const  double reflectionCoeff);
            
             void debugSingleRayIntersection(const Vec3& probePos, const Vec3& tangent, double angle, IntersectionMethod method, const std::string& debugName);
             void computePerpendicularPlane(const Vec3& tangent, Vec3& u, Vec3& v);
+
     };
 }
 
