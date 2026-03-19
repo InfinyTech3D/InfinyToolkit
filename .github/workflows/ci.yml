@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+      - master
+
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
   build-and-test:
     name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }}
+    if: >
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.labels.*.name, 'pr: status to review')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
