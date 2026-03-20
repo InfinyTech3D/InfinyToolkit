@@ -4,7 +4,7 @@ The Scripts folder has a collection of python scripts to provide basic utilities
 
 ## runBenchmarks_script.py
 
-"""
+```
 SOFA Scene Benchmarking Tool
 
 Usage:
@@ -38,4 +38,4 @@ Config file format (JSON):
 
 
 All top-level config keys can be overridden individually via CLI arguments.
-"""
+```
