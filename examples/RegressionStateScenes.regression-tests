@@ -5,9 +5,9 @@
 ../regression/references
 
 ### Demo scenes ###
-BeatingCube.scn 200 1e-4 1 1
-BeatingCube_moving.scn 200 1e-4 1 1
-Cube_AdvCarvingTexcoords.scn 500 1e-4 1 1
-Cube_Carving.scn 500 1e-4 1 1
-Cube_CarvingWithPenetration.scn 500 1e-4 1 1
-TetrahedronBeamMultiMaterials.scn 500 1e-4 1 1
+BeatingCube.scn 200 1e-4 1 20
+BeatingCube_moving.scn 200 1e-4 1 20
+Cube_AdvCarvingTexcoords.scn 500 1e-4 1 20
+Cube_Carving.scn 500 1e-4 1 20
+Cube_CarvingWithPenetration.scn 500 1e-4 1 20
+TetrahedronBeamMultiMaterials.scn 500 1e-4 1 20

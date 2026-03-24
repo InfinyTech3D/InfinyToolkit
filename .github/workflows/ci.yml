@@ -103,6 +103,53 @@ jobs:
           output_dir: ${{ github.workspace }}/tests-results_dir
           nb_parallel_threads: '4'
 
+      - name: Inspect repository tree
+        shell: bash
+        run: |
+          echo "Repository root:"
+          ls -la .
+          ls -la ${{ env.WORKSPACE_SRC_PATH }}
+
+          if [ -z "$SOFA_ROOT" ]; then
+              echo "SOFA_ROOT is not set"
+          else
+              echo "SOFA_ROOT=$SOFA_ROOT"
+          fi
+
+          if [ -z "$REGRESSION_DIR" ]; then
+              echo "REGRESSION_DIR is not set"
+          else
+              echo "REGRESSION_DIR=$REGRESSION_DIR"
+          fi
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "$BUILD_DIR/lib" >> $GITHUB_PATH
+            echo "$BUILD_DIR/bin" >> $GITHUB_PATH
+            
+            pythonroot="$(dirname "${{ inputs.python_exe }}")"
+            pythonroot=$(echo "$pythonroot" | tr '\\' '/' | sed 's/^\([A-Za-z]\):/\/\L\1/')
+            echo "$pythonroot" >> $GITHUB_PATH
+            echo "$pythonroot/DLLs" >> $GITHUB_PATH
+            echo "$pythonroot/Lib" >> $GITHUB_PATH
+            
+            echo "$SOFA_ROOT/plugins/SofaPython3/bin" >> $GITHUB_PATH
+          fi
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install tqdm
+
+      - name: New regression tests
+        shell: bash
+        env:
+          SOFA_ROOT: ${{ github.workspace }}/build
+        run: |
+          cd regression
+          python SofaRegressionProgram.py \
+              --input ${{ env.WORKSPACE_SRC_PATH }}/examples/ \
+              --output ${{ env.WORKSPACE_SRC_PATH }}/regression/references/
+
   deploy:
     name: Deploy artifacts
     if: always() && startsWith(github.ref, 'refs/heads/main') # we are on a branch (not a PR)
