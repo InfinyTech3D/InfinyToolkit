@@ -1,4 +1,24 @@
 #!/usr/bin/env python3
+"""
+Run SOFA benchmarks from a JSON config file.
+
+Usage:
+    python runBenchmarks_script.py -config benchmarks.json
+    python runBenchmarks_script.py -config benchmarks.json -output results/my_run
+
+Change the SOFA executable:
+    python runBenchmarks_script.py -config benchmarks.json -sofa_exe /path/to/runSofa
+
+Load SofaPython3:
+    python runBenchmarks_script.py -config benchmarks.json -python
+
+Override Parameters:
+    python runBenchmarks_script.py -config benchmarks.json -n_tests 5 -warmup 2 -iterations 1000 -timeout 60
+
+Required config keys:  iterations, n_tests, timeout, cases
+Optional config keys:  sofa_exe (default: runSofa), warmup (default: 1), output (default: log.benchmark)
+CLI flags override the corresponding config-file values.
+"""
 import os
 import re
 import sys
@@ -54,6 +74,7 @@ class CaseResults:
 
 DEFAULTS: Dict[str, Any] = {
     'sofa_exe': 'runSofa',
+    'python':   False,
     'warmup':   1,
     'output':   'log.benchmark',
 }
@@ -62,6 +83,7 @@ DEFAULTS: Dict[str, Any] = {
 REQUIRED_KEYS = ('iterations', 'n_tests', 'timeout')
 
 # All keys overrideable via CLI — must match build_parser arguments exactly.
+# 'python' uses store_true with default=None so it only overrides when explicitly passed.
 OVERRIDE_KEYS = (*DEFAULTS.keys(), *REQUIRED_KEYS)
 
 
@@ -132,12 +154,13 @@ def _parse_timing_line(line: str) -> Optional[RunResult]:
 
 
 def run_single(
-    sofa_exe: str, scene: str, iterations: int, timeout: int
+    sofa_exe: str, scene: str, iterations: int, timeout: int, python: bool = False
 ) -> Tuple[Optional[RunResult], Optional[str]]:
     """Returns (RunResult, None) on success, (None, error_message) on failure. Never raises."""
+    python_args = ['-l', 'SofaPython3'] if python else []
     try:
         proc = subprocess.run(
-            [sofa_exe, '-g', 'batch', '-n', str(iterations), scene],
+            [sofa_exe, *python_args, '-g', 'batch', '-n', str(iterations), scene],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -170,6 +193,7 @@ def run_case(config: Dict[str, Any], case: Dict[str, str]) -> CaseResults:
     scene      = case['scene']
     name       = case['name']
 
+    python = config.get('python', False)
     cr = CaseResults(name=name, scene=scene)
 
     for i in range(warmup + n_tests):
@@ -177,7 +201,7 @@ def run_case(config: Dict[str, Any], case: Dict[str, str]) -> CaseResults:
         label = f'warmup {i + 1}/{warmup}' if is_warmup else f'test {i - warmup + 1}/{n_tests}'
         print(f'  [{name}] {label} ... ', end='', flush=True)
 
-        result, error = run_single(sofa_exe, scene, iterations, timeout)
+        result, error = run_single(sofa_exe, scene, iterations, timeout, python)
 
         if result is not None:
             suffix = ' [warmup, discarded]' if is_warmup else ''
@@ -250,6 +274,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument('-config',     required=True,          help='Path to JSON config file')
     p.add_argument('-sofa_exe',   default=None,           help='Override: path to runSofa executable')
+    p.add_argument('-python',     action='store_true', default=None, help='Override: load SofaPython3 (-l SofaPython3)')
     p.add_argument('-iterations', default=None, type=int, help='Override: ODE iterations per run')
     p.add_argument('-n_tests',    default=None, type=int, help='Override: timed test runs per case')
     p.add_argument('-warmup',     default=None, type=int, help='Override: warmup runs (discarded from stats)')
