@@ -1,4 +1,24 @@
 #!/usr/bin/env python3
+"""
+Run SOFA benchmarks from a JSON config file.
+
+Usage:
+    python runBenchmarks_script.py -config benchmarks.json
+    python runBenchmarks_script.py -config benchmarks.json -output results/my_run
+
+Change the SOFA executable:
+    python runBenchmarks_script.py -config benchmarks.json -sofa_exe /path/to/runSofa
+
+Load SofaPython3:
+    python runBenchmarks_script.py -config benchmarks.json -python
+
+Override Parameters:
+    python runBenchmarks_script.py -config benchmarks.json -n_tests 5 -warmup 2 -iterations 1000 -timeout 60
+
+Required config keys:  iterations, n_tests, timeout, cases
+Optional config keys:  sofa_exe (default: runSofa), warmup (default: 1), output (default: log.benchmark)
+CLI flags override the corresponding config-file values.
+"""
 import os
 import re
 import sys
