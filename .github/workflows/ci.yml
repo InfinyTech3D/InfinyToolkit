@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - master
+    
+    tags:
+      - 'v*' #release tags in format of 'v25.12.00' for example
 
   pull_request:
     types: [opened, synchronize, reopened, labeled]
@@ -114,7 +117,7 @@ jobs:
 
   deploy:
     name: Deploy artifacts
-    if: always() && startsWith(github.ref, 'refs/heads/main') # we are on a branch (not a PR)
+    if: always() && startsWith(github.ref, 'refs/tags/')
     needs: [build-and-test]
     runs-on: ubuntu-latest
     continue-on-error: true
