@@ -22,8 +22,6 @@
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/PluginManager.h>
 
-using sofa::core::ObjectFactory;
-
 namespace sofa::infinytoolkit
 {
 // Haptic and Carving
@@ -58,14 +56,6 @@ extern void registerMotionReplayController(sofa::core::ObjectFactory* factory);
 
 
 
-} // namespace sofa::infinytoolkit
-
-
-namespace sofa::component
-{
-
-using namespace sofa::infinytoolkit;
-
 //Here are just several convenient functions to help user to know what contains the plugin
 extern "C" {
     SOFA_INFINYTOOLKIT_API void initExternalModule();
@@ -95,12 +85,12 @@ void initExternalModule()
 
 const char* getModuleName()
 {
-    return sofa_tostring(SOFA_TARGET);
+    return MODULE_NAME;
 }
 
 const char* getModuleVersion()
 {
-    return sofa_tostring(PLUGIN_VERSION);
+    return MODULE_VERSION;
 }
 
 const char* getModuleLicense()
@@ -147,4 +137,4 @@ void registerObjects(sofa::core::ObjectFactory* factory)
     registerMotionReplayController(factory);
 }
 
-} // namespace sofa::component
+} // namespace sofa::infinytoolkit
