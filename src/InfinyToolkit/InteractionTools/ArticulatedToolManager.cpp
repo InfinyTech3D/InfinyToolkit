@@ -30,7 +30,7 @@
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
 #include <sofa/core/topology/TopologyData.inl>
 
-#include <sofa/component/collision/geometry/SphereModel.h>
+#include <sofa/component/collision/geometry/SphereCollisionModel.h>
 
 
 namespace sofa::infinytoolkit

@@ -21,7 +21,7 @@
 
 #include <InfinyToolkit/config.h>
 #include <sofa/type/Vec.h>
-#include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/objectmodel/BaseComponent.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/CollisionModel.h>
@@ -42,10 +42,10 @@ public:
 	double dist; // equalt to (pB - pA).norm - contactDistance
 };
 
-class SOFA_INFINYTOOLKIT_API BaseJawModel : public core::objectmodel::BaseObject
+class SOFA_INFINYTOOLKIT_API BaseJawModel : public core::objectmodel::BaseComponent
 {
 public:
-	SOFA_CLASS(BaseJawModel, core::objectmodel::BaseObject);
+	SOFA_CLASS(BaseJawModel, core::objectmodel::BaseComponent);
 
 	using Vec3 = sofa::type::Vec3;
 
