@@ -98,14 +98,6 @@ jobs:
       - name: Build and install
         shell: bash
         run: |
-
-          ### Configure dependency on MeshRefinement if enabled
-          if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
-              EXTRA_PREFIX_PATH=";$GITHUB_WORKSPACE/deps/MeshRefinement/install"
-          else
-              EXTRA_PREFIX_PATH=""
-          fi
-
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
               && cd /d %WORKSPACE_BUILD_PATH% \
@@ -123,7 +115,7 @@ jobs:
               -GNinja \
               -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake%EXTRA_PREFIX_PATH%" \
+              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake;$GITHUB_WORKSPACE/deps/MeshRefinement/install" \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
               -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKSPACE_BUILD_PATH/lib" \
