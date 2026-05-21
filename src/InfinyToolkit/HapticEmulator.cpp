@@ -29,7 +29,7 @@
 
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/helper/system/thread/CTime.h>
-#include <sofa/simulation/MainTaskSchedulerFactory.h>
+#include <sofa/simulation/task/MainTaskSchedulerFactory.h>
 
 namespace sofa::infinytoolkit
 {

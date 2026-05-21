@@ -86,10 +86,10 @@ void PliersPositionsMapper::doUpdate()
 
 		const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(idTetra);
 
-		sofa::type::Vec3f p0 = _positions[tetra[0]];
-		sofa::type::Vec3f p1 = _positions[tetra[1]];
-		sofa::type::Vec3f p2 = _positions[tetra[2]];
-		sofa::type::Vec3f p3 = _positions[tetra[3]];
+		sofa::type::Vec3 p0 = _positions[tetra[0]];
+		sofa::type::Vec3 p1 = _positions[tetra[1]];
+		sofa::type::Vec3 p2 = _positions[tetra[2]];
+		sofa::type::Vec3 p3 = _positions[tetra[3]];
 
 		tubePositions[i] = (p0 + p1 + p2 + p3) / 4;
 	}
@@ -214,10 +214,10 @@ void PliersPositionsMapper::draw(const core::visual::VisualParams* vparams)
     {
         const BaseMeshTopology::Tetra& tetra = m_topo->getTetra(_tetraTube[i]);
         
-		sofa::type::Vec3f p0 = _positions[tetra[0]];
-        sofa::type::Vec3f p1 = _positions[tetra[1]];
-        sofa::type::Vec3f p2 = _positions[tetra[2]];
-        sofa::type::Vec3f p3 = _positions[tetra[3]];
+		sofa::type::Vec3 p0 = _positions[tetra[0]];
+        sofa::type::Vec3 p1 = _positions[tetra[1]];
+        sofa::type::Vec3 p2 = _positions[tetra[2]];
+        sofa::type::Vec3 p3 = _positions[tetra[3]];
         vparams->drawTool()->drawTetrahedron(p0, p1, p2, p3, color);
     }
 

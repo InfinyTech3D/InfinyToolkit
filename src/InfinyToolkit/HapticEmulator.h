@@ -28,8 +28,8 @@
 #include <sofa/component/controller/Controller.h>
 #include <sofa/component/haptics/ForceFeedback.h>
 
-#include <sofa/simulation/TaskScheduler.h>
-#include <sofa/simulation/InitTasks.h>
+#include <sofa/simulation/task/TaskScheduler.h>
+#include <sofa/simulation/task/InitTasks.h>
 
 #include <sofa/simulation/Node.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>

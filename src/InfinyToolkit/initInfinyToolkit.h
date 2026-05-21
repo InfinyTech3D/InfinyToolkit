@@ -20,9 +20,9 @@
 #pragma once
 #include <InfinyToolkit/config.h>
 
-namespace sofa::component
+namespace sofa::infinytoolkit
 {
 
 void SOFA_INFINYTOOLKIT_API initInfinyToolkit();
 
-} // namespace sofa::component
+} // namespace sofa::infinytoolkit
