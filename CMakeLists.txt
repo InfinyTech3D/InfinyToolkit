@@ -121,7 +121,7 @@ set(SOURCE_FILES
 
 # Add component for carving using refinement mesh
 message("find_package MeshRefinement")
-find_package(MeshRefinement QUIET)
+sofa_find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
     list(APPEND HEADER_FILES 
