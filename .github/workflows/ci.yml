@@ -45,7 +45,7 @@ jobs:
         with:
           path: deps/MeshRefinement
           repository: InfinyTech3D/MeshRefinement
-          ssh-key: ${{ secrets.MESH_REFINEMENT_DEPLOY_KEY }}
+          token: ${{ secrets.MESH_REFINEMENT_DEPLOY_KEY }}
 
       - name: Build and install MeshRefinement
         shell: bash
