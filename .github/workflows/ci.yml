@@ -56,10 +56,9 @@ jobs:
               && cd /d %GITHUB_WORKSPACE%/deps/MeshRefinement/build \
               && cmake \
                   -GNinja \
-                  -DCMAKE_PREFIX_PATH=$SOFA_ROOT/lib/cmake;%GITHUB_WORKSPACE%/deps/nlohmann_json/install \
+                  -DCMAKE_PREFIX_PATH=$SOFA_ROOT/lib/cmake \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
-                  -DMESH_REFINEMENT_WITH_HAPTICS=OFF \
                   .. \
               && ninja install"
             # Temp hack 
@@ -68,7 +67,7 @@ jobs:
             cd deps/MeshRefinement/build
             cmake \
               -GNinja \
-              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake;$GITHUB_WORKSPACE/deps/nlohmann_json/install" \
+              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake" \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/deps/MeshRefinement/install" \
               -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKSPACE_BUILD_PATH/lib" \
@@ -86,12 +85,13 @@ jobs:
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
-              && cd /d $WORKSPACE_BUILD_PATH \
+              && cd /d %GITHUB_WORKSPACE%/build \
               && cmake \
                   -GNinja \
                   -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake" \
                   -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
+                  -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/install \
+                  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=%WORKSPACE_BUILD_PATH% \
                   ../src \
               && ninja install"
           else
@@ -104,6 +104,7 @@ jobs:
               -DCMAKE_PREFIX_PATH=$SOFA_ROOT/lib/cmake \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
+              -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKSPACE_BUILD_PATH/lib" \
               ../src
             ninja install
             echo ${CCACHE_BASEDIR}
