@@ -6,12 +6,15 @@ on:
       - main
       - master
 
+    tags:
+      - 'v*' #release tags in format of 'v25.12.00' for example
+
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
 jobs:
   build-and-test:
-    name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }}
+    name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }} / MeshRefinement=${{ matrix.with_mesh_refinement }}
     if: >
       github.event_name == 'push' ||
       (
@@ -24,14 +27,18 @@ jobs:
           )
         )
       )
+
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-2022]
         sofa_branch: [master]
+        with_mesh_refinement: [ON, OFF]
 
     steps:
+      #######################   Setup SOFA   #######################
       - name: Setup SOFA and environment
         id: sofa
         uses: sofa-framework/sofa-setup-action@v5
@@ -40,17 +47,22 @@ jobs:
           sofa_version: ${{ matrix.sofa_branch }}
           sofa_scope: 'full'
 
+      ##############   Checkout MeshRefinement only if enabled   ##############
       - name: Checkout MeshRefinement source code
+        if: matrix.with_mesh_refinement == 'ON'
         uses: actions/checkout@v4
         with:
           path: deps/MeshRefinement
           repository: InfinyTech3D/MeshRefinement
           token: ${{ secrets.MESH_REFINEMENT_DEPLOY_KEY }}
 
+      ###############   Build and install MeshRefinement only if enabled   ##############
       - name: Build and install MeshRefinement
+        if: matrix.with_mesh_refinement == 'ON'
         shell: bash
         run: |
           mkdir -p deps/MeshRefinement/build
+
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
               && cd /d %GITHUB_WORKSPACE%/deps/MeshRefinement/build \
@@ -63,6 +75,7 @@ jobs:
               && ninja install"
             # Temp hack 
             cp deps/MeshRefinement/install/bin/MeshRefinement.dll "$WORKSPACE_BUILD_PATH/"
+          
           else
             cd deps/MeshRefinement/build
             cmake \
@@ -75,14 +88,24 @@ jobs:
             ninja install
           fi
 
-      - name: Checkout source code
+      #################   Checkout current repository   ##############
+      - name: Checkout current source code
         uses: actions/checkout@v4
         with:
           path: ${{ env.WORKSPACE_SRC_PATH }}        
       
+      ################   Build and install current plugin   ##############
       - name: Build and install
         shell: bash
         run: |
+
+          ### Configure dependency on MeshRefinement if enabled
+          if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
+              EXTRA_PREFIX_PATH=";$GITHUB_WORKSPACE/deps/MeshRefinement/install"
+          else
+              EXTRA_PREFIX_PATH=""
+          fi
+
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
               && cd /d %WORKSPACE_BUILD_PATH% \
@@ -100,7 +123,7 @@ jobs:
               -GNinja \
               -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake;$GITHUB_WORKSPACE/deps/MeshRefinement/install" \
+              -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake%EXTRA_PREFIX_PATH%" \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
               -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKSPACE_BUILD_PATH/lib" \
@@ -118,10 +141,18 @@ jobs:
         # This sanitization prevents errors in artifact creation and retrieval
         shell: pwsh
         run: |
-          $originalName = "InfinyToolkit_${{ steps.sofa.outputs.run_branch }}_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${{ runner.os }}"
+          if ("${{ matrix.with_mesh_refinement }}" -eq "ON") {
+              $dependency = "with_meshrefinement"
+          }
+          else {
+              $dependency = "standalone"
+          }
+          
+          $originalName = "InfinyToolkit_${dependency}_${{ steps.sofa.outputs.run_branch }}_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${{ runner.os }}"
           $artifact_name = $originalName -replace '[":;<>|*?\r\n\\/]', '' -replace ' ', '_'
           echo "artifact_name=$artifact_name" >> $env:GITHUB_OUTPUT
-          
+      
+      ###################   Create and upload artifact   ##############
       - name: Create artifact
         id: create-artifact
         uses: actions/upload-artifact@v4.4.0
@@ -148,6 +179,8 @@ jobs:
           output_dir: ${{ github.workspace }}/tests-results_dir
           nb_parallel_threads: '4'
 
+
+ 
   deploy:
     name: Deploy artifacts
     if: always() && startsWith(github.ref, 'refs/tags/')
