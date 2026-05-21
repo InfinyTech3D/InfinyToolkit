@@ -120,7 +120,6 @@ set(SOURCE_FILES
 )
 
 # Add component for carving using refinement mesh
-message("find_package MeshRefinement")
 sofa_find_package(MeshRefinement QUIET)
 if (MeshRefinement_FOUND)
     message("MeshRefinement plugin found - Adding it to ${PROJECT_NAME}")
