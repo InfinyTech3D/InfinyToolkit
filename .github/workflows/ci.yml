@@ -100,12 +100,13 @@ jobs:
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
-              && cd /d %WORKSPACE_BUILD_PATH% \
+              && cd /d %GITHUB_WORKSPACE%/build \
               && cmake \
                   -GNinja \
                   -DCMAKE_PREFIX_PATH=%SOFA_ROOT%/lib/cmake;%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
                   -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
+                  -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/install \
+                  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=%WORKSPACE_BUILD_PATH% \
                   ../src \
               && ninja install"
           else
