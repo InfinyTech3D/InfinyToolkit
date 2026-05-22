@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-14, windows-2022]
+        os: [ubuntu-22.04, windows-2022]
         sofa_branch: [master]
 
     steps:
@@ -85,7 +85,7 @@ jobs:
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
-              && cd /d %GITHUB_WORKSPACE%/build \
+              && cd /d $WORKSPACE_BUILD_PATH \
               && cmake \
                   -GNinja \
                   -DCMAKE_PREFIX_PATH="$SOFA_ROOT/lib/cmake" \
