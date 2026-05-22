@@ -90,7 +90,7 @@ jobs:
                   -GNinja \
                   -DCMAKE_PREFIX_PATH=%SOFA_ROOT%/lib/cmake;%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
                   -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=$WORKSPACE_INSTALL_PATH \
+                  -DCMAKE_INSTALL_PREFIX="$WORKSPACE_INSTALL_PATH" \
                   ../src \
               && ninja install"
           else
