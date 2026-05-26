@@ -30,6 +30,7 @@ RefineCarvingPerformer::RefineCarvingPerformer(TetrahedronSetTopologyContainer::
     , m_tetraAlgo(nullptr)
 {
     m_performerType = "RefineCarvingPerformer";
+    m_doRefine = true;
 }
 
 
@@ -60,9 +61,11 @@ void RefineCarvingPerformer::filterContacts()
     const SReal& refineDistance = m_carvingMgr->d_refineDistance.getValue();
     const SReal& carvingDistance = m_carvingMgr->d_carvingDistance.getValue();
     m_tetra2Filter.clear();
-    //m_tetra2Filter2.clear();
     m_triIdsToFilter.clear();
+	m_carvingPositions.clear();
+	m_tetra2Carv.clear();
 
+	// If triangle collision involved (only surface) take tetra behind the triangle, if close enough, for refinement
     for (contactInfo * cInfo : m_triangleContacts)
     {
         if (cInfo->dist > refineDistance)
@@ -77,14 +80,10 @@ void RefineCarvingPerformer::filterContacts()
         }
 
         m_tetra2Filter.insert(tetraAT[0]);
-
-        //if (cInfo->dist <= carvingDistance)
-        //    m_tetra2Filter2.push_back(tetraAT[0]);
-
-       
-        carvingPosition = cInfo->pointA;
+        m_carvingPositions.push_back(cInfo->pointA);
     }
 
+	// If point collision involved (can be surface or inside) take all tetra around the point, if close enough, for refinement
     for (contactInfo * cInfo : m_pointContacts)
     {
         if (cInfo->dist > refineDistance)
@@ -96,45 +95,37 @@ void RefineCarvingPerformer::filterContacts()
             m_tetra2Filter.insert(tetraId);
 
         if (cInfo->dist <= carvingDistance) {
-            const core::topology::BaseMeshTopology::TrianglesAroundVertex& triAV = m_topologyCon->getTrianglesAroundVertex(cInfo->elemId);
+            //const core::topology::BaseMeshTopology::TrianglesAroundVertex& triAV = m_topologyCon->getTrianglesAroundVertex(cInfo->elemId);
 
-            for (auto triId : triAV)
-                m_triIdsToFilter.insert(triId);
+            //for (auto triId : triAV)
+            //    m_triIdsToFilter.insert(triId);
+            for (auto tetraId : tetraAV)
+                m_tetra2Carv.insert(tetraId);
         }
 
-        carvingPosition = cInfo->pointA;
+        m_carvingPositions.push_back(cInfo->pointA);
     }
 }
 
 
 bool RefineCarvingPerformer::runPerformer()
 {
-    if (!m_tetra2Filter.empty())
+	// nothin to do if no tetra to refine
+    if (m_tetra2Filter.empty())
+        return false;
+
+	// will try to refine or carve but not the two at the same time for now, to avoid some conflict. 
+	if (m_doRefine)
     {
         sofa::Size nbrTetra = m_topologyCon->getNbTetrahedra();
-        bool res = m_tetraAlgo->refineTetrahedra(m_tetra2Filter, m_carvingMgr->d_refineCriteria.getValue());
-
-        if (res)
-        {
-#if 0
-            return res;
-#else
-            sofa::Size nbrTetraNew = m_topologyCon->getNbTetrahedra();
-            for (sofa::Index tetraId = nbrTetra; tetraId < nbrTetraNew; ++tetraId)
-                m_tetra2Filter.insert(tetraId);
-#endif
-        }
-#if 0
-        else
-        {
-            surfaceCarving2();
-        }
-#else
-        simpleCarving();
-#endif
-        
-        
-        return res;
+        m_tetraAlgo->refineTetrahedra(m_tetra2Filter, m_carvingMgr->d_refineCriteria.getValue());
+        m_doRefine = false;
+    }
+    else
+    {
+        //simpleCarving();
+        m_tetraAlgo->removeTetrahedra(m_tetra2Carv);
+        m_doRefine = true;
     }
 
     return false;
@@ -158,10 +149,16 @@ void RefineCarvingPerformer::simpleCarving()
             bary += vertices[tetra[j]];
         }
         bary *= 0.25;
-        SReal dist = (carvingPosition - bary).norm();
 
-        if (dist < carvingDistance)
-            tetraToremove.insert(tetraId);
+        for (const auto& carvingPos : m_carvingPositions)
+        {
+            SReal dist = (carvingPos - bary).norm();
+            if (dist < carvingDistance)
+            {
+                tetraToremove.insert(tetraId);
+                break;
+            }
+		}
     }
 
     if (!tetraToremove.empty())
@@ -188,20 +185,20 @@ void RefineCarvingPerformer::surfaceCarving()
     }
 
     // check all point dist from carving element
-    const SReal invCarv = 1 / carvingDistance * 0.5;
-    for (auto pointId : pointsToCheck)
-    {
-        Vec3& vertex = vertices[pointId];
-        Vec3 dir = vertex - carvingPosition;
-        const SReal dist = dir.norm();
+    //const SReal invCarv = 1 / carvingDistance * 0.5;
+    //for (auto pointId : pointsToCheck)
+    //{
+    //    Vec3& vertex = vertices[pointId];
+    //    Vec3 dir = vertex - carvingPosition;
+    //    const SReal dist = dir.norm();
 
-        if (dist > carvingDistance)
-            continue;
+    //    if (dist > carvingDistance)
+    //        continue;
 
-        SReal factor = (carvingDistance - dist)* invCarv; // ]0, carvingDistance]
-        msg_info("RefineCarvingPerformer") << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist;
-        vertex = vertex + dir * factor;
-    }
+    //    SReal factor = (carvingDistance - dist)* invCarv; // ]0, carvingDistance]
+    //    msg_info("RefineCarvingPerformer") << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist;
+    //    vertex = vertex + dir * factor;
+    //}
 }
 
 
@@ -271,7 +268,7 @@ void RefineCarvingPerformer::surfaceCarving2()
         {
             Vec3 vertex = vertices[pId];
             Vec3 dir = oppoPCoord - vertex; // normalise??
-            const SReal dist = (vertex - carvingPosition).norm();
+            const SReal dist = 0.0;// TODO check that (vertex - carvingPosition).norm();
 
             if (dist > carvingDistance)
                 continue;

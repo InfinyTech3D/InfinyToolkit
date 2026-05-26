@@ -58,8 +58,10 @@ protected:
 	sofa::type::vector<unsigned int> m_tetra2Filter2;
 	std::set<unsigned int> m_triIdsToFilter;
 	std::set<unsigned int> m_triIds;
+	std::set<unsigned int> m_tetra2Carv;
 
-	Vec3 carvingPosition;
+	std::vector<Vec3> m_carvingPositions;
+	bool m_doRefine = true;
 };
 					
 } // namespace sofa::infinytoolkit
