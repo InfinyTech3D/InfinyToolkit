@@ -52,6 +52,14 @@ bool RefineCarvingPerformer::initPerformer()
     return resInit;
 }
 
+void RefineCarvingPerformer::clearContacts()
+{
+	BaseCarvingPerformer::clearContacts();
+	m_tetra2Filter.clear();
+    m_carvingPositions.clear();
+	m_triIdsToFilter.clear();
+}
+
 
 void RefineCarvingPerformer::filterContacts()
 {
@@ -79,8 +87,14 @@ void RefineCarvingPerformer::filterContacts()
             continue;
         }
 
+		// Add the tetra behind the triangle to the list of tetra to refine
         m_tetra2Filter.insert(tetraAT[0]);
         m_carvingPositions.push_back(cInfo->pointA);
+
+		// Add the tetra behind the triangle to the list of tetra to carve if close enough
+		if (cInfo->dist <= carvingDistance) {
+			m_tetra2Carv.insert(tetraAT[0]);
+		}
     }
 
 	// If point collision involved (can be surface or inside) take all tetra around the point, if close enough, for refinement
@@ -94,11 +108,8 @@ void RefineCarvingPerformer::filterContacts()
         for (auto tetraId : tetraAV)
             m_tetra2Filter.insert(tetraId);
 
-        if (cInfo->dist <= carvingDistance) {
-            //const core::topology::BaseMeshTopology::TrianglesAroundVertex& triAV = m_topologyCon->getTrianglesAroundVertex(cInfo->elemId);
-
-            //for (auto triId : triAV)
-            //    m_triIdsToFilter.insert(triId);
+        if (cInfo->dist <= carvingDistance) 
+        {
             for (auto tetraId : tetraAV)
                 m_tetra2Carv.insert(tetraId);
         }
@@ -123,7 +134,6 @@ bool RefineCarvingPerformer::runPerformer()
     }
     else
     {
-        //simpleCarving();
         m_tetraAlgo->removeTetrahedra(m_tetra2Carv);
         m_doRefine = true;
     }

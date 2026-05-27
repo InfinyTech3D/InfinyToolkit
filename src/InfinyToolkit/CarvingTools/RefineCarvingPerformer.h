@@ -37,6 +37,8 @@ public:
 
 	bool initPerformer() override;
 
+	void clearContacts() override;
+
 	void filterContacts();
 
 	bool runPerformer() override;

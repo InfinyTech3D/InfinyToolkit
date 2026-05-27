@@ -55,7 +55,7 @@ public:
 
     virtual ~BaseCarvingPerformer();
 
-    void clearContacts();
+    virtual void clearContacts();
 
     const std::string& getType() { return m_performerType; }
     
