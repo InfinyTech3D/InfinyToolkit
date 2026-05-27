@@ -195,20 +195,24 @@ void RefineCarvingPerformer::surfaceCarving()
     }
 
     // check all point dist from carving element
-    //const SReal invCarv = 1 / carvingDistance * 0.5;
-    //for (auto pointId : pointsToCheck)
-    //{
-    //    Vec3& vertex = vertices[pointId];
-    //    Vec3 dir = vertex - carvingPosition;
-    //    const SReal dist = dir.norm();
+    const SReal invCarv = 1 / carvingDistance * 0.5;
+    for (auto pointId : pointsToCheck)
+    {
+        Vec3& vertex = vertices[pointId];
 
-    //    if (dist > carvingDistance)
-    //        continue;
+        for (const auto& carvingPos : m_carvingPositions)
+        {
+            Vec3 dir = vertex - carvingPos;
+            const SReal dist = dir.norm();
 
-    //    SReal factor = (carvingDistance - dist)* invCarv; // ]0, carvingDistance]
-    //    msg_info("RefineCarvingPerformer") << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist;
-    //    vertex = vertex + dir * factor;
-    //}
+            if (dist > carvingDistance)
+                continue;
+
+            SReal factor = (carvingDistance - dist) * invCarv; // ]0, carvingDistance]
+            msg_info("RefineCarvingPerformer") << "pointId: " << pointId << " | factor: " << factor << " | carvingDistance: " << carvingDistance << " | dist: " << dist;
+            vertex = vertex + dir * factor;
+        }
+    }
 }
 
 
