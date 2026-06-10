@@ -108,9 +108,9 @@ jobs:
       - name: Checkout current source code
         uses: actions/checkout@v4
         with:
-      ################   Build and install current plugin   ##############
           path: ${{ env.WORKSPACE_SRC_PATH }}
-
+          
+      ################   Build and install current plugin   ##############
       - name: Build and install
         shell: bash
         run: |
