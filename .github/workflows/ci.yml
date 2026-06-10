@@ -19,7 +19,6 @@ on:
         default: false
         type: boolean
 
-
 jobs:
   build-and-test:
     name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }} / MeshRefinement=${{ matrix.with_mesh_refinement }}
