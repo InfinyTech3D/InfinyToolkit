@@ -42,14 +42,8 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: ${{ fromJSON(
-          github.event_name == 'pull_request' ||
-          (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && inputs.full_build != 'true')
-          ? '["ubuntu-22.04","windows-2022"]'
-          : '["ubuntu-22.04","windows-2022","macos-14"]'
-        ) }}
-
+        os: [ubuntu-22.04, windows-2022]
+        
         sofa_branch: [master]
         with_mesh_refinement: [ON, OFF]
 
