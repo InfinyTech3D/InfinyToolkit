@@ -6,7 +6,7 @@ on:
       - main
       - master
     tags:
-      - 'v*'
+      - 'v*' #release tags in format of e.g: 'v25.12.00' 
 
   pull_request:
     types: [opened, synchronize, reopened, labeled]
@@ -68,7 +68,7 @@ jobs:
           repository: InfinyTech3D/MeshRefinement
           token: ${{ secrets.MESH_REFINEMENT_DEPLOY_KEY }}
 
-      ###############   Build and install MeshRefinement   ##############
+      ###############   Build and install MeshRefinement only if enabled   ##############
       - name: Build and install MeshRefinement
         if: matrix.with_mesh_refinement == 'ON'
         shell: bash
@@ -84,7 +84,7 @@ jobs:
                   -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
                   .. \
               && ninja install"
-
+            # Temp hack 
             cp deps/MeshRefinement/install/bin/MeshRefinement.dll "$WORKSPACE_BUILD_PATH/"
 
           else
@@ -103,9 +103,9 @@ jobs:
       - name: Checkout current source code
         uses: actions/checkout@v4
         with:
+      ################   Build and install current plugin   ##############
           path: ${{ env.WORKSPACE_SRC_PATH }}
 
-      ################   Build and install plugin   ##############
       - name: Build and install
         shell: bash
         run: |
@@ -138,6 +138,10 @@ jobs:
       ###################   Artifact naming   ##############
       - name: Sanitize artifact name
         id: sanitize
+        # This step removes special characters from the artifact name to ensure compatibility with upload-artifact
+        # Characters removed: " : < > | * ? \r \n \ /
+        # Spaces are replaced with underscores
+        # This sanitization prevents errors in artifact creation and retrieval
         shell: pwsh
         run: |
           if ("${{ matrix.with_mesh_refinement }}" -eq "ON") {
@@ -146,18 +150,24 @@ jobs:
           else {
               $dependency = "standalone"
           }
-
-          $originalName = "InfinyToolkit_${dependency}_${{ steps.sofa.outputs.run_branch }}_SOFA-${{ steps.sofa.outputs.sofa_version }}_${{ runner.os }}"
+          
+          $originalName = "InfinyToolkit_${dependency}_${{ steps.sofa.outputs.run_branch }}_for-SOFA-${{ steps.sofa.outputs.sofa_version }}_${{ runner.os }}"
           $artifact_name = $originalName -replace '[":;<>|*?\r\n\\/]', '' -replace ' ', '_'
           echo "artifact_name=$artifact_name" >> $env:GITHUB_OUTPUT
-
-      ###################   Upload artifact   ##############
+      
+      ###################   Create and upload artifact   ##############
       - name: Create artifact
+        id: create-artifact
         uses: actions/upload-artifact@v4.4.0
         with:
           name: ${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.WORKSPACE_INSTALL_PATH }}
 
+      - name: Install artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: ${{ steps.sanitize.outputs.artifact_name }}
+          path: ${{ env.WORKSPACE_ARTIFACT_PATH }}
       ###################   Tests   ##############
       - name: Launch test
         uses: sofa-framework/sofa-test-action@v1.0
