@@ -28,10 +28,13 @@ jobs:
       github.event_name == 'push' ||
       (
         github.event_name == 'pull_request' &&
-        contains(github.event.pull_request.labels.*.name, 'pr: run ci')
+        (
+          contains(github.event.pull_request.labels.*.name, 'pr: run ci') ||
+          github.event.action == 'labeled'
+        )
       ) ||
       github.event_name == 'workflow_dispatch' ||
-      startsWith(github.ref, 'refs/tags/')
+      startsWith(github.ref, 'refs/tags/v')
 
     runs-on: ${{ matrix.os }}
 
@@ -41,9 +44,10 @@ jobs:
       matrix:
         os: ${{ fromJSON(
           github.event_name == 'pull_request' ||
-          (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')) ?
-          '["ubuntu-22.04","windows-2022"]' :
-          '["ubuntu-22.04","windows-2022","macos-14"]'
+          (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.full_build != 'true')
+          ? '["ubuntu-22.04","windows-2022"]'
+          : '["ubuntu-22.04","windows-2022","macos-14"]'
         ) }}
 
         sofa_branch: [master]
