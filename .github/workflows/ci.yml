@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ env.WORKSPACE_SRC_PATH }}
-          
+
       ################   Build and install current plugin   ##############
       - name: Build and install
         shell: bash
@@ -173,6 +173,7 @@ jobs:
         with:
           name: ${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.WORKSPACE_ARTIFACT_PATH }}
+
       ###################   Tests   ##############
       - name: Launch test
         uses: sofa-framework/sofa-test-action@v1.0
@@ -186,6 +187,7 @@ jobs:
           nb_parallel_threads: '4'
 
 
+  ###################   Create plugin artifacts   ##############
   deploy:
     name: Deploy artifacts
     if: startsWith(github.ref, 'refs/tags/v')
