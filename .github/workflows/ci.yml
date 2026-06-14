@@ -5,18 +5,46 @@ on:
     branches:
       - main
       - master
-
     tags:
-      - 'v*' #release tags in format of 'v25.12.00' for example
+      - 'v*' #release tags in format of e.g: 'v25.12.00' 
 
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
+  workflow_dispatch:
+    inputs:
+      full_build:
+        description: "Run full build (including macOS)"
+        required: false
+        default: false
+        type: boolean
+
+
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      os_list: ${{ steps.set.outputs.os_list }}
+    steps:
+      - id: set
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]] ||
+             [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" != refs/tags/v* ]] ||
+             [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.full_build }}" != "true" ]]; then
+            echo 'os_list=["ubuntu-22.04","windows-2022"]' >> $GITHUB_OUTPUT
+          else
+            echo 'os_list=["ubuntu-22.04","windows-2022","macos-14"]' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Debug
+        run: echo '${{ steps.set.outputs.os_list }}'
+
   build-and-test:
+    needs: prepare
     name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }} / MeshRefinement=${{ matrix.with_mesh_refinement }}
+
     if: >
-      github.event_name == 'push' ||
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') ||
       (
         github.event_name == 'pull_request' &&
         (
@@ -32,8 +60,10 @@ jobs:
 
     strategy:
       fail-fast: false
+
       matrix:
-        os: [ubuntu-22.04, macos-14, windows-2022]
+        os: ${{ fromJSON(needs.prepare.outputs.os_list) }}
+        
         sofa_branch: [master]
         with_mesh_refinement: [ON, OFF]
 
@@ -66,8 +96,7 @@ jobs:
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
               && cd /d %GITHUB_WORKSPACE%/deps/MeshRefinement/build \
-              && cmake \
-                  -GNinja \
+              && cmake -GNinja \
                   -DCMAKE_PREFIX_PATH=$SOFA_ROOT/lib/cmake \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
@@ -75,7 +104,7 @@ jobs:
               && ninja install"
             # Temp hack 
             cp deps/MeshRefinement/install/bin/MeshRefinement.dll "$WORKSPACE_BUILD_PATH/"
-          
+
           else
             cd deps/MeshRefinement/build
             cmake \
@@ -92,8 +121,8 @@ jobs:
       - name: Checkout current source code
         uses: actions/checkout@v4
         with:
-          path: ${{ env.WORKSPACE_SRC_PATH }}        
-      
+          path: ${{ env.WORKSPACE_SRC_PATH }}
+
       ################   Build and install current plugin   ##############
       - name: Build and install
         shell: bash
@@ -101,8 +130,7 @@ jobs:
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cmd //c "${{ steps.sofa.outputs.vs_vsdevcmd }} \
               && cd /d %GITHUB_WORKSPACE%/build \
-              && cmake \
-                  -GNinja \
+              && cmake -GNinja \
                   -DCMAKE_PREFIX_PATH=%SOFA_ROOT%/lib/cmake;%GITHUB_WORKSPACE%/deps/MeshRefinement/install \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=%GITHUB_WORKSPACE%/install \
@@ -122,10 +150,10 @@ jobs:
               -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKSPACE_BUILD_PATH/lib" \
               ../src
             ninja install
-            echo ${CCACHE_BASEDIR}
             ccache -s
           fi
-          
+
+      ###################   Artifact naming   ##############
       - name: Sanitize artifact name
         id: sanitize
         # This step removes special characters from the artifact name to ensure compatibility with upload-artifact
@@ -158,10 +186,9 @@ jobs:
         with:
           name: ${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.WORKSPACE_ARTIFACT_PATH }}
-      
 
-      - name: Launch test 
-        id: tests
+      ###################   Tests   ##############
+      - name: Launch test
         uses: sofa-framework/sofa-test-action@v1.0
         with:
           sofa_root: ${{ github.workspace }}/sofa
@@ -173,13 +200,14 @@ jobs:
           nb_parallel_threads: '4'
 
 
- 
+  ###################   Create plugin artifacts   ##############
   deploy:
     name: Deploy artifacts
-    if: always() && startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: [build-and-test]
     runs-on: ubuntu-latest
     continue-on-error: true
+
     steps:
       - name: Get artifacts
         uses: actions/download-artifact@v4.1.7
@@ -193,6 +221,7 @@ jobs:
           for artifact in *; do
             zip $artifact.zip -r $artifact/*
           done
+
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
@@ -204,4 +233,3 @@ jobs:
             artifacts/InfinyToolkit_*_Linux.zip
             artifacts/InfinyToolkit_*_Windows.zip
             artifacts/InfinyToolkit_*_macOS.zip
-
