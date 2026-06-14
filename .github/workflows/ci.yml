@@ -36,7 +36,11 @@ jobs:
             echo 'os_list=["ubuntu-22.04","windows-2022","macos-14"]' >> $GITHUB_OUTPUT
           fi
 
+      - name: Debug
+        run: echo '${{ steps.set.outputs.os_list }}'
+
   build-and-test:
+    needs: prepare
     name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }} / MeshRefinement=${{ matrix.with_mesh_refinement }}
 
     if: >
