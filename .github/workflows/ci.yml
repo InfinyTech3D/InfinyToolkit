@@ -64,7 +64,7 @@ jobs:
       matrix:
         os: ${{ fromJSON(needs.prepare.outputs.os_list) }}
         
-        sofa_branch: [master]
+        sofa_branch: [v26.06]
         with_mesh_refinement: [ON, OFF]
 
     steps:
