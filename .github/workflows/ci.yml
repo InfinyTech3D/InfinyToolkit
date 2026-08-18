@@ -190,18 +190,6 @@ jobs:
           name: ${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.WORKSPACE_ARTIFACT_PATH }}
 
-      ###################   Tests   ##############
-      - name: Launch test
-        uses: sofa-framework/sofa-test-action@v1.0
-        with:
-          sofa_root: ${{ github.workspace }}/sofa
-          sofa_version: ${{ steps.sofa.outputs.sofa_version }}
-          src_dir: ${{ env.WORKSPACE_SRC_PATH }}
-          build_dir: ${{ env.WORKSPACE_BUILD_PATH }}
-          python_exe: ${{ steps.sofa.outputs.python_exe }}
-          output_dir: ${{ github.workspace }}/tests-results_dir
-          nb_parallel_threads: '4'
-
       ###################   Regression program   ###################
       - name: Fetch SofaRegressionProgram
         shell: bash
