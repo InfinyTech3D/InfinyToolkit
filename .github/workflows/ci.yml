@@ -226,6 +226,20 @@ jobs:
           fi
           ls -la "$SOFA_ROOT/plugins"
 
+      - name: Locate SofaPython3
+        shell: bash
+        run: |
+          echo "SOFA_ROOT = $SOFA_ROOT"
+          echo "PYTHONPATH = ${PYTHONPATH:-<empty>}"
+          echo "--- plugins ---"
+          ls -la "$SOFA_ROOT/plugins" 2>/dev/null || echo "(no plugins dir)"
+          echo "--- any site-packages ---"
+          find "$SOFA_ROOT" -type d -name 'site-packages' 2>/dev/null || true
+          echo "--- Sofa package inits ---"
+          find "$SOFA_ROOT" -name '__init__.py' -path '*Sofa*' 2>/dev/null | head -n 10
+          echo "--- binding modules ---"
+          find "$SOFA_ROOT" -name 'Core.cp*' -o -name 'Core.cpython*' 2>/dev/null | head -n 5
+
       - name: Configure python environment
         shell: bash
         run: |
