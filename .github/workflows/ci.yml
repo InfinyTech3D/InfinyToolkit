@@ -195,12 +195,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "Using ${REGRESSION_REPO}@${REGRESSION_BRANCH}"
+          cd "$GITHUB_WORKSPACE"
           curl -fSL "https://github.com/${REGRESSION_REPO}/archive/refs/heads/${REGRESSION_BRANCH}.zip" -o regression.zip
           python -c "import zipfile;zipfile.ZipFile('regression.zip').extractall('.')"
-          mv Regression-* Regression
-          SCRIPT=$(find Regression -name 'SofaRegressionProgram.py' | head -n1)
-          echo "found: $SCRIPT"
+          rm -rf Regression && mv Regression-* Regression
+          SCRIPT=$(find "$GITHUB_WORKSPACE/Regression" -name 'SofaRegressionProgram.py' | head -n1)
+          [[ -f "$SCRIPT" ]] || { echo "::error::SofaRegressionProgram.py not found"; exit 1; }
+          echo "resolved: $SCRIPT"
           echo "REGRESSION_SCRIPT=$SCRIPT" >> $GITHUB_ENV
 
       - name: Setup Python
