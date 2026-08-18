@@ -206,7 +206,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.10'
 
       - name: Install dependencies
         shell: bash
@@ -226,31 +226,19 @@ jobs:
           fi
           ls -la "$SOFA_ROOT/plugins"
 
-      - name: Locate SofaPython3
-        shell: bash
-        run: |
-          echo "SOFA_ROOT = $SOFA_ROOT"
-          echo "PYTHONPATH = ${PYTHONPATH:-<empty>}"
-          echo "--- plugins ---"
-          ls -la "$SOFA_ROOT/plugins" 2>/dev/null || echo "(no plugins dir)"
-          echo "--- any site-packages ---"
-          find "$SOFA_ROOT" -type d -name 'site-packages' 2>/dev/null || true
-          echo "--- Sofa package inits ---"
-          find "$SOFA_ROOT" -name '__init__.py' -path '*Sofa*' 2>/dev/null | head -n 10
-          echo "--- binding modules ---"
-          find "$SOFA_ROOT" -name 'Core.cp*' -o -name 'Core.cpython*' 2>/dev/null | head -n 5
-
       - name: Configure python environment
         shell: bash
         run: |
           set -euo pipefail
-          SP=$(find "$SOFA_ROOT" -type d -name 'site-packages' | head -n1)
-          [[ -n "$SP" ]] || { echo "::error::site-packages not found under $SOFA_ROOT"; exit 1; }
+          SP3="$SOFA_ROOT/plugins/SofaPython3"
+          SP="$SP3/lib/python3/site-packages"
+          [[ -d "$SP/Sofa" ]] || { echo "::error::Sofa package not found in $SP"; exit 1; }
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            echo "PYTHONPATH=$(cygpath -w "$SP")" >> $GITHUB_ENV
-            echo "SOFAPYTHON3_ROOT=$(cygpath -w "$SOFA_ROOT")" >> $GITHUB_ENV
+            echo "PYTHONPATH=$(cygpath -w "$SP")"        >> $GITHUB_ENV
+            echo "SOFAPYTHON3_ROOT=$(cygpath -w "$SP3")" >> $GITHUB_ENV
           else
-            echo "PYTHONPATH=$SP" >> $GITHUB_ENV
+            echo "PYTHONPATH=$SP"        >> $GITHUB_ENV
+            echo "SOFAPYTHON3_ROOT=$SP3" >> $GITHUB_ENV
           fi
           echo "site-packages: $SP"
 
