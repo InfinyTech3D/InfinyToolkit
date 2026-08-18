@@ -19,6 +19,9 @@ on:
         default: false
         type: boolean
 
+env:
+  REGRESSION_REPO:   sofa-framework/Regression
+  REGRESSION_BRANCH: master
 
 jobs:
   prepare:
@@ -199,7 +202,68 @@ jobs:
           output_dir: ${{ github.workspace }}/tests-results_dir
           nb_parallel_threads: '4'
 
+      ###################   Regression program   ###################
+      - name: Fetch SofaRegressionProgram
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Using ${REGRESSION_REPO}@${REGRESSION_BRANCH}"
+          curl -fSL "https://github.com/${REGRESSION_REPO}/archive/refs/heads/${REGRESSION_BRANCH}.zip" -o regression.zip
+          python -c "import zipfile;zipfile.ZipFile('regression.zip').extractall('.')"
+          mv Regression-* Regression
+          SCRIPT=$(find Regression -name 'SofaRegressionProgram.py' | head -n1)
+          echo "found: $SCRIPT"
+          echo "REGRESSION_SCRIPT=$SCRIPT" >> $GITHUB_ENV
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install numpy tqdm
+
+      - name: Deploy plugins into SOFA install tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$SOFA_ROOT/plugins"
+          cp -r "$WORKSPACE_INSTALL_PATH" "$SOFA_ROOT/plugins/InfinyToolkit"
+          if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
+            cp -r "$GITHUB_WORKSPACE/deps/MeshRefinement/install" "$SOFA_ROOT/plugins/MeshRefinement"
+          fi
+          ls -la "$SOFA_ROOT/plugins"
+
+      - name: Configure python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          SP=$(find "$SOFA_ROOT" -type d -name 'site-packages' | head -n1)
+          [[ -n "$SP" ]] || { echo "::error::site-packages not found under $SOFA_ROOT"; exit 1; }
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "PYTHONPATH=$(cygpath -w "$SP")" >> $GITHUB_ENV
+            echo "SOFAPYTHON3_ROOT=$(cygpath -w "$SOFA_ROOT")" >> $GITHUB_ENV
+          else
+            echo "PYTHONPATH=$SP" >> $GITHUB_ENV
+          fi
+          echo "site-packages: $SP"
+
+      - name: Verify SOFA python bindings
+        shell: bash
+        run: python -c "import Sofa, SofaRuntime; print('OK', SofaRuntime.__file__)"
+
+      - name: Run regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORKSPACE_SRC_PATH"
+          python "$REGRESSION_SCRIPT" --input ./examples --verbose
+
+ 
   ###################   Create plugin artifacts   ##############
   deploy:
     name: Deploy artifacts
