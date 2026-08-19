@@ -19,6 +19,9 @@ on:
         default: false
         type: boolean
 
+env:
+  REGRESSION_REPO:   sofa-framework/Regression
+  REGRESSION_BRANCH: master
 
 jobs:
   prepare:
@@ -153,6 +156,87 @@ jobs:
             ccache -s
           fi
 
+      - name: Deploy plugins into SOFA install tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$SOFA_ROOT/plugins"
+          cp -r "$WORKSPACE_INSTALL_PATH" "$SOFA_ROOT/plugins/InfinyToolkit"
+
+          if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
+            cp -r "$GITHUB_WORKSPACE/deps/MeshRefinement/install" "$SOFA_ROOT/plugins/MeshRefinement"
+
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              # Windows resolves dependent DLLs from the loading module's own
+              # directory, not from sibling plugin directories.
+              cp "$SOFA_ROOT/plugins/MeshRefinement/bin/"*.dll \
+                 "$SOFA_ROOT/plugins/InfinyToolkit/bin/" 2>/dev/null || true
+            else
+              # Linux/macOS resolve via RPATH / LD_LIBRARY_PATH instead.
+              echo "LD_LIBRARY_PATH=$SOFA_ROOT/plugins/MeshRefinement/lib:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
+            fi
+          fi
+
+      - name: Configure runtime library path
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          LP="$SOFA_ROOT/lib"
+          [[ -d "$LP" ]] || { echo "::error::$LP not found"; exit 1; }
+          echo "libSofa.Component.Controller: $(ls "$LP"/libSofa.Component.Controller.so* 2>/dev/null || echo MISSING)"
+          echo "LD_LIBRARY_PATH=$LP:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
+
+      #######################   Setup Python   #######################
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install numpy tqdm
+
+      - name: Configure python environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          SP3="$SOFA_ROOT/plugins/SofaPython3"
+          SP="$SP3/lib/python3/site-packages"
+          [[ -d "$SP/Sofa" ]] || { echo "::error::Sofa package not found in $SP"; exit 1; }
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "PYTHONPATH=$(cygpath -w "$SP")"        >> $GITHUB_ENV
+            echo "SOFAPYTHON3_ROOT=$(cygpath -w "$SP3")" >> $GITHUB_ENV
+          else
+            echo "PYTHONPATH=$SP"        >> $GITHUB_ENV
+            echo "SOFAPYTHON3_ROOT=$SP3" >> $GITHUB_ENV
+          fi
+
+      ###################   Regression tests   ###################
+      - name: Fetch SofaRegressionProgram
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          curl -fSL "https://github.com/${REGRESSION_REPO}/archive/refs/heads/${REGRESSION_BRANCH}.zip" -o regression.zip
+          python -c "import zipfile;zipfile.ZipFile('regression.zip').extractall('.')"
+          rm -rf Regression && mv Regression-* Regression
+          SCRIPT=$(find "$GITHUB_WORKSPACE/Regression" -name 'SofaRegressionProgram.py' | head -n1)
+          [[ -f "$SCRIPT" ]] || { echo "::error::SofaRegressionProgram.py not found"; exit 1; }
+          echo "resolved: $SCRIPT"
+          echo "REGRESSION_SCRIPT=$SCRIPT" >> $GITHUB_ENV
+
+      - name: Run regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$WORKSPACE_SRC_PATH"
+          python "$REGRESSION_SCRIPT" --input ./examples
+
+
       ###################   Artifact naming   ##############
       - name: Sanitize artifact name
         id: sanitize
@@ -187,19 +271,7 @@ jobs:
           name: ${{ steps.sanitize.outputs.artifact_name }}
           path: ${{ env.WORKSPACE_ARTIFACT_PATH }}
 
-      ###################   Tests   ##############
-      - name: Launch test
-        uses: sofa-framework/sofa-test-action@v1.0
-        with:
-          sofa_root: ${{ github.workspace }}/sofa
-          sofa_version: ${{ steps.sofa.outputs.sofa_version }}
-          src_dir: ${{ env.WORKSPACE_SRC_PATH }}
-          build_dir: ${{ env.WORKSPACE_BUILD_PATH }}
-          python_exe: ${{ steps.sofa.outputs.python_exe }}
-          output_dir: ${{ github.workspace }}/tests-results_dir
-          nb_parallel_threads: '4'
-
-
+ 
   ###################   Create plugin artifacts   ##############
   deploy:
     name: Deploy artifacts
