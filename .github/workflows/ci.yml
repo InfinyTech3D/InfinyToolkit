@@ -222,10 +222,18 @@ jobs:
           set -euo pipefail
           mkdir -p "$SOFA_ROOT/plugins"
           cp -r "$WORKSPACE_INSTALL_PATH" "$SOFA_ROOT/plugins/InfinyToolkit"
+
           if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
             cp -r "$GITHUB_WORKSPACE/deps/MeshRefinement/install" "$SOFA_ROOT/plugins/MeshRefinement"
+            # Windows resolves dependent DLLs from the loading module's own
+            # directory, not from sibling plugin directories.
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              cp "$SOFA_ROOT/plugins/MeshRefinement/bin/"*.dll "$SOFA_ROOT/plugins/InfinyToolkit/bin/" 2>/dev/null || true
+            fi
           fi
-          ls -la "$SOFA_ROOT/plugins"
+
+          echo "--- InfinyToolkit/bin ---"
+          ls -la "$SOFA_ROOT/plugins/InfinyToolkit/bin"
 
       - name: Configure python environment
         shell: bash
