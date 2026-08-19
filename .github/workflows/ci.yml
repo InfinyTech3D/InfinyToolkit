@@ -260,6 +260,16 @@ jobs:
           fi
           echo "site-packages: $SP"
 
+      - name: Configure runtime library path
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          LP="$SOFA_ROOT/lib"
+          [[ -d "$LP" ]] || { echo "::error::$LP not found"; exit 1; }
+          echo "libSofa.Component.Controller: $(ls "$LP"/libSofa.Component.Controller.so* 2>/dev/null || echo MISSING)"
+          echo "LD_LIBRARY_PATH=$LP:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
+
       - name: Verify SOFA python bindings
         shell: bash
         run: python -c "import Sofa, SofaRuntime; print('OK', SofaRuntime.__file__)"
