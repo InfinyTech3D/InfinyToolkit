@@ -225,15 +225,24 @@ jobs:
 
           if [[ "${{ matrix.with_mesh_refinement }}" == "ON" ]]; then
             cp -r "$GITHUB_WORKSPACE/deps/MeshRefinement/install" "$SOFA_ROOT/plugins/MeshRefinement"
-            # Windows resolves dependent DLLs from the loading module's own
-            # directory, not from sibling plugin directories.
+
             if [[ "$RUNNER_OS" == "Windows" ]]; then
-              cp "$SOFA_ROOT/plugins/MeshRefinement/bin/"*.dll "$SOFA_ROOT/plugins/InfinyToolkit/bin/" 2>/dev/null || true
+              # Windows resolves dependent DLLs from the loading module's own
+              # directory, not from sibling plugin directories.
+              cp "$SOFA_ROOT/plugins/MeshRefinement/bin/"*.dll \
+                 "$SOFA_ROOT/plugins/InfinyToolkit/bin/" 2>/dev/null || true
+            else
+              # Linux/macOS resolve via RPATH / LD_LIBRARY_PATH instead.
+              echo "LD_LIBRARY_PATH=$SOFA_ROOT/plugins/MeshRefinement/lib:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
             fi
           fi
 
-          echo "--- InfinyToolkit/bin ---"
-          ls -la "$SOFA_ROOT/plugins/InfinyToolkit/bin"
+          echo "--- installed plugin ---"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ls -la "$SOFA_ROOT/plugins/InfinyToolkit/bin"
+          else
+            ls -la "$SOFA_ROOT/plugins/InfinyToolkit/lib"
+          fi
 
       - name: Configure python environment
         shell: bash
