@@ -21,7 +21,7 @@
 
 #include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
-#include <MeshRefinement/TetrahedronRefinementAlgorithms.h>
+#include <MeshRefinement/TetrahedronSubdividersManager.h>
 
 namespace sofa::infinytoolkit
 {
@@ -53,7 +53,7 @@ protected:
 	void surfaceCarving2();
 
 protected:
-	TetrahedronRefinementAlgorithms* m_tetraAlgo;
+	TetrahedronSubdividersManager<sofa::defaulttype::Vec3Types>* m_tetraAlgo = nullptr;
 
 	std::set<unsigned int> m_tetra2Filter;
 

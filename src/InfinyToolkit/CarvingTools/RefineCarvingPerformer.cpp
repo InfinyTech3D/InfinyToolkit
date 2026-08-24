@@ -46,7 +46,7 @@ RefineCarvingPerformer::~RefineCarvingPerformer()
 
 bool RefineCarvingPerformer::initPerformer()
 {
-    m_tetraAlgo = new TetrahedronRefinementAlgorithms();
+    m_tetraAlgo = new TetrahedronSubdividersManager<sofa::defaulttype::Vec3Types>();
     bool resInit = m_tetraAlgo->init(m_topologyCon->getContext());
 
     return resInit;
