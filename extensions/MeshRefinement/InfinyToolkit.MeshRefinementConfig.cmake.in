@@ -1,0 +1,9 @@
+# CMake package configuration file for the InfinyToolkit.MeshRefinement library
+
+@PACKAGE_GUARD@
+@PACKAGE_INIT@
+
+find_package(MeshRefinement QUIET REQUIRED)
+find_package(Sofa.Component.Topology.Container.Dynamic QUIET REQUIRED)
+
+check_required_components(InfinyToolkit.MeshRefinement)

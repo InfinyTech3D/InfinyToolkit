@@ -1,0 +1,30 @@
+/*******************************************************************************
+ *                 - Copyright (C) 2026-Present InfinyTech3D -                 *
+ *                             All Rights Reserved                             *
+ *                                                                             *
+ * The contents of this file are confidential and proprietary to InfinyTech3D. *
+ * Unauthorized copying, modification, distribution or disclosure of this      *
+ * file, via any medium, is strictly prohibited.                               *
+ *                                                                             *
+ * This file may only be used under the terms and conditions of a valid        *
+ * commercial license agreement with InfinyTech3D.                             *
+ *                                                                             *
+ * For licensing inquiries: contact@infinytech3d.com                           *
+ * Further information: https://infinytech3d.com                               *
+ ******************************************************************************/
+#pragma once
+
+#include <sofa/config.h>
+
+#ifdef SOFA_BUILD_INFINYTOOLKIT_MESHREFINEMENT
+#  define SOFA_TARGET @PROJECT_NAME@
+#  define SOFA_INFINYTOOLKIT_MESHREFINEMENT_API SOFA_EXPORT_DYNAMIC_LIBRARY
+#else
+#  define SOFA_INFINYTOOLKIT_MESHREFINEMENT_API SOFA_IMPORT_DYNAMIC_LIBRARY
+#endif
+
+namespace sofa::infinytoolkit::meshrefinement
+{
+    constexpr const char* MODULE_NAME = "@PROJECT_NAME@";
+    constexpr const char* MODULE_VERSION = "@PROJECT_VERSION@";
+} // namespace sofa::infinytoolkit::meshrefinement

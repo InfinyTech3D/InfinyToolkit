@@ -171,6 +171,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BIN
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
+# The public MeshRefinement controller, as its own plugin: a scene requires
+# InfinyToolkit.MeshRefinement while the subdivision engine stays private to the
+# MeshRefinement plugin behind its facade.
+if(MeshRefinement_FOUND)
+    sofa_add_subdirectory(plugin extensions/MeshRefinement InfinyToolkit.MeshRefinement)
+endif()
+
 sofa_create_package_with_targets(
     PACKAGE_NAME ${PROJECT_NAME}
     PACKAGE_VERSION ${PROJECT_VERSION}
