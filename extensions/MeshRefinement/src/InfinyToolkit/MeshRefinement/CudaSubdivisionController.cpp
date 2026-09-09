@@ -16,7 +16,7 @@
 /// The Cuda instantiations of the controller. These used to live in
 /// MeshRefinement.CUDA, which cannot host them any more: the controller is here now,
 /// and MeshRefinement must not depend on InfinyToolkit. The engine side of the pair -
-/// TetrahedronSubdivisionManager for the same Cuda types - is still instantiated by
+/// MeshRefinementAPI for the same Cuda types - is still instantiated by
 /// MeshRefinement.CUDA, which is the only translation unit that can see the private
 /// .inl; this file links those symbols through the facade's public header.
 ///

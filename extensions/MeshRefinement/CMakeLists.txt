@@ -3,7 +3,7 @@ project(InfinyToolkit.MeshRefinement VERSION 0.1 LANGUAGES CXX)
 
 # The public face of the MeshRefinement plugin. The controller a scene instantiates
 # lives here; the subdivision engine stays private to MeshRefinement, reached only
-# through TetrahedronSubdivisionManager, its pimpl facade.
+# through MeshRefinementAPI, the one header that plugin publishes.
 set(INFINYTOOLKIT_MESHREFINEMENT_SRC_DIR src/InfinyToolkit/MeshRefinement)
 
 set(HEADER_FILES

@@ -15,7 +15,7 @@
 #pragma once
 
 #include <InfinyToolkit/MeshRefinement/config.h>
-#include <MeshRefinement/TetrahedronSubdivisionManager.h>
+#include <MeshRefinement/MeshRefinementAPI.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/BaseController.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyContainer.h>
@@ -32,11 +32,15 @@ namespace sofa::infinytoolkit
 * tetrahedral mesh: cutting along a plane or between two surface triangles, and
 * refining either the whole mesh or a chosen set of tetrahedra.
 *
-* Replaces TetrahedronCuttingController and TetrahedronRefinementController. Those
-* split one engine in two along a line a caller could not see: both operations
-* subdivide tetrahedra, and TetrahedronCuttingManager *is* a
-* TetrahedronSubdividersManager, so a single manager answers both halves. The old
-* pair also owned a manager each, which meant two engines over one topology.
+* Replaces TetrahedronCuttingController and TetrahedronRefinementController, which
+* split one engine in two along a line a caller could not see - both operations
+* subdivide tetrahedra - and owned a manager each, so a scene using both ran two
+* engines over one topology.
+*
+* The engine itself stays private to the MeshRefinement plugin. This controller
+* reaches it only through MeshRefinementAPI, the one header that plugin publishes,
+* which is why nothing below names a subdivider, a topology container or any other
+* implementation type.
 *
 * Cutting is two-phase by nature - the path is built first and committed second,
 * which is what lets a scene draw the plane and check it before anything changes.
@@ -172,7 +176,7 @@ private:
     /// The engine, behind its public handle: one manager for both operations. Owned
     /// rather than shared, because a cut is built by one call and applied by another
     /// and both halves have to reach the same engine and the same buffers.
-    std::unique_ptr<sofa::meshrefinement::TetrahedronSubdivisionManager<DataTypes> > m_mgr = nullptr;
+    std::unique_ptr<sofa::meshrefinement::MeshRefinementAPI<DataTypes> > m_mgr = nullptr;
 
     /// Kept for the init-time check that a tetrahedral topology is present, and for
     /// the id range checks; the operations themselves go through the manager, which

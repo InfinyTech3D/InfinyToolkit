@@ -73,7 +73,7 @@ void TetrahedronSubdivisionController<DataTypes>::init()
 
     if (m_mgr == nullptr)
     {
-        m_mgr = std::make_unique<sofa::meshrefinement::TetrahedronSubdivisionManager<DataTypes> >();
+        m_mgr = std::make_unique<sofa::meshrefinement::MeshRefinementAPI<DataTypes> >();
         m_controllerReady = m_mgr->init(this->getContext());
         m_mgr->activateLogs(this->f_printLog.getValue());
 
