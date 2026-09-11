@@ -28,33 +28,20 @@ namespace sofa::infinytoolkit
 {
 
 /**
-* Single entry point for the subdivision operations this plugin performs on a
-* tetrahedral mesh: cutting along a plane or between two surface triangles, and
-* refining either the whole mesh or a chosen set of tetrahedra.
+* Cuts and refines a tetrahedral mesh, driving the MeshRefinement plugin's engine.
 *
-* Replaces TetrahedronCuttingController and TetrahedronRefinementController, which
-* split one engine in two along a line a caller could not see - both operations
-* subdivide tetrahedra - and owned a manager each, so a scene using both ran two
-* engines over one topology.
+* Four operations: cut along a plane, cut between two surface triangles, refine a
+* given set of tetrahedra, and refine the whole mesh.
 *
-* The engine itself stays private to the MeshRefinement plugin. This controller
-* reaches it only through MeshRefinementAPI, the one header that plugin publishes,
-* which is why nothing below names a subdivider, a topology container or any other
-* implementation type.
-*
-* Cutting is two-phase by nature - the path is built first and committed second,
-* which is what lets a scene draw the plane and check it before anything changes.
-* Both shapes are offered: prepareCutFrom*() then applyCut() for that, and
-* cutFrom*() for callers that only want the operation done.
+* Cutting is two-phase: the path is built first and applied second, so a scene can
+* draw the plane and inspect it before the topology changes. prepareCutFrom*()
+* followed by applyCut() does that; cutFrom*() does both in one call.
 *
 * Interactive keys, used by the example scenes:
 *   '1'  build the cut plane from the cutPointA / cutPointB / cutDir / cutDepth Data
 *   '2'  apply the cut built by '1'
 *   '3'  refine the tetrahedra listed in testID
 *   '4'  refine the whole mesh
-*
-* '4' is new. refineFullMesh() used to answer '2' on the refinement controller,
-* which collides with applying a cut now that both live in one component.
 */
 template <class DataTypes>
 class TetrahedronSubdivisionController : public core::behavior::BaseController
@@ -66,9 +53,6 @@ public:
     using Coord = typename DataTypes::Coord;
     using VecCoord = typename DataTypes::VecCoord;
 
-    /// Aliased in the class rather than pulled in by a namespace-scope using: the
-    /// engine header used to supply these names to everyone who included it, and the
-    /// facade deliberately does not.
     using Vec3 = sofa::type::Vec3;
     using TetrahedronSetTopologyContainer = sofa::component::topology::container::dynamic::TetrahedronSetTopologyContainer;
 
@@ -77,9 +61,11 @@ public:
     /// Sofa API init method of the component
     void init() override;
 
-    /// Method to handle various event like keyboard or omni.
+    /// Handles the key presses listed in the class description.
     void handleEvent(sofa::core::objectmodel::Event* event) override;
 
+    /// Draws the subdivided tetrahedra and the cut plane, per @sa d_drawTetra and
+    /// @sa d_drawDebugCut.
     void draw(const core::visual::VisualParams* vparams) override;
 
 
@@ -135,58 +121,56 @@ protected:
     /// Default destructor
     ~TetrahedronSubdivisionController() override;
 
-    /// Builds the cut quad from the Data, for the interactive '1' key and
-    /// @sa d_performCut. Same geometry as @sa prepareCutFromPlane.
+    /// Builds the cut path from @sa d_cutPointA, @sa d_cutPointB, @sa d_cutDirection
+    /// and @sa d_cutDepth. Used by the '1' key and by @sa d_performCut.
     bool prepareCutFromData();
 
-    /// Drives the '3' key, honouring @sa d_delayMode
+    /// Refines the tetrahedra in @sa d_testID, honouring @sa d_delayMode.
     void refineFromData();
 
 
 public:
-    /// Bool to perform a cut at the current timestep
+    /// Performs a cut at the next time step, then resets itself to false.
     Data <bool> d_performCut;
 
-    // To define cut from a plan defined by 2 points, a direction and a depth
-    Data <Vec3> d_cutPointA; ///< First plan point position
-    Data <Vec3> d_cutPointB; ///< Second plan point position
-    Data <Vec3> d_cutDirection; ///< Plan 3d direction in space
-    Data <SReal> d_cutDepth; ///< Depth of the cut in the plan direction
+    /// The cut plane: the quad spanned by the two points below, extruded along
+    /// @sa d_cutDirection over @sa d_cutDepth.
+    Data <Vec3> d_cutPointA; ///< First point of the cut plane
+    Data <Vec3> d_cutPointB; ///< Second point of the cut plane
+    Data <Vec3> d_cutDirection; ///< Direction the plane is extruded along
+    Data <SReal> d_cutDepth; ///< Depth of the cut along @sa d_cutDirection
 
-    /// Booleen to define if new surface mesh and component will be created on cut.
+    /// Creates a new surface mesh, and the components to render it, on the cut faces.
     Data <bool> d_surfaceCut;
-    /// Texture filename to be used on the new surface mesh created by the cut. Only used if @sa d_surfaceCut is set to true.
+    /// Texture applied to the surface created by the cut. Only used when
+    /// @sa d_surfaceCut is true.
     Data <std::string> d_textureName;
 
-    /// Tetrahedra subdivided by the '3' key, @sa refineTetrahedra
+    /// Tetrahedra subdivided by the '3' key. @sa refineTetrahedra
     Data <std::set<unsigned int> > d_testID;
-    /// Edge length under which an edge is not subdivided by the '3' key. Defaults to
-    /// 0, i.e. subdivide regardless, which is what the refinement controller did.
+    /// Edge length under which an edge is left whole; 0 subdivides regardless.
     Data <SReal> d_refineCriteria;
     /// Splits the '3' key in two presses: the first computes the neighbourhood table,
     /// the second subdivides from it.
     Data <bool> d_delayMode;
 
     Data <bool> d_drawTetra; ///< Draw the tetrahedra held by the subdividers
-    Data <float> d_drawScaleTetrahedra; ///< Scale of the terahedra (between 0 and 1; if <1.0, it produces gaps between the tetrahedra)
-    Data <bool> d_drawDebugCut; ///< Bool to draw cut plan and intersection
+    Data <float> d_drawScaleTetrahedra; ///< Scale of the drawn tetrahedra; below 1.0 it leaves gaps between them
+    Data <bool> d_drawDebugCut; ///< Draw the cut plane and the intersections it computed
 
 
 private:
-    /// The engine, behind its public handle: one manager for both operations. Owned
-    /// rather than shared, because a cut is built by one call and applied by another
-    /// and both halves have to reach the same engine and the same buffers.
+    /// The subdivision engine. Owned, because a cut is built by one call and applied
+    /// by another and both have to reach the same engine.
     std::unique_ptr<sofa::meshrefinement::MeshRefinementAPI<DataTypes> > m_mgr = nullptr;
 
-    /// Kept for the init-time check that a tetrahedral topology is present, and for
-    /// the id range checks; the operations themselves go through the manager, which
-    /// holds its own handles.
+    /// The topology this controller operates on, used to range-check the ids given to it.
     TetrahedronSetTopologyContainer::SPtr m_topoCon = nullptr;
 
-    // Bool to store the information if component has well be init and can be used.
+    /// True once init() has found a topology and the engine has initialised.
     bool m_controllerReady = false;
 
-    /// Two-phase '3' key handling, @sa d_delayMode
+    /// Press counter for the two-phase '3' key. @sa d_delayMode
     int m_refineStatus = 0;
 };
 

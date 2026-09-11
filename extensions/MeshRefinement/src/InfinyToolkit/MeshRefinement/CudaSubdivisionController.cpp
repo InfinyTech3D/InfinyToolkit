@@ -13,14 +13,13 @@
  * Further information: https://infinytech3d.com                               *
  ******************************************************************************/
 
-/// The Cuda instantiations of the controller. These used to live in
-/// MeshRefinement.CUDA, which cannot host them any more: the controller is here now,
-/// and MeshRefinement must not depend on InfinyToolkit. The engine side of the pair -
-/// MeshRefinementAPI for the same Cuda types - is still instantiated by
-/// MeshRefinement.CUDA, which is the only translation unit that can see the private
-/// .inl; this file links those symbols through the facade's public header.
+/// Instantiates and registers the controller for the Cuda vector types.
 ///
-/// Only compiled when SofaCUDA is found.
+/// The matching MeshRefinementAPI instantiations are provided by MeshRefinement.CUDA,
+/// the only translation unit that can see the engine's private .inl; this file links
+/// against those symbols through the public header.
+///
+/// Only compiled when both SofaCUDA and MeshRefinement.CUDA are found.
 
 #include <InfinyToolkit/MeshRefinement/TetrahedronSubdivisionController.inl>
 #include <sofa/gpu/cuda/CudaTypes.h>

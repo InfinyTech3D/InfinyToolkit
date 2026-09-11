@@ -109,8 +109,7 @@ bool TetrahedronSubdivisionController<DataTypes>::prepareCutFromPlane(const Vec3
     planPositions[3] = planPositions[0] + cutDir * depth;
     const Vec3 planNormal = (planPositions[1] - planPositions[0]).cross(cutDir);
 
-    // Test all tetra. Thickness is a quarter of the depth, as the cutting controller
-    // has always used here; it is the tolerance for snapping points onto the plane.
+    // The thickness is the tolerance within which points are snapped onto the plane.
     m_mgr->createCutPlanPath(planPositions, planNormal, depth * 0.25);
     return true;
 }
@@ -182,10 +181,8 @@ bool TetrahedronSubdivisionController<DataTypes>::refineTetrahedra(const std::se
         return false;
     }
 
-    // Neither this controller nor the manager used to check the ids, and an id past
-    // the end is read straight out of the tetrahedron array: an access violation, not
-    // an error. SimpleCubeRefinement.scn shipped testID="60" against a 44 tetrahedron
-    // mesh, so pressing its refine key crashed. Guard at the API boundary.
+    // The engine does not range-check: an id past the end is read straight out of the
+    // tetrahedron array, which is an access violation rather than an error.
     const auto nbTetrahedra = m_topoCon->getNbTetrahedra();
     for (const unsigned int id : ids)
     {
@@ -281,7 +278,6 @@ void TetrahedronSubdivisionController<DataTypes>::draw(const core::visual::Visua
 
     if (d_drawTetra.getValue())
     {
-        // The engine draws its own buffers; the controller no longer reaches into them.
         m_mgr->drawSubdividedTetrahedra(vparams);
     }
 
