@@ -1,15 +1,14 @@
 /**
- * Covers the public API of TetrahedronSubdivisionController, the component that
- * replaced TetrahedronCuttingController and TetrahedronRefinementController.
+ * Covers the public API of TetrahedronSubdivisionController.
  *
- * The example scenes are loaded as-is so that they stay the single source of truth
- * for the geometry, and the controller is then driven through its own methods rather
- * than only by key event. Each case asserts the topology actually changed: a cut or a
- * subdivision that silently does nothing would otherwise pass.
+ * The scenes live in scenes/ beside this file, so the test is self-contained and
+ * needs nothing from the MeshRefinement repository at runtime. They take their
+ * geometry and their cut parameters from the Data the scene sets, which the cases
+ * read back rather than hard-coding, so retuning a scene does not invalidate them.
  *
- * The key-driven cases exist because the merge moved refineFullMesh() from '2' to
- * '4' - '2' now applies a cut - so the interactive contract of the 13 migrated scenes
- * is worth pinning down.
+ * The controller is driven through its own methods as well as by key event. Each case
+ * asserts the topology actually changed: a cut or a subdivision that silently does
+ * nothing would otherwise pass.
  */
 
 #include <sofa/testing/BaseTest.h>

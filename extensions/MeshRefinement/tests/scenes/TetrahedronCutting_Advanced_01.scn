@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<!-- Automatic Tetrahedron removing with Tetra2Triangle mapping example: Element removed are define in: ./RemovingTetra2TriangleProcess.txt -->
+<Node name="root" dt="0.03" showBoundingTree="0" gravity="0 -9 0">
+    <RequiredPlugin pluginName="InfinyToolkit.MeshRefinement"/> <!-- Needed to use components [TetrahedronSubdivisionController] -->
+    <VisualStyle displayFlags="showBehaviorModels showVisual hideWireframe hideForceFields" />
+    
+    <include href="headers.xml" />
+    
+    <RegularGridTopology name="grid_1" n="16 16 16" min="-10 -10 -10" max="10 10 10" />
+    <Node name="Beam_generator_01">
+        <MechanicalObject src="@../grid_1" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Container" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Container" />
+    </Node>
+    
+    <Node name="Beam_01">
+        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="10" name="linear solver" tolerance="1e-5" threshold="1e-5"/>
+        <MechanicalObject src="@../grid_1" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Tetra_con" src="@../Beam_generator_01/Container"/>
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.7"/>
+
+        <TetrahedronSubdivisionController name="ACutting" listening="1" printLog="1" 
+        cutPointA="-12 0 -12" cutPointB="12 6 -12" cutDir="0 0 1" cutDepth="20" drawDebugCut="1"/>
+	
+        <BoxROI name="box_roi" box="-12 9.9 -12 12 11 12" drawBoxes="1"/>
+        <FixedProjectiveConstraint indices="@[-1].indices" />
+
+        <DiagonalMass massDensity="2.0" />
+        <!--<TetrahedralCorotationalFEMForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large" />-->
+        <FastTetrahedralCorotationalForceField name="FastTetrahedral" youngModulus="1000" poissonRatio="0.3" method="large" />
+        <!--<TetrahedronFEMForceField name="TetrahedronFEM" youngModulus="1000" poissonRatio="0.3" method="large" />-->
+
+        <PlaneForceField normal="0 1 0" d="-20  " stiffness="100000" showPlane="1" showPlaneSize="20"/>
+
+        <Node name="T">
+            <TriangleSetTopologyContainer  name="ContainerTri" />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_con" output="@ContainerTri" />
+
+            <TriangleCollisionModel />
+        </Node>
+    </Node>
+</Node>

@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<!-- Automatic Tetrahedron removing with Tetra2Triangle mapping example: Element removed are define in: ./RemovingTetra2TriangleProcess.txt -->
+<Node name="root" dt="0.01" showBoundingTree="0" gravity="0 -9 0">
+    <RequiredPlugin pluginName="InfinyToolkit.MeshRefinement"/> <!-- Needed to use components [TetrahedronSubdivisionController] -->
+    <include href="headers.xml" />  
+    <Node name="TT">
+        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linear solver" tolerance="1e-05" threshold="1e-05"/>
+        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" />
+        <MechanicalObject src="@loader" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.7"/>
+
+        <TetrahedronSubdivisionController name="ACarving" listening="1" printLog="0" drawScaleTetrahedra="0.6" testID="20"/>
+	
+        <BoxROI name="box_roi" box="-5 3.4 -5 5 4 5" drawBoxes="1"/>
+        <FixedProjectiveConstraint indices="@[-1].indices" />
+
+        <DiagonalMass massDensity="1.0" />
+
+        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="360" poissonRatio="0.3" method="large" />
+    </Node>
+</Node>
