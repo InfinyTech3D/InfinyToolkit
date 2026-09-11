@@ -20,7 +20,7 @@
 #pragma once
 
 #include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
-#include <MeshRefinement/TetrahedronCuttingManager.h>
+#include <MeshRefinement/MeshRefinementAPI.h>
 #include <sofa/component/topology/container/dynamic/TetrahedronSetTopologyModifier.h>
 
 namespace sofa::infinytoolkit
@@ -46,7 +46,7 @@ public:
 private:
 	TetrahedronSetTopologyModifier::SPtr m_topoModif = nullptr;
 
-	std::unique_ptr<sofa::meshrefinement::TetrahedronCuttingManager<sofa::defaulttype::Vec3Types> > m_tetraCuttingMgr = nullptr;
+	std::unique_ptr<sofa::meshrefinement::MeshRefinementAPI<sofa::defaulttype::Vec3Types> > m_tetraCuttingMgr = nullptr;
 
 	std::vector<Index> m_tetra2Remove;
 };

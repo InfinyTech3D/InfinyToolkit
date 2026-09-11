@@ -21,12 +21,10 @@
 
 #include <InfinyToolkit/CarvingTools/BaseCarvingPerformer.h>
 
-#include <MeshRefinement/TetrahedronSubdividersManager.h>
+#include <MeshRefinement/MeshRefinementAPI.h>
 
 namespace sofa::infinytoolkit
 {
-
-using namespace sofa::meshrefinement;
 
 class SOFA_INFINYTOOLKIT_API RefineCarvingPerformer : public BaseCarvingPerformer
 {
@@ -53,7 +51,7 @@ protected:
 	void surfaceCarving2();
 
 protected:
-	TetrahedronSubdividersManager<sofa::defaulttype::Vec3Types>* m_tetraAlgo = nullptr;
+	sofa::meshrefinement::MeshRefinementAPI<sofa::defaulttype::Vec3Types>* m_tetraAlgo = nullptr;
 
 	std::set<unsigned int> m_tetra2Filter;
 
