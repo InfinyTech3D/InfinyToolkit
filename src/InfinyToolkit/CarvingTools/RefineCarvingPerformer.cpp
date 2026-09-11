@@ -20,6 +20,7 @@
 #include <InfinyToolkit/CarvingTools/RefineCarvingPerformer.h>
 #include <InfinyToolkit/CarvingTools/AdvancedCarvingManager.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
+#include <sofa/component/topology/container/dynamic/TetrahedronSetGeometryAlgorithms.h>
 
 namespace sofa::infinytoolkit
 {
@@ -46,7 +47,7 @@ RefineCarvingPerformer::~RefineCarvingPerformer()
 
 bool RefineCarvingPerformer::initPerformer()
 {
-    m_tetraAlgo = new TetrahedronSubdividersManager<sofa::defaulttype::Vec3Types>();
+    m_tetraAlgo = new sofa::meshrefinement::MeshRefinementAPI<sofa::defaulttype::Vec3Types>();
     bool resInit = m_tetraAlgo->init(m_topologyCon->getContext());
 
     return resInit;

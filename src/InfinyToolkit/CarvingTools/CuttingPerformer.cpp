@@ -43,7 +43,7 @@ bool CuttingPerformer::initPerformer()
     
     if (m_tetraCuttingMgr == nullptr)
     {
-        m_tetraCuttingMgr = std::make_unique<sofa::meshrefinement::TetrahedronCuttingManager<sofa::defaulttype::Vec3Types> >();
+        m_tetraCuttingMgr = std::make_unique<sofa::meshrefinement::MeshRefinementAPI<sofa::defaulttype::Vec3Types> >();
         m_tetraCuttingMgr->init(m_topologyCon->getContext());
         m_tetraCuttingMgr->activateLogs(m_topologyCon->f_printLog.getValue());
 
