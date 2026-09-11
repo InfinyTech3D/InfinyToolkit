@@ -26,21 +26,21 @@ sofa_find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
 # MeshRefinement must not depend on InfinyToolkit. MeshRefinement.CUDA still
 # instantiates the engine facade for the same types, being the only place that can
 # see its private .inl, and this target links those symbols.
-sofa_find_package(SofaCUDA QUIET)
-sofa_find_package(MeshRefinement.CUDA QUIET)
-if(SofaCUDA_FOUND AND MeshRefinement.CUDA_FOUND)
-    message("${PROJECT_NAME}: SofaCUDA found - adding the Cuda subdivision controller")
-    list(APPEND SOURCE_FILES ${INFINYTOOLKIT_MESHREFINEMENT_SRC_DIR}/CudaSubdivisionController.cpp)
-    add_definitions(-DINFINYTOOLKIT_MESHREFINEMENT_USES_SOFACUDA)
-endif()
+#sofa_find_package(SofaCUDA QUIET)
+#sofa_find_package(MeshRefinement.CUDA QUIET)
+#if(SofaCUDA_FOUND AND MeshRefinement.CUDA_FOUND)
+#    message("${PROJECT_NAME}: SofaCUDA found - adding the Cuda subdivision controller")
+#    list(APPEND SOURCE_FILES ${INFINYTOOLKIT_MESHREFINEMENT_SRC_DIR}/CudaSubdivisionController.cpp)
+#    add_definitions(-DINFINYTOOLKIT_MESHREFINEMENT_USES_SOFACUDA)
+#endif()
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_INFINYTOOLKIT_MESHREFINEMENT")
 target_link_libraries(${PROJECT_NAME} MeshRefinement Sofa.Component.Topology.Container.Dynamic)
 
-if(SofaCUDA_FOUND AND MeshRefinement.CUDA_FOUND)
-    target_link_libraries(${PROJECT_NAME} SofaCUDA MeshRefinement.CUDA)
-endif()
+#if(SofaCUDA_FOUND AND MeshRefinement.CUDA_FOUND)
+#    target_link_libraries(${PROJECT_NAME} SofaCUDA MeshRefinement.CUDA)
+#endif()
 
 sofa_create_package_with_targets(
     PACKAGE_NAME ${PROJECT_NAME}
