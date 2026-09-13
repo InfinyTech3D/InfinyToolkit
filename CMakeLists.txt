@@ -19,7 +19,7 @@
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.12)
-project(InfinyToolkit VERSION 0.1 LANGUAGES CXX)
+project(InfinyToolkit VERSION 0.2 LANGUAGES CXX)
 
 include(cmake/environment.cmake)
 
@@ -171,6 +171,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BIN
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
+if(MeshRefinement_FOUND)
+    sofa_add_subdirectory(plugin extensions/MeshRefinement InfinyToolkit.MeshRefinement
+        BINARY_DIR "${CMAKE_BINARY_DIR}/InfinyToolkit.MeshRefinement")
+endif()
+
 sofa_create_package_with_targets(
     PACKAGE_NAME ${PROJECT_NAME}
     PACKAGE_VERSION ${PROJECT_VERSION}
