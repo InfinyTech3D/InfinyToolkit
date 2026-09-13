@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(InfinyToolkit.MeshRefinement VERSION 0.1 LANGUAGES CXX)
 
-# The public face of the MeshRefinement plugin. The controller a scene instantiates
-# lives here; the subdivision engine stays private to MeshRefinement, reached only
-# through MeshRefinementAPI, the one header that plugin publishes.
+# This plugin provides a component controller that will be used in SOFA scene to use the public interface MeshRefinementAPI of the MeshRefinement plugin.
 set(INFINYTOOLKIT_MESHREFINEMENT_SRC_DIR src/InfinyToolkit/MeshRefinement)
 
 set(HEADER_FILES
@@ -21,11 +19,8 @@ set(SOURCE_FILES
 sofa_find_package(MeshRefinement REQUIRED)
 sofa_find_package(Sofa.Component.Topology.Container.Dynamic REQUIRED)
 
-# Optional: the Cuda template instantiations of the controller. They used to sit in
-# MeshRefinement.CUDA, which cannot host them now that the controller lives here -
-# MeshRefinement must not depend on InfinyToolkit. MeshRefinement.CUDA still
-# instantiates the engine facade for the same types, being the only place that can
-# see its private .inl, and this target links those symbols.
+# Optional: the Cuda template instantiations of the controller. 
+# Not yet working
 #sofa_find_package(SofaCUDA QUIET)
 #sofa_find_package(MeshRefinement.CUDA QUIET)
 #if(SofaCUDA_FOUND AND MeshRefinement.CUDA_FOUND)

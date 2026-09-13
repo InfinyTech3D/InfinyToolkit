@@ -171,17 +171,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BIN
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
-# The public MeshRefinement controller, as its own plugin: a scene requires
-# InfinyToolkit.MeshRefinement while the subdivision engine stays private to the
-# MeshRefinement plugin behind its facade.
 if(MeshRefinement_FOUND)
-    # BINARY_DIR is kept short and CMAKE_BINARY_DIR-relative (rather than the
-    # default, which mirrors the deep external_directories/InfinyToolkit/extensions/...
-    # source path) because the relocatable-install custom target this generates
-    # (see sofa_set_project_install_relocatable in SofaMacrosInstall.cmake) already
-    # produces a long .tlog filename; combined with the default nesting it trips
-    # Windows' 260-char MAX_PATH (MSB3491). This must hold on every machine/CI
-    # runner building this repo, not just this one, so the fix has to be structural.
     sofa_add_subdirectory(plugin extensions/MeshRefinement InfinyToolkit.MeshRefinement
         BINARY_DIR "${CMAKE_BINARY_DIR}/InfinyToolkit.MeshRefinement")
 endif()

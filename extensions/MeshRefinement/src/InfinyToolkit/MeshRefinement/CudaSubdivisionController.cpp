@@ -14,11 +14,7 @@
  ******************************************************************************/
 
 /// Instantiates and registers the controller for the Cuda vector types.
-///
 /// The matching MeshRefinementAPI instantiations are provided by MeshRefinement.CUDA,
-/// the only translation unit that can see the engine's private .inl; this file links
-/// against those symbols through the public header.
-///
 /// Only compiled when both SofaCUDA and MeshRefinement.CUDA are found.
 
 #include <InfinyToolkit/MeshRefinement/TetrahedronSubdivisionController.inl>
