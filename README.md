@@ -36,7 +36,11 @@ Several components are still work in progress or just benchmarks. Here are the c
     - CuttingPerformer: will define a fine cut or incision in the mesh (using [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement))
 
 <img align="center" width="60%" height="auto" src="https://github.com/InfinyTech3D/InfinyToolkit/blob/main/doc/MeshRefinement_AdvancedCarving_penetration.gif">
-    
+
+### Sub-plugins
+- **InfinyToolkit.MeshRefinement:** provides the `TetrahedronSubdivisionController` component, to cut and refine a tetrahedral mesh during the simulation: cutting along a plane or between two triangles, refining a chosen set of tetrahedra or the whole mesh. It is the public interface of the [MeshRefinement plugin](https://github.com/InfinyTech3D/MeshRefinement), which does the work, and is configured automatically when that plugin is found.
+**See [extensions/MeshRefinement/README.md](extensions/MeshRefinement/README.md) for the full documentation, the Data reference and the example scenes.**
+
 ### Architecture
 - **examples:** with several examples of the components and some benchmarks.
 - **scripts:** a bunch of python scripts to apply changes to the SOFA code base or scenes. Such as:
@@ -45,6 +49,7 @@ Several components are still work in progress or just benchmarks. Here are the c
 	- Update headers inclusion
 	- ...
 - **src/InfinyToolkit:** All the source code of the SOFA components.
+- **extensions:** sub-plugins, built only when their own dependencies are found. See [Sub-plugins](#sub-plugins) above.
 
 
 ## Installation
