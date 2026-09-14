@@ -107,8 +107,9 @@ public:
     /// @return false if the controller is unusable.
     bool refineFullMesh();
 
-    /// Subdivides the tetrahedra given by @p ids. @p criteria is the edge length
-    /// under which an edge is left whole; 0 subdivides regardless of length.
+    /// Subdivides the tetrahedra given by @p ids. @p criteria is a fraction of the
+    /// mean tetrahedron volume of the mesh: a tetrahedron whose volume is not above
+    /// criteria * that mean is left alone. 0 subdivides regardless of volume.
     /// @return false if the controller is unusable.
     bool refineTetrahedra(const std::set<unsigned int>& ids, SReal criteria = 0.0);
     /// @}
@@ -148,7 +149,8 @@ public:
 
     /// Tetrahedra subdivided by the '3' key. @sa refineTetrahedra
     Data <std::set<unsigned int> > d_testID;
-    /// Edge length under which an edge is left whole; 0 subdivides regardless.
+    /// Fraction of the mesh's mean tetrahedron volume under which a tetrahedron is
+    /// left alone; 0 subdivides regardless of volume.
     Data <SReal> d_refineCriteria;
     /// Splits the '3' key in two presses: the first computes the neighbourhood table,
     /// the second subdivides from it.
