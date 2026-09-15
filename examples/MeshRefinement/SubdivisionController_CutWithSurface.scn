@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<!--
+    TetrahedronSubdivisionController: cut along a plane and build the cut surface.
+
+    Same cut as SubdivisionController_CutFromPlane.scn, with surfaceCut="1". On top
+    of splitting the tetrahedra, the engine then creates two mapped surfaces - one
+    per side of the cut - under the first child of the node holding the surface
+    TriangleSetTopologyContainer, and renders them with textureName.
+
+    That scene structure is a requirement, not a convention: the triangle container
+    must live in a node ("Surface" here) that itself has a child node ("Visu"), or
+    the surface creation reports an error and does nothing. Cutting still happens.
+
+    Press '1' to build the cut path, then '2' to apply it.
+-->
+<Node name="root" dt="0.03" gravity="0 -9 0">
+    <Node name="RequiredPlugins">
+        <RequiredPlugin pluginName="InfinyToolkit.MeshRefinement"/> <!-- Needed to use components [TetrahedronSubdivisionController] -->
+        <RequiredPlugin pluginName="MeshRefinement"/> <!-- Needed to use components [MeshCutSurface] -->
+        <RequiredPlugin pluginName="Sofa.Component.Constraint.Projective"/> <!-- Needed to use components [FixedProjectiveConstraint] -->
+        <RequiredPlugin pluginName="Sofa.Component.Engine.Select"/> <!-- Needed to use components [BoxROI] -->
+        <RequiredPlugin pluginName="Sofa.Component.LinearSolver.Iterative"/> <!-- Needed to use components [CGLinearSolver] -->
+        <RequiredPlugin pluginName="Sofa.Component.Mapping.Linear"/> <!-- Needed to use components [IdentityMapping] -->
+        <RequiredPlugin pluginName="Sofa.Component.Mass"/> <!-- Needed to use components [DiagonalMass] -->
+        <RequiredPlugin pluginName="Sofa.Component.ODESolver.Backward"/> <!-- Needed to use components [EulerImplicitSolver] -->
+        <RequiredPlugin pluginName="Sofa.Component.SolidMechanics.FEM.Elastic"/> <!-- Needed to use components [FastTetrahedralCorotationalForceField] -->
+        <RequiredPlugin pluginName="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TetrahedronSetGeometryAlgorithms,TetrahedronSetTopologyContainer,TetrahedronSetTopologyModifier,TriangleSetGeometryAlgorithms,TriangleSetTopologyContainer,TriangleSetTopologyModifier] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Container.Grid"/> <!-- Needed to use components [RegularGridTopology] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Mapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping,Tetra2TriangleTopologicalMapping] -->
+        <RequiredPlugin pluginName="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
+        <RequiredPlugin pluginName="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->
+    </Node>
+
+    <DefaultAnimationLoop />
+    <DefaultVisualManagerLoop />
+    <VisualStyle displayFlags="showBehaviorModels showVisual hideWireframe" />
+
+    <RegularGridTopology name="grid" n="6 6 6" min="-5 -5 -5" max="5 5 5" />
+
+    <Node name="TetraGenerator">
+        <MechanicalObject src="@../grid" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Container" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+        <Hexa2TetraTopologicalMapping name="hexa2tetra" input="@../grid" output="@Container" />
+    </Node>
+
+    <Node name="Cube">
+        <EulerImplicitSolver name="odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linearSolver" tolerance="1e-5" threshold="1e-5"/>
+        <MechanicalObject src="@../grid" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../TetraGenerator/Container"/>
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.7"/>
+
+        <TetrahedronSubdivisionController name="Cutter" listening="1" printLog="1"
+            cutPointA="-6 0 -6" cutPointB="6 3 -6" cutDir="0 0 1" cutDepth="12"
+            surfaceCut="1" textureName="textures/colorMap.png"
+            drawDebugCut="1"/>
+
+        <BoxROI name="box_roi" box="-5.1 4.9 -5.1 5.1 5.1 5.1" drawBoxes="1"/>
+        <FixedProjectiveConstraint indices="@box_roi.indices" />
+
+        <DiagonalMass massDensity="2.0" />
+        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large" />
+
+        <Node name="Surface">
+            <TriangleSetTopologyContainer name="ContainerTri" />
+            <TriangleSetTopologyModifier name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@ContainerTri" />
+
+            <!-- Required: the cut surfaces are created as children of this node. -->
+            <Node name="Visu">
+                <OglModel name="Visual" />
+                <IdentityMapping input="@../../Volume" output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+</Node>

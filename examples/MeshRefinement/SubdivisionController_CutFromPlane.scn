@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<!--
+    TetrahedronSubdivisionController: cut along a plane.
+
+    The cut plane is the quad spanned by cutPointA and cutPointB, extruded along
+    cutDir over cutDepth. drawDebugCut="1" draws it.
+
+    Press '1' to build the cut path, which draws the intersections without changing
+    the topology, then '2' to apply it. Setting performCut="1" from the GUI does
+    both at the end of the next time step.
+-->
+<Node name="root" dt="0.03" gravity="0 -9 0">
+    <Node name="RequiredPlugins">
+        <RequiredPlugin pluginName="InfinyToolkit.MeshRefinement"/> <!-- Needed to use components [TetrahedronSubdivisionController] -->
+        <RequiredPlugin pluginName="Sofa.Component.Constraint.Projective"/> <!-- Needed to use components [FixedProjectiveConstraint] -->
+        <RequiredPlugin pluginName="Sofa.Component.Engine.Select"/> <!-- Needed to use components [BoxROI] -->
+        <RequiredPlugin pluginName="Sofa.Component.LinearSolver.Iterative"/> <!-- Needed to use components [CGLinearSolver] -->
+        <RequiredPlugin pluginName="Sofa.Component.Mass"/> <!-- Needed to use components [DiagonalMass] -->
+        <RequiredPlugin pluginName="Sofa.Component.MechanicalLoad"/> <!-- Needed to use components [PlaneForceField] -->
+        <RequiredPlugin pluginName="Sofa.Component.ODESolver.Backward"/> <!-- Needed to use components [EulerImplicitSolver] -->
+        <RequiredPlugin pluginName="Sofa.Component.SolidMechanics.FEM.Elastic"/> <!-- Needed to use components [FastTetrahedralCorotationalForceField] -->
+        <RequiredPlugin pluginName="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TetrahedronSetGeometryAlgorithms,TetrahedronSetTopologyContainer,TetrahedronSetTopologyModifier,TriangleSetGeometryAlgorithms,TriangleSetTopologyContainer,TriangleSetTopologyModifier] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Container.Grid"/> <!-- Needed to use components [RegularGridTopology] -->
+        <RequiredPlugin pluginName="Sofa.Component.Topology.Mapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping,Tetra2TriangleTopologicalMapping] -->
+        <RequiredPlugin pluginName="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->
+    </Node>
+
+    <DefaultAnimationLoop />
+    <DefaultVisualManagerLoop />
+    <VisualStyle displayFlags="showBehaviorModels hideVisual hideWireframe" />
+
+    <RegularGridTopology name="grid" n="10 10 10" min="-10 -10 -10" max="10 10 10" />
+
+    <Node name="TetraGenerator">
+        <MechanicalObject src="@../grid" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Container" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+        <Hexa2TetraTopologicalMapping name="hexa2tetra" input="@../grid" output="@Container" />
+    </Node>
+
+    <Node name="Beam">
+        <EulerImplicitSolver name="odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="10" name="linearSolver" tolerance="1e-5" threshold="1e-5"/>
+        <MechanicalObject src="@../grid" name="Volume" />
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../TetraGenerator/Container"/>
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.7"/>
+
+        <!-- The cut quad spans (-12, 0, -12) to (12, 6, -12) and is extruded 20
+             units along +Z, so it crosses the whole beam. -->
+        <TetrahedronSubdivisionController name="Cutter" listening="1" printLog="1"
+            cutPointA="-12 0 -12" cutPointB="12 6 -12" cutDir="0 0 1" cutDepth="20"
+            drawDebugCut="1"/>
+
+        <BoxROI name="box_roi" box="-12 9.9 -12 12 11 12" drawBoxes="1"/>
+        <FixedProjectiveConstraint indices="@box_roi.indices" />
+
+        <DiagonalMass massDensity="2.0" />
+        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large" />
+        <PlaneForceField normal="0 1 0" d="-20" stiffness="100000" showPlane="1" showPlaneSize="20"/>
+
+        <Node name="Surface">
+            <TriangleSetTopologyContainer name="ContainerTri" />
+            <TriangleSetTopologyModifier name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@ContainerTri" />
+        </Node>
+    </Node>
+</Node>
