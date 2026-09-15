@@ -28,7 +28,7 @@
         
         
     <Node name="Jaws_up_right" >
-        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+        <EulerImplicitIntegrationScheme name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
         
         <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
@@ -47,7 +47,7 @@
     
     
     <Node name="Jaws_down_right" >
-        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+        <EulerImplicitIntegrationScheme name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
         
         <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
@@ -68,7 +68,7 @@
     
     
     <Node name="Jaws_up_left" >
-        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+        <EulerImplicitIntegrationScheme name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
         
         <MeshOBJLoader name="loader" filename="mesh/tools/grasper_up_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>
@@ -85,7 +85,7 @@
     
     
     <Node name="Jaws_down_left" >
-        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
+        <EulerImplicitIntegrationScheme name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.0" />
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
         
         <MeshOBJLoader name="loader" filename="mesh/tools/grasper_low_jaw_collision_light.obj" scale3d="1 1 1" translation="0 0 0" handleSeams="0"/>

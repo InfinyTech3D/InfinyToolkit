@@ -7,7 +7,7 @@ print ('test', len(sys.argv))
 print (str(sys.argv[1]))
 
 #CollisionGroup DefaultCollisionGroupManager
-#EulerImplicit EulerImplicitSolver
+#EulerImplicit EulerImplicitIntegrationScheme
 #TriangleModel TriangleCollisionModel
 #LineModel LineCollisionModel
 #PointModel PointCollisionModel

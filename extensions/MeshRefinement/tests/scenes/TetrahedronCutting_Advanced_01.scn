@@ -16,8 +16,8 @@
     </Node>
     
     <Node name="Beam_01">
-        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
-        <CGLinearSolver iterations="10" name="linear solver" tolerance="1e-5" threshold="1e-5"/>
+        <EulerImplicitIntegrationScheme name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="10" name="linearSolver" tolerance="1e-5" threshold="1e-5"/>
         <MechanicalObject src="@../grid_1" name="Volume" />
         <TetrahedronSetTopologyContainer name="Tetra_con" src="@../Beam_generator_01/Container"/>
         <TetrahedronSetTopologyModifier name="Modifier" />
