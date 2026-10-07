@@ -61,7 +61,7 @@ modifier and the geometry algorithms. It finds them by itself; there is nothing 
 
 ```xml
 <Node name="Beam">
-    <EulerImplicitSolver />
+    <EulerImplicitIntegrationScheme />
     <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
 
     <MechanicalObject src="@../grid" name="Volume" />

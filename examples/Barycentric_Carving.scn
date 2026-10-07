@@ -7,13 +7,10 @@
         <RequiredPlugin pluginName="Sofa.Component.Collision.Response.Contact"/> <!-- Needed to use components [DefaultContactManager] -->  
         <RequiredPlugin pluginName="Sofa.Component.Constraint.Projective"/> <!-- Needed to use components [FixedConstraint] -->  
         <RequiredPlugin pluginName="Sofa.Component.Engine.Select"/> <!-- Needed to use components [BoxROI] -->  
-        <RequiredPlugin pluginName="Sofa.Component.IO.Mesh"/> <!-- Needed to use components [MeshOBJLoader] -->  
         <RequiredPlugin pluginName="Sofa.Component.LinearSolver.Iterative"/> <!-- Needed to use components [CGLinearSolver] -->  
         <RequiredPlugin pluginName="Sofa.Component.Mapping.Linear"/> <!-- Needed to use components [IdentityMapping] -->  
-        <RequiredPlugin pluginName="Sofa.Component.Mapping.NonLinear"/> <!-- Needed to use components [RigidMapping] -->  
         <RequiredPlugin pluginName="Sofa.Component.Mass"/> <!-- Needed to use components [DiagonalMass, UniformMass] -->  
         <RequiredPlugin pluginName="Sofa.Component.IntegrationScheme.Backward"/> <!-- Needed to use components [EulerImplicitIntegrationScheme] -->  
-        <RequiredPlugin pluginName="Sofa.Component.SceneUtility"/> <!-- Needed to use components [InfoComponent] -->  
         <RequiredPlugin pluginName="Sofa.Component.SolidMechanics.FEM.Elastic"/> <!-- Needed to use components [TetrahedralCorotationalFEMForceField] -->  
         <RequiredPlugin pluginName="Sofa.Component.StateContainer"/> <!-- Needed to use components [MechanicalObject] -->  
         <RequiredPlugin pluginName="Sofa.Component.Topology.Container.Dynamic"/> <!-- Needed to use components [TetrahedronSetGeometryAlgorithms, TetrahedronSetTopologyContainer, TetrahedronSetTopologyModifier, TriangleSetGeometryAlgorithms, TriangleSetTopologyContainer, TriangleSetTopologyModifier] -->  
@@ -21,71 +18,52 @@
         <RequiredPlugin pluginName="Sofa.Component.Topology.Mapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->  
         <RequiredPlugin pluginName="Sofa.Component.Visual"/> <!-- Needed to use components [VisualStyle] -->  
         <RequiredPlugin pluginName="Sofa.GL.Component.Rendering3D"/> <!-- Needed to use components [OglModel] -->  
-        <RequiredPlugin pluginName="InfinyToolkit" />
-        <RequiredPlugin pluginName="MeshRefinement" />
+        <RequiredPlugin pluginName="SofaCarving"/> <!-- Needed to use components [CarvingManager] -->
+        <RequiredPlugin pluginName="InfinyToolkit"/> <!-- Needed to use components [CarvingManager] -->  
     </Node>
 
-    <VisualStyle displayFlags="hideCollisionModels showVisual" />
-  
+    <VisualStyle displayFlags="showCollisionModels hideVisual" />
+
     <DefaultAnimationLoop />
     <DefaultVisualManagerLoop />
     <CollisionPipeline verbose="0" />
     <BruteForceBroadPhase/>
     <BVHNarrowPhase/>
     <CollisionResponse response="PenalityContactForceField" />
-    <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1" />
-
+    <MinProximityIntersection name="Proximity" alarmDistance="1.0" contactDistance="0.1"/>
+  
     <EulerImplicitIntegrationScheme name="EulerImplicit"  rayleighStiffness="0.1" rayleighMass="0.1" />
     <CGLinearSolver name="CG Solver" iterations="25" tolerance="1e-9" threshold="1e-9"/>
 
-    <AdvancedCarvingManager name="ACarving" active="1" refineDistance="1.0" refineCriteria="0.5" carvingDistance="0.5" 
-    carvingWithBurning="0" carvingWithRefinement="1" drawContacts="0" process="1"/>
+    <CarvingManager active="true" carvingDistance="1.0"/>
 
     <Node name="carvingElement">
-        <MechanicalObject name="Particles" template="Rigid3d" position="5 15 5 0 0 0 1" />
-        <UniformMass name="Mass" totalMass="10.0" template="Rigid3d"/>
-        <SphereCollisionModel name="tool" radius="0.1" tags="CarvingTool"/>
-        <Node name="VisuTool" >
-            <MeshOBJLoader name="meshLoader_1" filename="./mesh/sphere.obj" scale3d="0.1 0.1 0.1"/>
-            <OglModel name="InstrumentVisualModel" src="@meshLoader_1" color="0.0 1.0 0.0 1.0" />
-            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
-        </Node>        
+        <MechanicalObject name="Particles" template="Vec3d" position="-5 10 0" velocity="0 0 0"/>
+        <UniformMass name="Mass" totalMass="10.0" />
+        <SphereCollisionModel name="tool" radius="0.1" contactStiffness="10" tags="CarvingTool"/>
     </Node>
 
-    <Node name="Hexa2Tetra" >
-        <RegularGridTopology name="HexaTop" n="11 11 11" min="0 0 0" max="10 10 10" />
-        <TetrahedronSetTopologyContainer name="Container" position="@HexaTop.position" />
-        <TetrahedronSetTopologyModifier name="Modifier"/>
-        <Hexa2TetraTopologicalMapping input="@HexaTop" output="@Container" swapping="false" />
-    </Node>
-
-    <Node name="Cube">
-        <MechanicalObject position="@../Hexa2Tetra/Container.position" name="Volume" />
-
-        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@../Hexa2Tetra/Container" />
-        <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
-
-        <DiagonalMass massDensity="1.0" />
-
-        <BoxROI name="box" box="-1 -1 -1 11 0 11" drawBoxes="true" />
-        <FixedProjectiveConstraint  name="FixedConstraint" indices="@box.indices" activate_projectVelocity="1"/>
-
-        <TetrahedralCorotationalFEMForceField name="CFEM" youngModulus="100" poissonRatio="0.3" method="large" />
-
-        <Node name="Surface">
-            <TriangleSetTopologyContainer  name="Container"/>
+    <Node name="LiverFFD-lowres">
+        <EulerImplicitIntegrationScheme  />
+        <CGLinearSolver iterations="100" tolerance="1e-7" threshold="1e-7"/>
+        <MechanicalObject name="gridDof"/>
+        <UniformMass totalMass="100.0" />
+        <RegularGridTopology nx="4" ny="3" nz="3" xmin="-10.25" xmax="-3.25" ymin="0.25" ymax="5.25" zmin="-2" zmax="3" />
+        <BoxConstraint box="-8.5 0 -2.5 -5 3 2" />
+        <RegularGridSpringForceField name="Springs" stiffness="400" damping="4" />
+        <Node name="Visu">
+            <MeshOBJLoader name="meshLoader" filename="mesh/liver.obj" translation="-5 0 0" handleSeams="1" />
+            <MechanicalObject position="@[-1].position" name="surfDof" />
+            
+            <TriangleSetTopologyContainer  name="Container" triangles="@meshLoader.triangles"/>
             <TriangleSetTopologyModifier   name="Modifier" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTriangles="0"/>
-            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="triangleCol" tags="CarvingSurface"/>
-            <PointCollisionModel name="pointCol" tags="CarvingSurface"/>
+            <TriangleCollisionModel name="triangleCol" contactStiffness="10" tags="CarvingSurface"/>
+            <PointCollisionModel name="pointCol" contactStiffness="10" tags="CarvingSurface"/>
 
-            <Node name="liver-Visual">
-                <OglModel name="Visual" color="red" />
-                <IdentityMapping input="@../../Volume" output="@Visual" />
-            </Node>
+            <BarycentricMapping input="@../gridDof" output="@./surfDof" />
         </Node>
+
     </Node>
 </Node>
