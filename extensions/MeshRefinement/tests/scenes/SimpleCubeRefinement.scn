@@ -4,8 +4,8 @@
     <RequiredPlugin pluginName="InfinyToolkit.MeshRefinement"/> <!-- Needed to use components [TetrahedronSubdivisionController] -->
     <include href="headers.xml" />  
     <Node name="TT">
-        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
-        <CGLinearSolver iterations="25" name="linear solver" tolerance="1e-05" threshold="1e-05"/>
+        <EulerImplicitIntegrationScheme name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linearSolver" tolerance="1e-05" threshold="1e-05"/>
         <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" />
         <MechanicalObject src="@loader" name="Volume" />
         <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />

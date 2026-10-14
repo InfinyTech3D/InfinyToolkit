@@ -44,7 +44,7 @@ for root, dirs, files in os.walk(sys.argv[1]):
             for key, value in includes.items():
                 print("----------------")
                 print("Before: ", key, value)
-                line = value.replace("SofaExplicitOdeSolver", "Sofa.Component.ODESolver.Forward")
+                line = value.replace("SofaExplicitOdeSolver", "Sofa.Component.IntegrationScheme.Forward")
                 #line = value.replace("<Triangle", "<TriangleCollisionModel")
                 #line = line.replace("< Triangle", "<TriangleCollisionModel")
                 print("After: ", key, line)

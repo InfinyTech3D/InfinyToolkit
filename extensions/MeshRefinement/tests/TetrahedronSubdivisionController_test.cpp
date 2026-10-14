@@ -77,7 +77,7 @@ public:
                  "Sofa.Component.Mapping.Linear",
                  "Sofa.Component.Mass",
                  "Sofa.Component.MechanicalLoad",
-                 "Sofa.Component.ODESolver.Backward",
+                 "Sofa.Component.IntegrationScheme.Backward",
                  "Sofa.Component.SceneUtility",
                  "Sofa.Component.SolidMechanics.FEM.Elastic",
                  "Sofa.Component.StateContainer",
