@@ -246,6 +246,11 @@ jobs:
 
       - name: Run regression
         shell: bash
+        env:
+          # The regression program captures each scene's output with
+          # subprocess.run(text=True), which decodes with the locale encoding:
+          # cp1252 on Windows, which chokes on SOFA's UTF-8 logs.
+          PYTHONUTF8: '1'
         run: |
           set -euo pipefail
           cd "$WORKSPACE_SRC_PATH"
