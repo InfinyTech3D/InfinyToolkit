@@ -188,10 +188,25 @@ jobs:
           echo "LD_LIBRARY_PATH=$LP:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
 
       #######################   Setup Python   #######################
+      # SofaPython3's compiled modules only load in the exact python version SOFA
+      # was built against (ABI tag in their filename: cpython-312 / cp312), so read
+      # it from the binaries instead of hardcoding it.
+      - name: Detect SOFA python version
+        id: pyver
+        shell: bash
+        run: |
+          set -euo pipefail
+          SP="$SOFA_ROOT/plugins/SofaPython3/lib/python3/site-packages/Sofa"
+          TAG=$(ls "$SP" | grep -oE '^Helper\.(cpython-|cp)3[0-9]+' | grep -oE '3[0-9]+$' | head -n1)
+          [[ -n "$TAG" ]] || { echo "::error::Could not detect python ABI tag from $SP"; ls -la "$SP"; exit 1; }
+          VERSION="3.${TAG:1}"
+          echo "SOFA was built against python $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: ${{ steps.pyver.outputs.version }}
 
       - name: Install dependencies
         shell: bash
