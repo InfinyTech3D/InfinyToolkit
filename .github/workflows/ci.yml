@@ -215,6 +215,27 @@ jobs:
             echo "SOFAPYTHON3_ROOT=$SP3" >> $GITHUB_ENV
           fi
 
+      - name: Debug python environment
+        shell: bash
+        run: |
+          set +e
+          echo "--- interpreter"
+          which python; python --version
+          python -c "import sys, sysconfig; print(sys.executable); print('EXT_SUFFIX =', sysconfig.get_config_var('EXT_SUFFIX'))"
+          echo "--- env"
+          echo "SOFA_ROOT=$SOFA_ROOT"
+          echo "SOFAPYTHON3_ROOT=$SOFAPYTHON3_ROOT"
+          echo "PYTHONPATH=$PYTHONPATH"
+          echo "--- sys.path"
+          python -c "import sys; print('\n'.join(sys.path))"
+          echo "--- compiled modules shipped in the Sofa package"
+          ls -la "$SOFA_ROOT/plugins/SofaPython3/lib/python3/site-packages/Sofa/" | grep -Ei '\.(so|pyd)'
+          echo "--- python libs shipped with / linked by SofaPython3"
+          ls "$SOFA_ROOT/plugins/SofaPython3/bin" "$SOFA_ROOT/plugins/SofaPython3/lib" 2>/dev/null | grep -i python
+          echo "--- direct import attempt"
+          python -c "import Sofa.Helper; print('Sofa.Helper OK:', Sofa.Helper.__file__)"
+          exit 0
+
       ###################   Regression tests   ###################
       - name: Fetch SofaRegressionProgram
         shell: bash
