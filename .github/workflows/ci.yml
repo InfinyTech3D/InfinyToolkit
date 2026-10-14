@@ -188,9 +188,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$LP:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
 
       #######################   Setup Python   #######################
-      # SofaPython3's compiled modules only load in the exact python version SOFA
-      # was built against (ABI tag in their filename: cpython-312 / cp312), so read
-      # it from the binaries instead of hardcoding it.
+      # detect python version from SOFA binaries instead of hardcoding it.
       - name: Detect SOFA python version
         id: pyver
         shell: bash
