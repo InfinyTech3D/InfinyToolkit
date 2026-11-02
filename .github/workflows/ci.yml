@@ -34,9 +34,9 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" ]] ||
              [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" != refs/tags/v* ]] ||
              [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.full_build }}" != "true" ]]; then
-            echo 'os_list=["ubuntu-22.04","windows-2022"]' >> $GITHUB_OUTPUT
+            echo 'os_list=["ubuntu-24.04","windows-2022"]' >> $GITHUB_OUTPUT
           else
-            echo 'os_list=["ubuntu-22.04","windows-2022","macos-14"]' >> $GITHUB_OUTPUT
+            echo 'os_list=["ubuntu-24.04","windows-2022","macos-14"]' >> $GITHUB_OUTPUT
           fi
 
       - name: Debug
