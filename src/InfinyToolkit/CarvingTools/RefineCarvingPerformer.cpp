@@ -50,6 +50,9 @@ bool RefineCarvingPerformer::initPerformer()
     m_tetraAlgo = new sofa::meshrefinement::MeshRefinementAPI<sofa::defaulttype::Vec3Types>();
     bool resInit = m_tetraAlgo->init(m_topologyCon->getContext());
 
+    // CI test:
+    do you compile me?
+
     return resInit;
 }
 
